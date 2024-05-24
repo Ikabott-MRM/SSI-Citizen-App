@@ -9,7 +9,9 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+.env
 .idea
+expo-env.d.ts
 
 # macOS
 .DS_Store
