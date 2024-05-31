@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button } from 'react-native-paper';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import { StyleSheet, View, Platform } from 'react-native';
+import { ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDid';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
-const storedDid = SecureStore.getItem(KEY_DID_SECURE_STORE);
+const storedDid =
+  Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
-export default function HomeScreen() {
+export default function Identity() {
   const { createDid, isPending } = useDidMutation();
   const [did, setDid] = useState<string | null>(storedDid);
 
   const handleCreateDid = () => {
     createDid(undefined, {
       onSuccess: data => {
-        SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
+        if (Platform.OS !== 'web') {
+          SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
+        }
         setDid(data.uri);
       },
     });
@@ -23,9 +25,18 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text variant="bodyMedium">My DID: {did}</Text>
-      {!isPending && (
-        <Button mode="contained" onPress={handleCreateDid}>
+      {did && (
+        <View>
+          <Text variant="titleLarge">My DID:</Text>
+          <Text variant="bodyMedium">{did}</Text>
+        </View>
+      )}
+      {!isPending && !did && (
+        <Button
+          style={styles.button}
+          mode="contained"
+          onPress={handleCreateDid}
+        >
           Create DID
         </Button>
       )}
@@ -36,8 +47,14 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    marginHorizontal: 12,
+    marginTop: 50,
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+  },
+  button: {
+    marginTop: 10,
+    maxWidth: 200,
+    alignSelf: 'center',
   },
 });
