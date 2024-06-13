@@ -1,7 +1,9 @@
 import { Tabs } from 'expo-router';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { useTheme } from 'react-native-paper';
 
 export default function TabLayout() {
+  const theme = useTheme();
   return (
     <Tabs
       screenOptions={{
@@ -12,10 +14,10 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Identity',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'person' : 'person-outline'}
-              color={color}
+              color={theme.colors.primary}
             />
           ),
         }}
@@ -24,10 +26,10 @@ export default function TabLayout() {
         name="credentials"
         options={{
           title: 'Credentials',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'id-card' : 'id-card-outline'}
-              color={color}
+              color={theme.colors.primary}
             />
           ),
         }}

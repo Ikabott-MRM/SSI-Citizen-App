@@ -12,7 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Colors } from '@/constants/Colors';
-import { useIdentityMutation } from '@/hooks/mutations/useIdentity';
+import { useIdentityMutation } from '@/hooks/mutations/useIdentityMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
@@ -41,7 +41,6 @@ export default function Identity() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     formData.append('file', image);
-
     if (formData && did) {
       uploadDocumentFile({
         did,
@@ -101,11 +100,7 @@ export default function Identity() {
             You need to create your DID first
           </Text>
           <Link href="/" asChild>
-            <Button
-              style={styles.button}
-              onPress={() => setImage(null)}
-              mode="contained"
-            >
+            <Button style={styles.button} mode="contained">
               Go to Identity
             </Button>
           </Link>

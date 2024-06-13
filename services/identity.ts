@@ -10,7 +10,7 @@ export default {
   }) => {
     try {
       const response = await axios.post(
-        `/identity/${did}/documents`,
+        `/verifications/${did}/request`,
         formData,
         {
           headers: {

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
-import { ActivityIndicator, Text, Button } from 'react-native-paper';
-import { useDidMutation } from '@/hooks/mutations/useDid';
+import { ActivityIndicator, Button } from 'react-native-paper';
+import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import { List } from '@/components/List';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
@@ -26,10 +27,7 @@ export default function Identity() {
   return (
     <View style={styles.container}>
       {did && (
-        <View>
-          <Text variant="titleLarge">My DID:</Text>
-          <Text variant="bodyMedium">{did}</Text>
-        </View>
+        <List data={[{ id: '1', title: 'Identity (DID)', content: did }]} />
       )}
       {!isPending && !did && (
         <Button
@@ -50,11 +48,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginTop: 50,
     flex: 1,
-    justifyContent: 'center',
   },
   button: {
-    marginTop: 10,
-    maxWidth: 200,
+    marginTop: 300,
+    width: 200,
+    height: 50,
+    justifyContent: 'center',
     alignSelf: 'center',
   },
 });

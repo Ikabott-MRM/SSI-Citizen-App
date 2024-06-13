@@ -1,15 +1,102 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import QRCode from 'react-qr-code';
 import { Text } from 'react-native-paper';
 import FabWithMenu from '@/components/FabWithMenu';
 import { Stack } from 'expo-router';
+import { List } from '@/components/List';
+import * as SecureStore from 'expo-secure-store';
+import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import { Credential } from '@/@types/credential';
+import { format } from 'date-fns';
+import { useNetInfo } from '@/hooks/useNetInfo';
+import { useEffect, useState } from 'react';
+import { getCredentials, insertCredential } from '@/database/db';
+import credential from '@/services/credential';
+
+const storedDid =
+  Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
+
+// Function to map credentials to the required format
+const mapCredentials = (credentials: Credential[]) => {
+  return credentials.map(credential => ({
+    id: credential.verifiableCredential.vcDataModel.id,
+    title: 'Driver License',
+    content: (
+      <View>
+        <Text variant="bodyLarge">
+          Issuance date:{' '}
+          {format(
+            new Date(credential.verifiableCredential.vcDataModel.issuanceDate),
+            'dd/MM/yyyy',
+          )}
+        </Text>
+        <Text variant="bodyLarge">
+          Expiration date:{' '}
+          {format(
+            new Date(
+              credential.verifiableCredential.vcDataModel.expirationDate,
+            ),
+            'dd/MM/yyyy',
+          )}
+        </Text>
+        <QRCode size={200} value={credential.vcJwt} />
+      </View>
+    ),
+  }));
+};
+
+// Function to insert credentials
+const insertCredentials = async (credentials: Credential[]) => {
+  for (const cred of credentials) {
+    const { id, issuer, expirationDate, issuanceDate } =
+      cred.verifiableCredential.vcDataModel;
+    await insertCredential(
+      cred.vcJwt,
+      id,
+      issuer,
+      issuanceDate,
+      expirationDate,
+    );
+  }
+};
 
 export default function Credentials() {
+  const isConnected = useNetInfo();
+  const [credentials, setCredentials] = useState<object[]>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let data;
+        if (isConnected) {
+          data = await credential.getCredentials(storedDid!);
+          await insertCredentials(data);
+        } else {
+          data = await getCredentials();
+          console.log('data', data);
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        const mappedData = mapCredentials(data);
+        console.log('mappedData', mappedData);
+
+        setCredentials(mappedData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [isConnected]);
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerTitle: 'Credentials' }} />
       <FabWithMenu />
-      <ScrollView>
-        <Text>VCS list here</Text>
+      <ScrollView style={{ marginTop: 10 }}>
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/*@ts-expect-error*/}
+        <List data={credentials} />
       </ScrollView>
     </View>
   );
@@ -18,7 +105,7 @@ export default function Credentials() {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 12,
-    marginTop: 50,
+    marginTop: 30,
   },
   optionsContainer: {
     position: 'absolute',
