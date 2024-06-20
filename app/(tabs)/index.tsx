@@ -9,16 +9,14 @@ import { List } from '@/components/List';
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
-export default function Identity() {
+export default function HomeScreen() {
   const { createDid, isPending } = useDidMutation();
   const [did, setDid] = useState<string | null>(storedDid);
 
-  const handleCreateDid = () => {
-    createDid(undefined, {
+  const handleCreateDid = async () => {
+    await createDid(undefined, {
       onSuccess: data => {
-        if (Platform.OS !== 'web') {
-          SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
-        }
+        SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
         setDid(data.uri);
       },
     });

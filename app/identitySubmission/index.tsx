@@ -5,7 +5,7 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import { Stack } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -16,7 +16,10 @@ import { useIdentityMutation } from '@/hooks/mutations/useIdentityMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
+// const FormData = global.FormData;
+
 export default function Identity() {
+  const router = useRouter();
   const theme = useTheme();
   const [image, setImage] = useState<string | null>(null);
   const { uploadDocumentFile, isPending } = useIdentityMutation();
@@ -40,12 +43,25 @@ export default function Identity() {
     const formData = new FormData();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    formData.append('file', image);
+    formData.append('file', {
+      uri: image,
+      type: 'image/jpeg',
+      name: 'document-image',
+    });
+
     if (formData && did) {
-      uploadDocumentFile({
-        did,
-        formData,
-      });
+      uploadDocumentFile(
+        {
+          did,
+          formData,
+        },
+        {
+          onSuccess: () => {
+            router.push('/');
+            setImage(null);
+          },
+        },
+      );
     }
   };
 

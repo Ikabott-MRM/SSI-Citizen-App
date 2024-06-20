@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.iss.driverlicensemobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -41,6 +42,11 @@
       "eas": {
         "projectId": "67564153-fced-432c-b065-bc90c9cdd821"
       }
+    },
+    "owner": "iovf",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/67564153-fced-432c-b065-bc90c9cdd821"
     }
   }
 }

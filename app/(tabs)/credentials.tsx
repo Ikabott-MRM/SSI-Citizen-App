@@ -10,7 +10,12 @@ import { Credential } from '@/@types/credential';
 import { format } from 'date-fns';
 import { useNetInfo } from '@/hooks/useNetInfo';
 import { useEffect, useState } from 'react';
-import { getCredentials, insertCredential } from '@/database/db';
+import {
+  DBCredentials,
+  getCredentials,
+  insertCredential,
+  MappedCredential,
+} from '@/database/db';
 import credential from '@/services/credential';
 
 const storedDid =
@@ -60,25 +65,40 @@ const insertCredentials = async (credentials: Credential[]) => {
   }
 };
 
+const mapDatabaseCredentials = (
+  dbCredentials: DBCredentials,
+): MappedCredential[] => {
+  return dbCredentials.map(dbCredential => ({
+    verifiableCredential: {
+      vcDataModel: {
+        id: dbCredential.dataModelId,
+        issuanceDate: dbCredential.issuanceDate,
+        expirationDate: dbCredential.expirationDate,
+        issuer: dbCredential.issuer,
+      },
+    },
+    vcJwt: dbCredential.jwt,
+  }));
+};
+
 export default function Credentials() {
   const isConnected = useNetInfo();
-  const [credentials, setCredentials] = useState<object[]>();
+  const [credentials, setCredentials] = useState<object[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         let data;
-        if (isConnected) {
-          data = await credential.getCredentials(storedDid!);
+        if (isConnected && storedDid) {
+          data = await credential.getCredentials(storedDid);
           await insertCredentials(data);
         } else {
-          data = await getCredentials();
-          console.log('data', data);
+          const dbData = await getCredentials();
+          data = mapDatabaseCredentials(dbData);
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         const mappedData = mapCredentials(data);
-        console.log('mappedData', mappedData);
 
         setCredentials(mappedData);
       } catch (error) {
