@@ -61,3 +61,7 @@ export const insertCredential = async (
 export const getCredentials = async (): Promise<DBCredentials> => {
   return await SQLiteDatabase.getAllAsync(`SELECT * FROM credential`);
 };
+
+export const deleteCredentials = async (): Promise<DBCredentials> => {
+  return await SQLiteDatabase.getAllAsync('DELETE FROM credential');
+};
