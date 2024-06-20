@@ -2,7 +2,7 @@
   "expo": {
     "name": "driver-license-mobile",
     "slug": "driver-license-mobile",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -15,7 +15,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "iovf-ida-demo-wallet",
-      "name":"IDA Ciudadano"
+      "name":"IDA Ciudadano",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "aps-environment": "production"
+      }
+
     },
     "android": {
       "adaptiveIcon": {
