@@ -14,14 +14,15 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.iss.driverlicensemobile"
+      "bundleIdentifier": "iovf-ida-demo-wallet",
+      "name":"IDA Ciudadano"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.iss.driverlicensemobile"
+      "package": "iovf-ida-demo-wallet"
     },
     "web": {
       "bundler": "metro",
