@@ -85,27 +85,27 @@ export default function Credentials() {
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<object[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let data;
-        if (isConnected && storedDid) {
-          data = await credential.getCredentials(storedDid);
-          await insertCredentials(data);
-        } else {
-          const dbData = await getCredentials();
-          data = mapDatabaseCredentials(dbData);
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        const mappedData = mapCredentials(data);
-
-        setCredentials(mappedData);
-      } catch (error) {
-        console.error(error);
+  const fetchData = async () => {
+    try {
+      let data;
+      if (isConnected && storedDid) {
+        data = await credential.getCredentials(storedDid);
+        await insertCredentials(data);
+      } else {
+        const dbData = await getCredentials();
+        data = mapDatabaseCredentials(dbData);
       }
-    };
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const mappedData = mapCredentials(data);
 
+      setCredentials(mappedData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [isConnected]);
 

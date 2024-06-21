@@ -57,7 +57,7 @@ export default function Identity() {
         },
         {
           onSuccess: () => {
-            router.push('/');
+            router.back();
             setImage(null);
           },
         },

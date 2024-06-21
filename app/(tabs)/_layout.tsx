@@ -34,6 +34,18 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="requests"
+        options={{
+          title: 'Requests',
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon
+              name={focused ? 'list' : 'list-outline'}
+              color={theme.colors.primary}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
