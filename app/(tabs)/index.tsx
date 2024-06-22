@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Platform, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Platform, Text, TouchableOpacity, Dimensions, TextInput } from 'react-native';
 import { ActivityIndicator, Button, Menu, Divider, Provider } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
@@ -49,7 +49,13 @@ export default function HomeScreen() {
         {did && (
           <Accordion title="Identificador Descentralizado (DID)">
           <View style={styles.didContainer}>
-              <Text style={styles.didText}>{did}</Text>
+              <TextInput
+                style={styles.didTextInput}
+                value={did}
+                editable={true}
+                selectTextOnFocus={true}
+                multiline={true}
+              />
           </View>
           </Accordion>
         )}
@@ -63,12 +69,6 @@ export default function HomeScreen() {
             <Button style={styles.button} mode="contained" onPress={handleCreateDid}>
               Crea tu DID
             </Button>
-            <Accordion title="Seleccionar Tipo DID">
-              <Menu>
-                <Menu.Item onPress={() => setSelectedDIDType('default')} title="Default" />
-                <Divider />
-              </Menu>
-            </Accordion>
           </>
         )}
         {isPending && <ActivityIndicator size="large" />}
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
-    width: width - 32, // Span the width of the device with some margin
+    width: width - 41, // Span the width of the device with some margin
     alignSelf: 'center',
   },
   didTitle: {
@@ -148,11 +148,12 @@ const styles = StyleSheet.create({
     color: '#333333',
     paddingHorizontal:0,
   },
-  didText: {
+  didTextInput: {
     fontSize: 16,
     lineHeight: 24,
     fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
     color: '#333333',
     textAlign: 'center',
+    paddingHorizontal:10,
   },
 });

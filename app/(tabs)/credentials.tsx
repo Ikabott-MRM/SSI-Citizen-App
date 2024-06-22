@@ -139,7 +139,9 @@ export default function Credentials() {
       <ScrollView style={styles.scrollView}>
       <View style={styles.container}>
         <Text style={styles.h1}>Tus Credenciales</Text></View>
-        {credentials.map(credential => credential.content)}
+        {credentials.map((credential, index) => (
+          <View key={index}>{credential.content}</View>
+        ))}
       </ScrollView>
       <FabWithMenu style={styles.fab} />
     </View>
