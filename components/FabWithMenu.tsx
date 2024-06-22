@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { FAB, useTheme } from 'react-native-paper';
 import { Link } from 'expo-router';
 
@@ -27,7 +27,7 @@ const FabWithMenu = () => {
         <View style={styles.menu}>
           <TouchableOpacity style={styles.option}>
             <Link href="/identitySubmission" onPress={toggleMenu}>
-              Driver License
+              Licencia de Conducir
             </Link>
           </TouchableOpacity>
         </View>
@@ -42,24 +42,30 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   fab: {
-    borderRadius: 0,
+    borderRadius: 50,
+
   },
   menu: {
-    backgroundColor: 'white',
+    backgroundColor: '#f2f2f2',
     position: 'absolute',
-    top: 60,
-    minWidth: 180,
+    top: -60,
+    minWidth: 120,
     right: 0,
-    color: '#000',
+    color: '#333',
+    fontWeight:600,
     borderWidth: 1,
-    borderColor: '#CCC',
+    borderColor: '#F9f9f9',
     zIndex: 999,
+    fontSize: 16,
+    lineHeight: 24,
+    borderRadius: 5,
+    fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
   },
   option: {
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#f2f2f2',
   },
 });
 

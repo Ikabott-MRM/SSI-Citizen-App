@@ -25,7 +25,7 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#65CDA3',
+    primary: '#00d27d',
     secondary: '#535353',
   },
 };
@@ -33,7 +33,8 @@ const theme = {
 export default function RootLayout() {
   const queryClient = new QueryClient();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    Roboto: require('../assets/fonts/Roboto-Regular.ttf'),
+    RobotoBold: require('../assets/fonts/Roboto-Bold.ttf'),
   });
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function RootLayout() {
               headerTitle: () => (
                 <Image
                   source={require('../assets/images/logo-iovf.png')}
-                  style={{ width: 150, height: 60 }}
+                  style={{ width: 80, height: 30 }}
                 />
               ),
             }}

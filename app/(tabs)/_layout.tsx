@@ -13,7 +13,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Identity',
+          title: 'Identidad',
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'person' : 'person-outline'}
@@ -25,7 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="credentials"
         options={{
-          title: 'Credentials',
+          title: 'Credenciales',
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'id-card' : 'id-card-outline'}
@@ -37,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="requests"
         options={{
-          title: 'Requests',
+          title: 'Solicitudes',
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'list' : 'list-outline'}
