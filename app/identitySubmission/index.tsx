@@ -56,7 +56,7 @@ export default function Identity() {
         },
         {
           onSuccess: () => {
-            Toast.show('Credencial enviada exitosamente', {
+            Toast.show('Credencial solicitada exitosamente', {
               duration: Toast.durations.LONG,
               position: Toast.positions.BOTTOM,
             });
