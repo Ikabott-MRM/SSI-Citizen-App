@@ -16,7 +16,7 @@ const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) || '' : '';
 
 const CREDENTIAL_TYPES = {
-  drivers_license: 'Drivers License',
+  drivers_license: 'Licencia de Conducir',
 };
 
 // Function to map credentials to the required format
@@ -27,7 +27,7 @@ const mapRequests = requests => {
 
   return requests.map((request, index) => ({
     id: request.id,
-    title: `Request ${index + 1} - ${CREDENTIAL_TYPES[request.schema_id]}`,
+    title: `Solicitud ${index + 1} - ${CREDENTIAL_TYPES[request.schema_id]}`,
     content: (
       <View>
         <Text style={{ marginBottom: 10 }}>
@@ -45,7 +45,7 @@ const mapRequests = requests => {
                 fontSize: 16,
               }}
             >
-              {request.status.toUpperCase()}
+              {request.status === 'approved' ? 'APROBADO' : 'RECHAZADO'}
             </Text>
           </View>
         </Text>

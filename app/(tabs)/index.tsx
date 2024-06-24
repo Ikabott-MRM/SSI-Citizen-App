@@ -25,7 +25,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {did && (
-        <List data={[{ id: '1', title: 'Identity (DID)', content: did }]} />
+        <List data={[{ id: '1', title: 'Identidad (DID)', content: did }]} />
       )}
       {!isPending && !did && (
         <Button
@@ -33,7 +33,7 @@ export default function HomeScreen() {
           mode="contained"
           onPress={handleCreateDid}
         >
-          Create DID
+          Crear DID
         </Button>
       )}
       {isPending && <ActivityIndicator size="large" />}

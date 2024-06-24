@@ -25,18 +25,18 @@ const storedDid =
 const mapCredentials = (credentials: Credential[]) => {
   return credentials.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
-    title: 'Driver License',
+    title: 'Licencia de Conducir',
     content: (
       <View>
         <Text variant="bodyLarge">
-          Issuance date:{' '}
+          Fecha de emisión:{' '}
           {format(
             new Date(credential.verifiableCredential.vcDataModel.issuanceDate),
             'dd/MM/yyyy',
           )}
         </Text>
         <Text variant="bodyLarge">
-          Expiration date:{' '}
+          Fecha de vencimiento:{' '}
           {format(
             new Date(
               credential.verifiableCredential.vcDataModel.expirationDate,
@@ -111,7 +111,7 @@ export default function Credentials() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerTitle: 'Credentials' }} />
+      <Stack.Screen options={{ headerTitle: 'Credenciales' }} />
       <FabWithMenu />
       <ScrollView style={{ marginTop: 10 }}>
         {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}

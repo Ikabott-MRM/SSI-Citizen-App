@@ -79,7 +79,10 @@ export default function Identity() {
   return (
     <View style={styles.container}>
       <Stack.Screen
-        options={{ headerShown: true, headerTitle: 'Identity Submission' }}
+        options={{
+          headerShown: true,
+          headerTitle: 'Presentación de Identidad',
+        }}
       />
       {!image && did && (
         <TouchableOpacity onPress={pickImage}>
@@ -90,7 +93,7 @@ export default function Identity() {
               color={theme.colors.primary}
             />
             <Button style={styles.button} mode="contained">
-              Upload Image
+              Cargar Imagen
             </Button>
           </View>
         </TouchableOpacity>
@@ -98,7 +101,7 @@ export default function Identity() {
       {image && !isPending && did && (
         <View>
           <Text style={styles.text} variant="titleLarge">
-            Is the image OK?
+            ¿Desea confirmar la imagen seleccionada?
           </Text>
           <Image source={{ uri: image }} style={styles.image} />
           <View style={styles.actionsContainer}>
@@ -115,7 +118,7 @@ export default function Identity() {
               mode="contained"
               onPress={uploadImage}
             >
-              Yes
+              Sí
             </Button>
           </View>
         </View>
@@ -124,11 +127,11 @@ export default function Identity() {
       {!did && (
         <View style={styles.container}>
           <Text variant="titleLarge" style={{ marginBottom: 20 }}>
-            You need to create your DID first
+            Primero debes crear tu DID
           </Text>
           <Link href="/" asChild>
             <Button style={styles.button} mode="contained">
-              Go to Identity
+              Ir a Identidad
             </Button>
           </Link>
         </View>

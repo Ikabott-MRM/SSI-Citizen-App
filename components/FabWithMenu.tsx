@@ -27,7 +27,7 @@ const FabWithMenu = () => {
         <View style={styles.menu}>
           <TouchableOpacity style={styles.option}>
             <Link href="/identitySubmission" onPress={toggleMenu}>
-              Driver License
+              Licencia de conducir
             </Link>
           </TouchableOpacity>
         </View>
