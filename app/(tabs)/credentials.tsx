@@ -29,6 +29,20 @@ const mapCredentials = (credentials: Credential[]) => {
     content: (
       <View>
         <Text variant="bodyLarge">
+          Nombre:{' '}
+          {
+            credential.verifiableCredential.vcDataModel.credentialSubject
+              .firstname
+          }
+        </Text>
+        <Text variant="bodyLarge">
+          Apellido:{' '}
+          {
+            credential.verifiableCredential.vcDataModel.credentialSubject
+              .lastname
+          }
+        </Text>
+        <Text variant="bodyLarge">
           Fecha de emisión:{' '}
           {format(
             new Date(credential.verifiableCredential.vcDataModel.issuanceDate),

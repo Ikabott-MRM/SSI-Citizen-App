@@ -82,6 +82,7 @@ export default function Identity() {
         options={{
           headerShown: true,
           headerTitle: 'Presentación de Identidad',
+          headerBackTitle: '',
         }}
       />
       {!image && did && (
