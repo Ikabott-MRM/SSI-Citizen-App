@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { RootSiblingParent } from 'react-native-root-siblings';
 import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';

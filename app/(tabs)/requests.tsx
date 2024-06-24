@@ -45,7 +45,7 @@ const mapRequests = requests => {
                 fontSize: 16,
               }}
             >
-              {request.status.toUpperCase()}
+              {request.status === 'approved' ? 'APROBADO' : 'RECHAZADO'}
             </Text>
           </View>
         </Text>
