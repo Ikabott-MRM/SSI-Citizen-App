@@ -67,6 +67,7 @@ export default function Credentials() {
   return (
     <View style={styles.container}>
       <ScrollView style={{ marginTop: 10 }}>
+        <Text style={styles.h1}>Tus Solicitudes</Text>
         <List data={requests} />
       </ScrollView>
     </View>
@@ -75,8 +76,15 @@ export default function Credentials() {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 12,
-    marginTop: 30,
+    flex: 1,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    marginBottom: 0,
+  },
+  scrollView: {
+    marginTop: 10,
+    marginBottom: 0,
   },
   optionsContainer: {
     position: 'absolute',
@@ -86,5 +94,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 10,
     borderRadius: 5,
+  },
+  h1: {
+    fontSize: 24, 
+    fontWeight: 'bold',
+    color: '#00d27d',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontFamily: 'Roboto', 
   },
 });
