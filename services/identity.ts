@@ -16,10 +16,9 @@ export default {
       });
       return response?.data?.data;
     } catch (e: unknown) {
-      console.log(e);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      throw e?.response?.data;
+      throw e?.message;
     }
   },
 };

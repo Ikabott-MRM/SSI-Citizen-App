@@ -15,8 +15,7 @@ import { Colors } from '@/constants/Colors';
 import { useIdentityMutation } from '@/hooks/mutations/useIdentityMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
-
-// const FormData = global.FormData;
+import Toast from 'react-native-root-toast';
 
 export default function Identity() {
   const router = useRouter();
@@ -57,8 +56,20 @@ export default function Identity() {
         },
         {
           onSuccess: () => {
+            Toast.show('Credencial enviada exitosamente', {
+              duration: Toast.durations.LONG,
+              position: Toast.positions.BOTTOM,
+            });
             router.back();
             setImage(null);
+          },
+          onError: (error: string | Error) => {
+            if (typeof error === 'string') {
+              Toast.show(error, {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+              });
+            }
           },
         },
       );
