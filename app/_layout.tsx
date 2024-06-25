@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
@@ -7,12 +7,14 @@ import 'react-native-reanimated';
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
+  IconButton
 } from 'react-native-paper';
 import { DevSettings, Image } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { deleteCredentials, initDatabase } from '@/database/db';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -37,6 +39,9 @@ export default function RootLayout() {
     Roboto: require('../assets/fonts/Roboto-Regular.ttf'),
     RobotoBold: require('../assets/fonts/Roboto-Bold.ttf'),
   });
+  const segments = useSegments();
+  const router = useRouter();
+
 
   useEffect(() => {
     (async function initializeApp() {
@@ -67,18 +72,35 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <PaperProvider theme={theme}>
         <RootSiblingParent>
-          <Stack>
+          <Stack
+         screenOptions={{
+          headerStyle: {
+            backgroundColor: '#f2f2f2',
+          },
+          headerTintColor: '#4c4c4c',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          headerTitleAlign: 'center',
+          headerTitle: () =>
+            <Image
+          source={require('../assets/images/logo-iovf.png')}
+          style={{ width: 80, height: 30 }}
+        />,
+          headerLeft: () =>
+            segments.length > 0 &&
+            segments[0] === 'identitySubmission' && (
+              <IconButton
+                icon={() => (
+                  <Ionicons name="home-outline" size={24} color="#4c4c4c" />
+                )}
+                onPress={() => router.replace('/')}
+              />
+            ),
+        }}
+          >
             <Stack.Screen
               name="(tabs)"
-              options={{
-                headerTitleAlign: 'center',
-                headerTitle: () => (
-                  <Image
-                    source={require('../assets/images/logo-iovf.png')}
-                    style={{ width: 80, height: 30 }}
-                  />
-                ),
-              }}
             />
             <Stack.Screen name="+not-found" />
           </Stack>
