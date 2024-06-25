@@ -66,21 +66,23 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <PaperProvider theme={theme}>
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerTitleAlign: 'center',
-              headerTitle: () => (
-                <Image
-                  source={require('../assets/images/logo-iovf.png')}
-                  style={{ width: 80, height: 30 }}
-                />
-              ),
-            }}
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        <RootSiblingParent>
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerTitleAlign: 'center',
+                headerTitle: () => (
+                  <Image
+                    source={require('../assets/images/logo-iovf.png')}
+                    style={{ width: 80, height: 30 }}
+                  />
+                ),
+              }}
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </RootSiblingParent>
       </PaperProvider>
     </QueryClientProvider>
   );

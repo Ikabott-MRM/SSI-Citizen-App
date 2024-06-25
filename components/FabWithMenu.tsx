@@ -40,19 +40,19 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     alignItems: 'flex-end',
+    marginBottom: 15,
   },
   fab: {
     borderRadius: 50,
-
   },
   menu: {
     backgroundColor: '#f2f2f2',
     position: 'absolute',
-    top: -60,
+    top: -50,
     minWidth: 120,
     right: 0,
     color: '#333',
-    fontWeight:600,
+    fontWeight: 600,
     borderWidth: 1,
     borderColor: '#F9f9f9',
     zIndex: 999,

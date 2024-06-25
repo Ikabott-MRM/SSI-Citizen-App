@@ -1,4 +1,11 @@
-import { Platform, ScrollView, StyleSheet, View, Dimensions, TouchableOpacity } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import QRCode from 'react-qr-code';
 import { Text } from 'react-native-paper';
 import FabWithMenu from '@/components/FabWithMenu';
@@ -32,7 +39,12 @@ const Accordion = ({ title, children }) => {
   };
 
   return (
-    <View style={[styles.accordionContainer, { backgroundColor: isExpanded ? '#e1e1e1' : '#f2f2f2' }]}>
+    <View
+      style={[
+        styles.accordionContainer,
+        { backgroundColor: isExpanded ? '#e1e1e1' : '#f2f2f2' },
+      ]}
+    >
       <TouchableOpacity onPress={toggleAccordion}>
         <Text style={styles.accordionTitle}>{title}</Text>
       </TouchableOpacity>
@@ -53,9 +65,25 @@ const mapCredentials = (credentials: Credential[]) => {
             <QRCode size={150} value={credential.vcJwt} />
           </View>
           <Text style={styles.credentialText}>
+            Nombre:{' '}
+            {
+              credential.verifiableCredential.vcDataModel.credentialSubject
+                .firstname
+            }
+          </Text>
+          <Text style={styles.credentialText}>
+            Apellido:{' '}
+            {
+              credential.verifiableCredential.vcDataModel.credentialSubject
+                .lastname
+            }
+          </Text>
+          <Text style={styles.credentialText}>
             Emitida el{' '}
             {format(
-              new Date(credential.verifiableCredential.vcDataModel.issuanceDate),
+              new Date(
+                credential.verifiableCredential.vcDataModel.issuanceDate,
+              ),
               'dd/MM/yyyy',
             )}
           </Text>
@@ -137,8 +165,9 @@ export default function Credentials() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerTitle: 'Credentials' }} />
       <ScrollView style={styles.scrollView}>
-      <View style={styles.container}>
-        <Text style={styles.h1}>Tus Credenciales</Text></View>
+        <View style={styles.container}>
+          <Text style={styles.h1}>Tus Credenciales</Text>
+        </View>
         {credentials.map((credential, index) => (
           <View key={index}>{credential.content}</View>
         ))}
@@ -179,7 +208,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#333333',
-    paddingHorizontal:5,
+    paddingHorizontal: 5,
   },
   credentialText: {
     fontSize: 14,
@@ -204,12 +233,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
   },
   h1: {
-    fontSize: 24, 
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#00d27d',
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Roboto', 
+    fontFamily: 'Roboto',
   },
   text: {
     fontSize: 16,
