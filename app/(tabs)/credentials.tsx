@@ -5,12 +5,12 @@ import {
   View,
   Dimensions,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import QRCode from 'react-qr-code';
 import { Text } from 'react-native-paper';
 import FabWithMenu from '@/components/FabWithMenu';
 import { Stack } from 'expo-router';
-import { List } from '@/components/List';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { Credential } from '@/@types/credential';
@@ -136,6 +136,7 @@ const mapDatabaseCredentials = (
 export default function Credentials() {
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<object[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -161,10 +162,21 @@ export default function Credentials() {
     fetchData();
   }, [isConnected]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerTitle: 'Credentials' }} />
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.container}>
           <Text style={styles.h1}>Tus Credenciales</Text>
         </View>
@@ -172,7 +184,7 @@ export default function Credentials() {
           <View key={index}>{credential.content}</View>
         ))}
       </ScrollView>
-      <FabWithMenu style={styles.fab} />
+      <FabWithMenu />
     </View>
   );
 }

@@ -1,9 +1,11 @@
+import React, { useState } from 'react';
 import {
   Dimensions,
   Platform,
   ScrollView,
   StyleSheet,
   View,
+  RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Text } from 'react-native-paper';
@@ -11,7 +13,6 @@ import { List } from '@/components/List';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
-import { orange400 } from 'react-native-paper/src/styles/themes/v2/colors';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) || '' : '';
@@ -76,13 +77,26 @@ const mapRequests = requests => {
 };
 
 export default function Credentials() {
-  const { requests, isPending } = useRequestsQuery(storedDid, {
+  const { requests, refetch } = useRequestsQuery(storedDid, {
     select: data => mapRequests(data),
   });
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView style={{ marginTop: 10 }}>
+      <ScrollView
+        style={{ marginTop: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <Text style={styles.h1}>Tus Solicitudes</Text>
         <List data={requests} />
       </ScrollView>

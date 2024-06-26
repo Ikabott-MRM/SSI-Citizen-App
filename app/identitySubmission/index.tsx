@@ -63,11 +63,16 @@ export default function Identity() {
               duration: Toast.durations.LONG,
               position: Toast.positions.BOTTOM,
             });
-            queryClient.invalidateQueries({
-              queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS],
-            });
-            router.navigate('/requests');
-            setImage(null);
+            queryClient
+              .invalidateQueries({
+                queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS],
+                refetchType: 'all',
+              })
+              .then(() => {
+                console.log('dale');
+                router.navigate('/requests');
+                setImage(null);
+              });
           },
           onError: (error: string | Error) => {
             if (typeof error === 'string') {

@@ -6,7 +6,7 @@ const useRequestsQuery = (did: string, queryOptions?: object) => {
   const requests = useQuery({
     // networkMode: 'always',
     enabled: !!did,
-    queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS, did],
+    queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS],
     queryFn: () => requestsApi.getRequests(did),
     ...queryOptions,
   });
