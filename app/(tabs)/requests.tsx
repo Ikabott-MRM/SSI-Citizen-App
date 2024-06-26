@@ -11,12 +11,28 @@ import { List } from '@/components/List';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
+import { orange400 } from 'react-native-paper/src/styles/themes/v2/colors';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) || '' : '';
 
 const CREDENTIAL_TYPES = {
   drivers_license: 'Licencia de Conducir',
+};
+
+const STATUS_CONFIG = {
+  pending: {
+    color: 'orange',
+    text: 'PENDIENTE',
+  },
+  rejected: {
+    color: 'red',
+    text: 'RECHAZADO',
+  },
+  approved: {
+    color: 'green',
+    text: 'APROBADO',
+  },
 };
 
 // Function to map credentials to the required format
@@ -33,7 +49,7 @@ const mapRequests = requests => {
         <Text style={{ marginBottom: 10 }}>
           <View
             style={{
-              backgroundColor: `${request.status === 'approved' ? 'green' : 'red'}`,
+              backgroundColor: `${STATUS_CONFIG[request.status].color}`,
               paddingVertical: 3,
               paddingHorizontal: 7,
               borderRadius: 5,
@@ -45,7 +61,7 @@ const mapRequests = requests => {
                 fontSize: 16,
               }}
             >
-              {request.status === 'approved' ? 'APROBADO' : 'RECHAZADO'}
+              {STATUS_CONFIG[request.status].text}
             </Text>
           </View>
         </Text>
@@ -96,11 +112,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   h1: {
-    fontSize: 24, 
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#00d27d',
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Roboto', 
+    fontFamily: 'Roboto',
   },
 });

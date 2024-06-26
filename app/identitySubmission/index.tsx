@@ -16,8 +16,11 @@ import { useIdentityMutation } from '@/hooks/mutations/useIdentityMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Toast from 'react-native-root-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 
 export default function Identity() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const theme = useTheme();
   const [image, setImage] = useState<string | null>(null);
@@ -60,7 +63,10 @@ export default function Identity() {
               duration: Toast.durations.LONG,
               position: Toast.positions.BOTTOM,
             });
-            router.back();
+            queryClient.invalidateQueries({
+              queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS],
+            });
+            router.navigate('/requests');
             setImage(null);
           },
           onError: (error: string | Error) => {
@@ -119,7 +125,7 @@ export default function Identity() {
               mode="contained"
               onPress={uploadImage}
             >
-              Sí
+              Continuar
             </Button>
           </View>
         </View>
