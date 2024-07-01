@@ -1,42 +1,81 @@
 import * as React from 'react';
-import { Text } from 'react-native';
-import { List as ListPaper, useTheme } from 'react-native-paper';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { List as ListPaper, useTheme, IconButton } from 'react-native-paper';
 
 const Details = ({ content }: { content: React.ReactNode }) => {
-  const theme = useTheme();
-  return (
-    <Text style={{ color: theme.colors.secondary }} selectable>
-      {content}
-    </Text>
-  );
+  return <View>{content}</View>;
 };
 
-interface IList {
-  id: string;
+export interface IList {
+  id: string | number;
   title: string;
   content: React.ReactNode;
 }
 
 const List = ({ data }: { data: IList[] }) => {
+  const [expandedId, setExpandedId] = React.useState<string | number>('');
+  const theme = useTheme();
+
+  const handleAccordionPress = (newExpandedId: string | number) => {
+    setExpandedId(expandedId === newExpandedId ? '' : newExpandedId);
+  };
+
+  const CustomChevron = ({ isExpanded }: { isExpanded: boolean }) => (
+    <IconButton
+      icon={isExpanded ? 'chevron-up' : 'chevron-down'}
+      iconColor={theme.colors.typography.secondary}
+      size={24}
+      style={{ height: 24, width: 24 }}
+    />
+  );
+
   return (
     <View>
-      <ListPaper.AccordionGroup>
-        {data?.map(item => (
-          <View key={item.id} style={{ marginBottom: 10 }}>
-            <ListPaper.Accordion title={item.title} id={item.id.toString()}>
-              <ListPaper.Item
-                title={null}
-                description={props => (
-                  <Details content={item.content} {...props} />
-                )}
-              />
-            </ListPaper.Accordion>
-          </View>
-        ))}
+      <ListPaper.AccordionGroup
+        expandedId={expandedId.toString()}
+        onAccordionPress={handleAccordionPress}
+      >
+        {data?.map(item => {
+          const isOpened = expandedId === item.id.toString();
+          return (
+            <View
+              key={item.id}
+              style={[
+                styles.accordionContainer,
+                { backgroundColor: '#444', borderRadius: 5 },
+                !isOpened && styles.accordionClosed,
+              ]}
+            >
+              <ListPaper.Accordion
+                title={item.title}
+                id={item.id.toString()}
+                titleStyle={{
+                  color: theme.colors.typography.secondary,
+                }}
+                right={() => <CustomChevron isExpanded={isOpened} />}
+              >
+                <ListPaper.Item
+                  title={null}
+                  description={props => (
+                    <Details content={item.content} {...props} />
+                  )}
+                />
+              </ListPaper.Accordion>
+            </View>
+          );
+        })}
       </ListPaper.AccordionGroup>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  accordionContainer: {
+    marginBottom: 10,
+  },
+  accordionClosed: {
+    minHeight: 40, // Adjust this value as needed
+  },
+});
 
 export { List };

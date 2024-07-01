@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { Text } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { List } from '@/components/List';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
@@ -40,7 +40,6 @@ const STATUS_CONFIG = {
 const mapRequests = requests => {
   const dimensions = Dimensions.get('window');
   const imageHeight = Math.round((dimensions.width * 9) / 16);
-  const imageWidth = dimensions.width;
 
   return requests.map((request, index) => ({
     id: request.id,
@@ -68,7 +67,7 @@ const mapRequests = requests => {
         </Text>
         <Image
           source={`https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/${request.document_url}`}
-          style={{ height: imageHeight, width: imageWidth }}
+          style={{ height: imageHeight, width: '100%' }}
           transition={300}
         />
       </View>
@@ -77,6 +76,12 @@ const mapRequests = requests => {
 };
 
 export default function Credentials() {
+  const theme = useTheme();
+  const styles = stylesFnc({
+    container: {
+      backgroundColor: theme.colors.background.primary,
+    },
+  });
   const { requests, refetch } = useRequestsQuery(storedDid, {
     select: data => mapRequests(data),
   });
@@ -98,39 +103,51 @@ export default function Credentials() {
         }
       >
         <Text style={styles.h1}>Tus Solicitudes</Text>
+        {requests?.length === 0 && (
+          <Text
+            style={{
+              color: theme.colors.typography.secondary,
+              textAlign: 'center',
+              fontSize: 18,
+            }}
+          >
+            Actualmente no tienes ninguna solicitude.
+          </Text>
+        )}
         <List data={requests} />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    marginBottom: 0,
-  },
-  scrollView: {
-    marginTop: 10,
-    marginBottom: 0,
-  },
-  optionsContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 5,
-  },
-  h1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#00d27d',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontFamily: 'Roboto',
-  },
-});
+const stylesFnc = css =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: css.container.backgroundColor,
+      paddingHorizontal: 20,
+      paddingTop: 50,
+      marginBottom: 0,
+    },
+    scrollView: {
+      marginTop: 10,
+      marginBottom: 0,
+    },
+    optionsContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: '#fff',
+      padding: 10,
+      borderRadius: 5,
+    },
+    h1: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#00d27d',
+      textAlign: 'center',
+      marginBottom: 20,
+      fontFamily: 'Roboto',
+    },
+  });

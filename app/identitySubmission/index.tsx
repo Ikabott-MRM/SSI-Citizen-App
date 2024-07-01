@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
@@ -19,12 +20,21 @@ import Toast from 'react-native-root-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 
+const dimensions = Dimensions.get('window');
+const imageHeight = Math.round((dimensions.width * 9) / 16);
+const imageWidth = dimensions.width - 30;
+
 export default function Identity() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const theme = useTheme();
   const [image, setImage] = useState<string | null>(null);
   const { uploadDocumentFile, isPending } = useIdentityMutation();
+  const styles = styleFnc({
+    container: {
+      backgroundColor: theme.colors.background.primary,
+    },
+  });
   const did =
     Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
@@ -92,8 +102,11 @@ export default function Identity() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: 'Presentación de Identidad',
+          headerTitle: 'Subir foto del documento de conducir',
           headerBackTitle: '',
+          headerTitleStyle: {
+            color: theme.colors.typography.secondary,
+          },
         }}
       />
       {!image && did && (
@@ -104,7 +117,7 @@ export default function Identity() {
               size={240}
               color={theme.colors.primary}
             />
-            <Button style={styles.button} mode="contained">
+            <Button style={styles.button} mode="contained" textColor="#333">
               Cargar Imagen
             </Button>
           </View>
@@ -115,7 +128,12 @@ export default function Identity() {
           <Text style={styles.text} variant="titleLarge">
             ¿Desea confirmar la imagen seleccionada?
           </Text>
-          <Image source={{ uri: image }} style={styles.image} />
+          <Image
+            source={{ uri: image }}
+            style={styles.image}
+            height={imageHeight}
+            width={imageWidth}
+          />
           <View style={styles.actionsContainer}>
             <Button
               onPress={() => setImage(null)}
@@ -152,40 +170,39 @@ export default function Identity() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  button: {
-    display: 'flex',
-    justifyContent: 'center',
-    width: 200,
-    height: 50,
-  },
-  containerUpload: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    cursor: 'pointer',
-  },
-  image: {
-    width: 350,
-    height: 250,
-  },
-  text: {
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  actionsContainer: {
-    marginTop: 10,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 5,
-  },
-  actionBtn: {
-    flex: 1,
-  },
-});
+const styleFnc = css =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: css.container.backgroundColor,
+    },
+    button: {
+      display: 'flex',
+      justifyContent: 'center',
+      width: 200,
+      height: 50,
+    },
+    containerUpload: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      cursor: 'pointer',
+    },
+    text: {
+      textAlign: 'center',
+      marginBottom: 10,
+      color: '#CCC',
+    },
+    actionsContainer: {
+      marginTop: 10,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 5,
+    },
+    actionBtn: {
+      flex: 1,
+    },
+  });

@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import QRCode from 'react-qr-code';
-import { Text } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import FabWithMenu from '@/components/FabWithMenu';
 import { Stack } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -24,46 +24,25 @@ import {
   MappedCredential,
 } from '@/database/db';
 import credential from '@/services/credential';
+import { IList, List } from '@/components/List';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
 const { width } = Dimensions.get('window');
 
-// Componente de acordeón para mostrar/ocultar detalles
-const Accordion = ({ title, children }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const toggleAccordion = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  return (
-    <View
-      style={[
-        styles.accordionContainer,
-        { backgroundColor: isExpanded ? '#e1e1e1' : '#f2f2f2' },
-      ]}
-    >
-      <TouchableOpacity onPress={toggleAccordion}>
-        <Text style={styles.accordionTitle}>{title}</Text>
-      </TouchableOpacity>
-      {isExpanded && <View>{children}</View>}
-    </View>
-  );
-};
-
 // Function to map credentials to the required format
-const mapCredentials = (credentials: Credential[]) => {
+const mapCredentials = (credentials: Credential[], styles) => {
   return credentials.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
     title: 'Licencia de Conducir',
     content: (
-      <Accordion title="Licencia de Conducir">
-        <View style={styles.credentialContainer}>
-          <View style={styles.qrCodeContainer}>
-            <QRCode size={150} value={credential.vcJwt} />
-          </View>
+      <View style={styles.credentialContainer}>
+        <View style={styles.qrCodeContainer}>
+          <QRCode size={300} value={credential.vcJwt} />
+        </View>
+        {credential.verifiableCredential.vcDataModel.credentialSubject
+          .firstname && (
           <Text style={styles.credentialText}>
             Nombre:{' '}
             {
@@ -71,6 +50,9 @@ const mapCredentials = (credentials: Credential[]) => {
                 .firstname
             }
           </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject
+          .lastname && (
           <Text style={styles.credentialText}>
             Apellido:{' '}
             {
@@ -78,6 +60,8 @@ const mapCredentials = (credentials: Credential[]) => {
                 .lastname
             }
           </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.issuanceDate && (
           <Text style={styles.credentialText}>
             Emitida el{' '}
             {format(
@@ -87,6 +71,8 @@ const mapCredentials = (credentials: Credential[]) => {
               'dd/MM/yyyy',
             )}
           </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.expirationDate && (
           <Text style={styles.credentialText}>
             Expira el{' '}
             {format(
@@ -96,8 +82,8 @@ const mapCredentials = (credentials: Credential[]) => {
               'dd/MM/yyyy',
             )}
           </Text>
-        </View>
-      </Accordion>
+        )}
+      </View>
     ),
   }));
 };
@@ -107,13 +93,16 @@ const insertCredentials = async (credentials: Credential[]) => {
   for (const cred of credentials) {
     const { id, issuer, expirationDate, issuanceDate } =
       cred.verifiableCredential.vcDataModel;
-    await insertCredential(
-      cred.vcJwt,
-      id,
-      issuer,
-      issuanceDate,
-      expirationDate,
-    );
+
+    if ((cred.vcJwt, id, issuer, issuanceDate, expirationDate)) {
+      await insertCredential(
+        cred.vcJwt,
+        id,
+        issuer,
+        expirationDate,
+        expirationDate,
+      );
+    }
   }
 };
 
@@ -134,9 +123,15 @@ const mapDatabaseCredentials = (
 };
 
 export default function Credentials() {
+  const theme = useTheme();
   const isConnected = useNetInfo();
-  const [credentials, setCredentials] = useState<object[]>([]);
+  const [credentials, setCredentials] = useState<IList[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const styles = stylesFnc({
+    container: {
+      backgroundColor: theme.colors.background.primary,
+    },
+  });
 
   const fetchData = async () => {
     try {
@@ -150,7 +145,7 @@ export default function Credentials() {
       }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      const mappedData = mapCredentials(data);
+      const mappedData = mapCredentials(data, styles);
 
       setCredentials(mappedData);
     } catch (error) {
@@ -180,98 +175,98 @@ export default function Credentials() {
         <View style={styles.container}>
           <Text style={styles.h1}>Tus Credenciales</Text>
         </View>
-        {credentials.map((credential, index) => (
-          <View key={index}>{credential.content}</View>
-        ))}
+        {credentials.length === 0 && (
+          <Text
+            style={{
+              color: theme.colors.typography.secondary,
+              textAlign: 'center',
+              fontSize: 18,
+            }}
+          >
+            Actualmente no tienes ninguna credencial, solicitá una nueva
+            utilizando el botón '+'!
+          </Text>
+        )}
+        <List data={credentials} />
       </ScrollView>
       <FabWithMenu />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    marginBottom: 0,
-  },
-  scrollView: {
-    marginTop: 10,
-    marginBottom: 0,
-  },
-  credentialContainer: {
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 20,
-    borderRadius: 0,
-    marginBottom: 0,
-    marginTop: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    width: width - 32, // Span the width of the device with some margin
-    alignSelf: 'center',
-  },
-  credentialTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333333',
-    paddingHorizontal: 5,
-  },
-  credentialText: {
-    fontSize: 14,
-    lineHeight: 24,
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
-    color: '#333333',
-    textAlign: 'center',
-  },
-  qrCodeContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  button: {
-    marginTop: 20,
-    width: 200,
-    height: 50,
-    justifyContent: 'center',
-    alignSelf: 'center',
-    borderRadius: 25,
-    fontSize: 16,
-    fontFamily: 'Roboto',
-  },
-  h1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#00d27d',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontFamily: 'Roboto',
-  },
-  text: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    fontFamily: 'Roboto',
-    color: '#333',
-  },
-  accordionContainer: {
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
-  },
-  accordionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginBottom: 5,
-  },
-});
+const stylesFnc = (css: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: css.container.backgroundColor,
+      paddingHorizontal: 20,
+      paddingTop: 25,
+      marginBottom: 0,
+    },
+    scrollView: {
+      marginTop: 10,
+      marginBottom: 0,
+    },
+    credentialContainer: {
+      backgroundColor: '#444',
+    },
+    credentialTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: '#333333',
+      paddingHorizontal: 5,
+    },
+    credentialText: {
+      fontSize: 18,
+      lineHeight: 24,
+      fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
+      color: '#CCC',
+      textAlign: 'center',
+    },
+    qrCodeContainer: {
+      backgroundColor: '#f5f5f5',
+      alignItems: 'center',
+      paddingVertical: 30,
+      marginBottom: 10,
+    },
+    button: {
+      marginTop: 20,
+      width: 200,
+      height: 50,
+      justifyContent: 'center',
+      alignSelf: 'center',
+      borderRadius: 25,
+      fontSize: 16,
+      fontFamily: 'Roboto',
+    },
+    h1: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#00d27d',
+      textAlign: 'center',
+      marginBottom: 20,
+      fontFamily: 'Roboto',
+    },
+    text: {
+      fontSize: 16,
+      lineHeight: 24,
+      textAlign: 'center',
+      marginBottom: 20,
+      paddingHorizontal: 20,
+      fontFamily: 'Roboto',
+      color: '#333',
+    },
+    accordionContainer: {
+      marginBottom: 10,
+      backgroundColor: '#f9f9f9',
+      borderRadius: 5,
+    },
+    accordionTitle: {
+      fontSize: 18,
+      color: '#CCC',
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      marginBottom: 5,
+    },
+  });

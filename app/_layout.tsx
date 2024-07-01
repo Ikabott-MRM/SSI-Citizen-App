@@ -7,7 +7,7 @@ import 'react-native-reanimated';
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
-  IconButton
+  IconButton,
 } from 'react-native-paper';
 import { DevSettings, Image } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -28,8 +28,19 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#00d27d',
+    primary: '#0bb664',
     secondary: '#535353',
+    typography: {
+      primary: '#FFF',
+      secondary: '#CCC',
+      color3: '#333',
+    },
+    background: {
+      primary: '#3a3a3a',
+      secondary: '#444',
+      color3: '#555',
+      color4: '#2c2c2c',
+    },
   },
 };
 
@@ -41,7 +52,6 @@ export default function RootLayout() {
   });
   const segments = useSegments();
   const router = useRouter();
-
 
   useEffect(() => {
     (async function initializeApp() {
@@ -73,35 +83,38 @@ export default function RootLayout() {
       <PaperProvider theme={theme}>
         <RootSiblingParent>
           <Stack
-         screenOptions={{
-          headerStyle: {
-            backgroundColor: '#f2f2f2',
-          },
-          headerTintColor: '#4c4c4c',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          headerTitleAlign: 'center',
-          headerTitle: () =>
-            <Image
-          source={require('../assets/images/logo-iovf.png')}
-          style={{ width: 80, height: 30 }}
-        />,
-          headerLeft: () =>
-            segments.length > 0 &&
-            segments[0] === 'identitySubmission' && (
-              <IconButton
-                icon={() => (
-                  <Ionicons name="home-outline" size={24} color="#4c4c4c" />
-                )}
-                onPress={() => router.replace('/')}
-              />
-            ),
-        }}
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#343434',
+              },
+              headerTintColor: '#4c4c4c',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+              headerTitleAlign: 'center',
+              headerTitle: () => (
+                <Image
+                  source={require('../assets/images/logo-iovf.png')}
+                  style={{ width: 80, height: 30 }}
+                />
+              ),
+              headerLeft: () =>
+                segments.length > 0 &&
+                segments[0] === 'identitySubmission' && (
+                  <IconButton
+                    icon={() => (
+                      <Ionicons
+                        name="home-outline"
+                        size={24}
+                        color={theme.colors.typography.secondary}
+                      />
+                    )}
+                    onPress={() => router.back()}
+                  />
+                ),
+            }}
           >
-            <Stack.Screen
-              name="(tabs)"
-            />
+            <Stack.Screen name="(tabs)" />
             <Stack.Screen name="+not-found" />
           </Stack>
         </RootSiblingParent>

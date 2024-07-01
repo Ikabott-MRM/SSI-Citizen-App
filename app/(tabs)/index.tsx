@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Platform, Text, TouchableOpacity, Dimensions, TextInput } from 'react-native';
-import { ActivityIndicator, Button, Menu, Divider, Provider } from 'react-native-paper';
+import {
+  StyleSheet,
+  View,
+  Platform,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  TextInput,
+} from 'react-native';
+import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
-import { List } from '@/components/List';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
@@ -12,7 +19,7 @@ const storedDid =
 const { width } = Dimensions.get('window');
 
 // Componente de acordeón para mostrar/ocultar detalles
-const Accordion = ({ title, children }) => {
+const Accordion = ({ styles, title, children }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleAccordion = () => {
@@ -20,7 +27,7 @@ const Accordion = ({ title, children }) => {
   };
 
   return (
-    <View style={[styles.accordionContainer, { backgroundColor: isExpanded ? '#e1e1e1' : '#f2f2f2' }]}>
+    <View style={[styles.accordionContainer, { backgroundColor: '#444' }]}>
       <TouchableOpacity onPress={toggleAccordion}>
         <Text style={styles.accordionTitle}>{title}</Text>
       </TouchableOpacity>
@@ -30,9 +37,26 @@ const Accordion = ({ title, children }) => {
 };
 
 export default function HomeScreen() {
+  const theme = useTheme();
   const { createDid, isPending } = useDidMutation();
   const [did, setDid] = useState<string | null>(storedDid);
-  const [selectedDIDType, setSelectedDIDType] = useState('default'); // Default or whatever your initial DID type is
+  const styles = stylesFnc({
+    container: {
+      backgroundColor: theme.colors.background.primary,
+    },
+    text: {
+      color: theme.colors.typography.secondary,
+    },
+    accordionTitle: {
+      color: theme.colors.primary,
+    },
+    didContainer: {
+      backgroundColor: theme.colors.background.color3,
+    },
+    didTextInput: {
+      color: theme.colors.typography.secondary,
+    },
+  });
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
@@ -44,116 +68,119 @@ export default function HomeScreen() {
   };
 
   return (
-      <View style={styles.container}>
-        <Text style={styles.h1}>Bienvenidos a IDA DEMO</Text>
-        {did && (
-          <Accordion title="Identificador Descentralizado (DID)">
+    <View style={{ ...styles.container }}>
+      <Text style={styles.h1}>Bienvenidos a IDA DEMO</Text>
+      {did && (
+        <Accordion title="Identificador Descentralizado (DID)" styles={styles}>
           <View style={styles.didContainer}>
-              <TextInput
-                style={styles.didTextInput}
-                value={did}
-                editable={true}
-                selectTextOnFocus={true}
-                multiline={true}
-              />
+            <TextInput
+              style={styles.didTextInput}
+              value={did}
+              editable={true}
+              selectTextOnFocus={true}
+              multiline={true}
+            />
           </View>
-          </Accordion>
-        )}
+        </Accordion>
+      )}
 
-        {!isPending && !did && (
-          <>
-            <Text style={styles.text}>
-              Primero se debe generar un Identificador Descentralizado (DID) que te identificará
-              al momento de recibir credenciales de los emisores confiables.
-            </Text>
-            <Button style={styles.button} mode="contained" onPress={handleCreateDid}>
-              Crea tu DID
-            </Button>
-          </>
-        )}
-        {isPending && <ActivityIndicator size="large" />}
-      </View>
+      {!isPending && !did && (
+        <>
+          <Text style={styles.text}>
+            Primero se debe generar un Identificador Descentralizado (DID) que
+            te identificará al momento de recibir credenciales de los emisores
+            confiables.
+          </Text>
+          <Button
+            labelStyle={{
+              fontSize: 18,
+            }}
+            style={styles.button}
+            mode="contained"
+            onPress={handleCreateDid}
+            textColor={theme.colors.typography.color3}
+          >
+            Crea tu DID
+          </Button>
+        </>
+      )}
+      {isPending && <ActivityIndicator size="large" />}
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    marginBottom: 0,
-  },
-  scrollView: {
-    marginTop: 10,
-    marginBottom: 0,
-  },
-  button: {
-    marginTop: 20,
-    width: 200,
-    height: 50,
-    justifyContent: 'center',
-    alignSelf: 'center',
-    borderRadius: 25,
-    fontSize: 16,
-    fontFamily: 'Roboto', 
-  },
-  h1: {
-    fontSize: 24, 
-    fontWeight: 'bold',
-    color: '#00d27d',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontFamily: 'Roboto', 
-  },
-  text: {
-    fontSize: 16, 
-    lineHeight: 24,
-    textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 0,
-    fontFamily: 'Roboto', 
-    color: '#333',
-  },
-  accordionContainer: {
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
-  },
-  accordionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginBottom: 5,
-  },
-  didContainer: {
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 20,
-    borderRadius: 0,
-    marginTop: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    width: width - 41, // Span the width of the device with some margin
-    alignSelf: 'center',
-  },
-  didTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333333',
-    paddingHorizontal:0,
-  },
-  didTextInput: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
-    color: '#333333',
-    textAlign: 'center',
-    paddingHorizontal:10,
-  },
-});
+const stylesFnc = (css?: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: css.container.backgroundColor,
+      paddingHorizontal: 20,
+      paddingTop: 50,
+      marginBottom: 0,
+    },
+    scrollView: {
+      marginTop: 10,
+      marginBottom: 0,
+    },
+    button: {
+      marginTop: 20,
+      width: 200,
+      height: 50,
+      justifyContent: 'center',
+      alignSelf: 'center',
+      borderRadius: 25,
+      fontFamily: 'Roboto',
+    },
+    h1: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#00ff85',
+      textAlign: 'center',
+      marginBottom: 20,
+      fontFamily: 'Roboto',
+    },
+    text: {
+      fontSize: 16,
+      lineHeight: 24,
+      textAlign: 'center',
+      marginBottom: 20,
+      paddingHorizontal: 0,
+      fontFamily: 'Roboto',
+      color: css.text.color,
+    },
+    accordionContainer: {
+      marginBottom: 20,
+      backgroundColor: '#f9f9f9',
+      borderRadius: 5,
+    },
+    accordionTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: css.accordionTitle.color,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      marginBottom: 5,
+      textAlign: 'center',
+    },
+    didContainer: {
+      backgroundColor: css.didContainer.backgroundColor,
+      paddingVertical: 10,
+      borderRadius: 5,
+      margin: 10,
+    },
+    didTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: '#333333',
+      paddingHorizontal: 0,
+    },
+    didTextInput: {
+      fontSize: 16,
+      lineHeight: 24,
+      fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
+      color: css.didTextInput.color,
+      textAlign: 'center',
+      paddingHorizontal: 10,
+    },
+  });

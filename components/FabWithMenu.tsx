@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { FAB, useTheme } from 'react-native-paper';
-import { Link } from 'expo-router';
+import { FAB, useTheme, Portal, Modal, Text, Button } from 'react-native-paper';
+import { Link, useRouter } from 'expo-router';
 
 const FabWithMenu = () => {
-  const [menuVisible, setMenuVisible] = useState(false);
   const theme = useTheme();
+  const router = useRouter();
+  const [visible, setVisible] = React.useState(false);
+  const toggleModal = () => {
+    setVisible(!visible);
+  };
 
-  const toggleMenu = () => {
-    setMenuVisible(!menuVisible);
+  const handleNewCredential = () => {
+    setVisible(false);
+    router.push('/identitySubmission');
   };
 
   return (
@@ -21,17 +26,64 @@ const FabWithMenu = () => {
         color="white"
         mode="flat"
         icon="plus"
-        onPress={toggleMenu}
+        onPress={toggleModal}
       />
-      {menuVisible && (
-        <View style={styles.menu}>
-          <TouchableOpacity style={styles.option}>
-            <Link href="/identitySubmission" onPress={toggleMenu}>
-              Licencia de Conducir
-            </Link>
-          </TouchableOpacity>
-        </View>
-      )}
+      <Portal>
+        <Modal
+          visible={visible}
+          onDismiss={() => setVisible(false)}
+          contentContainerStyle={{
+            backgroundColor: theme.colors.background.color4,
+            width: 350,
+            alignSelf: 'center',
+            paddingVertical: 20,
+            borderRadius: 20,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.colors.typography.primary,
+              textAlign: 'center',
+              fontSize: 24,
+            }}
+          >
+            Solicitar Nueva Credencial
+          </Text>
+          <Button
+            labelStyle={{
+              fontSize: 18,
+            }}
+            style={styles.button}
+            mode="contained"
+            onPress={() => handleNewCredential()}
+            textColor={theme.colors.typography.color3}
+          >
+            Licencia de Conducir
+          </Button>
+          <Button
+            labelStyle={{
+              fontSize: 18,
+            }}
+            style={styles.buttonDisabled}
+            mode="contained"
+            textColor={theme.colors.typography.color3}
+            disabled={true}
+          >
+            Pasaporte
+          </Button>
+          <Button
+            labelStyle={{
+              fontSize: 18,
+            }}
+            style={styles.buttonDisabled}
+            mode="contained"
+            textColor={theme.colors.typography.color3}
+            disabled={true}
+          >
+            Documento de Identidad
+          </Button>
+        </Modal>
+      </Portal>
     </View>
   );
 };
@@ -66,6 +118,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#f2f2f2',
+  },
+  button: {
+    marginTop: 20,
+    width: 300,
+    height: 50,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    borderRadius: 25,
+    fontFamily: 'Roboto',
+  },
+  buttonDisabled: {
+    marginTop: 20,
+    width: 300,
+    height: 50,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    borderRadius: 25,
+    fontFamily: 'Roboto',
+    backgroundColor: '#464646',
   },
 });
 
