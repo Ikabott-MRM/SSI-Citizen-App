@@ -23,7 +23,7 @@ const FabWithMenu = () => {
           ...styles.fab,
           backgroundColor: theme.colors.primary,
         }}
-        color="white"
+        color="#444"
         mode="flat"
         icon="plus"
         onPress={toggleModal}

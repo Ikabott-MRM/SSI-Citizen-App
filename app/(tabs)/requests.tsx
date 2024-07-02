@@ -111,7 +111,7 @@ export default function Credentials() {
               fontSize: 18,
             }}
           >
-            Actualmente no tienes ninguna solicitude.
+            Actualmente no tienes ninguna solicitud.
           </Text>
         )}
         <List data={requests} />
@@ -145,7 +145,7 @@ const stylesFnc = css =>
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#00d27d',
+      color: '#00ff85',
       textAlign: 'center',
       marginBottom: 20,
       fontFamily: 'Roboto',

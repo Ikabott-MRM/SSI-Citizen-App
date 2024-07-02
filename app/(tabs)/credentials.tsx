@@ -184,7 +184,7 @@ export default function Credentials() {
             }}
           >
             Actualmente no tienes ninguna credencial, solicitá una nueva
-            utilizando el botón '+'!
+            utilizando el botón '+'.
           </Text>
         )}
         <List data={credentials} />
@@ -239,11 +239,12 @@ const stylesFnc = (css: any) =>
       borderRadius: 25,
       fontSize: 16,
       fontFamily: 'Roboto',
+      color:'#444',
     },
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#00d27d',
+      color: '#00ff85',
       textAlign: 'center',
       marginBottom: 20,
       fontFamily: 'Roboto',
