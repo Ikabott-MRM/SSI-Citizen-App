@@ -41,9 +41,9 @@ const mapRequests = requests => {
   const dimensions = Dimensions.get('window');
   const imageHeight = Math.round((dimensions.width * 9) / 16);
 
-  return requests.map((request, index) => ({
+  return requests.map(request => ({
     id: request.id,
-    title: `Solicitud ${index + 1} - ${CREDENTIAL_TYPES[request.schema_id]}`,
+    title: `Solicitud ${request.code} - ${CREDENTIAL_TYPES[request.schema_id]}`,
     content: (
       <View>
         <Text style={{ marginBottom: 10 }}>
