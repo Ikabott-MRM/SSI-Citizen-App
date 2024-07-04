@@ -24,6 +24,12 @@ const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
 const imageWidth = dimensions.width - 30;
 
+const THREE_MB: number = 3145728; // 3MB in bytes
+
+const validateImageSize = (fileSize: number) => {
+  return fileSize <= THREE_MB;
+};
+
 export default function Identity() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -39,19 +45,35 @@ export default function Identity() {
     Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
   const pickImage = async () => {
+    let isValidSize = false;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.2,
     });
 
-    if (!result.canceled) {
+    if (result.assets && result.assets[0]?.fileSize) {
+      isValidSize = validateImageSize(result.assets[0].fileSize);
+    }
+
+    if (!isValidSize) {
+      Toast.show('El tamaño de la imagen supera el límite máximo de 3 MB', {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+    }
+
+    if (!result.canceled && isValidSize) {
       setImage(result.assets[0].uri);
     }
   };
 
   const uploadImage = () => {
+    if (!image) {
+      return;
+    }
+
     const formData = new FormData();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -147,6 +169,7 @@ export default function Identity() {
               style={styles.actionBtn}
               mode="contained"
               onPress={uploadImage}
+              disabled={!image}
             >
               Continuar
             </Button>
