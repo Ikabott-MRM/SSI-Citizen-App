@@ -146,7 +146,7 @@ export default function Identity() {
         </TouchableOpacity>
       )}
       {image && !isPending && did && (
-        <View>
+        <View style={styles.imageContainer}>
           <Text style={styles.text} variant="titleLarge">
             ¿Desea confirmar la imagen seleccionada?
           </Text>
@@ -213,6 +213,17 @@ const styleFnc = css =>
       alignItems: 'center',
       cursor: 'pointer',
     },
+    imageContainer: {
+      marginHorizontal: 15,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    image: {
+      width: '100%',
+      aspectRatio: 4 / 3,
+      resizeMode: 'contain',
+    },
     text: {
       textAlign: 'center',
       marginBottom: 10,
@@ -220,6 +231,7 @@ const styleFnc = css =>
     },
     actionsContainer: {
       marginTop: 10,
+      marginHorizontal: 15,
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
