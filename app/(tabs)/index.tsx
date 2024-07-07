@@ -13,14 +13,13 @@ import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
+const { width } = Dimensions.get('window');
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
-const { width } = Dimensions.get('window');
-
-// Componente de acordeón para mostrar/ocultar detalles
-const Accordion = ({ styles, title, children }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+// Accordion component - show/hide DID - Open by default
+const Accordion = ({ styles, title, children, isOpen = false }) => {
+  const [isExpanded, setIsExpanded] = useState(isOpen);
 
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
@@ -60,7 +59,7 @@ export default function HomeScreen() {
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: data => {
+      onSuccess: (data) => {
         SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
         setDid(data.uri);
       },
@@ -68,10 +67,14 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ ...styles.container }}>
+    <View style={styles.container}>
       <Text style={styles.h1}>Bienvenidos a IDA DEMO</Text>
       {did && (
-        <Accordion title="Identificador Descentralizado (DID)" styles={styles}>
+        <Accordion
+          title="Identificador Descentralizado (DID)"
+          styles={styles}
+          isOpen={true}
+        >
           <View style={styles.didContainer}>
             <TextInput
               style={styles.didTextInput}
@@ -83,7 +86,6 @@ export default function HomeScreen() {
           </View>
         </Accordion>
       )}
-
       {!isPending && !did && (
         <>
           <Text style={styles.text}>
@@ -92,13 +94,10 @@ export default function HomeScreen() {
             confiables.
           </Text>
           <Button
-            labelStyle={{
-              fontSize: 18,
-            }}
+            labelStyle={styles.buttonLabel}
             style={styles.button}
             mode="contained"
             onPress={handleCreateDid}
-            textColor={theme.colors.typography.color3}
           >
             Crea tu DID
           </Button>
@@ -118,9 +117,9 @@ const stylesFnc = (css?: any) =>
       paddingTop: 50,
       marginBottom: 0,
     },
-    scrollView: {
-      marginTop: 10,
-      marginBottom: 0,
+    buttonLabel: {
+      fontSize: 18,
+      color: '#444',
     },
     button: {
       marginTop: 20,
@@ -129,7 +128,7 @@ const stylesFnc = (css?: any) =>
       justifyContent: 'center',
       alignSelf: 'center',
       borderRadius: 25,
-      fontFamily: 'Roboto',
+      color: '#444',
     },
     h1: {
       fontSize: 24,
@@ -137,21 +136,19 @@ const stylesFnc = (css?: any) =>
       color: '#00ff85',
       textAlign: 'center',
       marginBottom: 20,
-      fontFamily: 'Roboto',
     },
     text: {
       fontSize: 16,
       lineHeight: 24,
       textAlign: 'center',
       marginBottom: 20,
-      paddingHorizontal: 0,
-      fontFamily: 'Roboto',
       color: css.text.color,
     },
     accordionContainer: {
       marginBottom: 20,
       backgroundColor: '#f9f9f9',
       borderRadius: 5,
+      marginTop: 50,
     },
     accordionTitle: {
       fontSize: 18,
@@ -167,13 +164,6 @@ const stylesFnc = (css?: any) =>
       paddingVertical: 10,
       borderRadius: 5,
       margin: 10,
-    },
-    didTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 10,
-      color: '#333333',
-      paddingHorizontal: 0,
     },
     didTextInput: {
       fontSize: 16,
