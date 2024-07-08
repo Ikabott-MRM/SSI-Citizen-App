@@ -140,7 +140,6 @@ export default function Credentials() {
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [openAccordionId, setOpenAccordionId] = useState(null);
   const styles = stylesFnc({
     container: {
       backgroundColor: theme.colors.background.primary,
@@ -228,6 +227,7 @@ const stylesFnc = (css: any) =>
       paddingTop: 25,
       marginBottom: 0,
     },
+
     scrollView: {
       marginTop: 10,
       marginBottom: 0,
@@ -238,6 +238,7 @@ const stylesFnc = (css: any) =>
       marginTop: 0,
       paddingBottom: 20,
     },
+
     credentialTitle: {
       fontSize: 18,
       fontWeight: 'bold',
@@ -245,6 +246,7 @@ const stylesFnc = (css: any) =>
       color: '#333333',
       paddingHorizontal: 5,
     },
+
     credentialText: {
       fontSize: 16,
       lineHeight: 24,
