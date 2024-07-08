@@ -114,7 +114,7 @@ export default function Identity() {
               });
             }
           },
-        },
+        }
       );
     }
   };
@@ -124,7 +124,7 @@ export default function Identity() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: 'Subir foto del documento de conducir',
+          headerTitle: 'Subir Prueba de Identidad',
           headerBackTitle: '',
           headerTitleStyle: {
             color: theme.colors.typography.secondary,
@@ -139,7 +139,7 @@ export default function Identity() {
               size={240}
               color={theme.colors.primary}
             />
-            <Button style={styles.button} mode="contained" textColor="#333">
+            <Button style={styles.button} mode="contained" textColor="#444">
               Cargar Imagen
             </Button>
           </View>
@@ -170,8 +170,9 @@ export default function Identity() {
               mode="contained"
               onPress={uploadImage}
               disabled={!image}
+              textColor="#444"
             >
-              Continuar
+              Confirmar
             </Button>
           </View>
         </View>
@@ -180,7 +181,8 @@ export default function Identity() {
       {!did && (
         <View style={styles.container}>
           <Text variant="titleLarge" style={{ marginBottom: 20 }}>
-            Primero debes crear tu DID
+            Para poder solicitar una credencial debes tener primero un DID
+            creado en la sección Identidad.
           </Text>
           <Link href="/" asChild>
             <Button style={styles.button} mode="contained">
@@ -193,12 +195,13 @@ export default function Identity() {
   );
 }
 
-const styleFnc = css =>
+const styleFnc = (css) =>
   StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'top',
+      paddingTop: 150,
       backgroundColor: css.container.backgroundColor,
     },
     button: {
@@ -216,7 +219,8 @@ const styleFnc = css =>
     imageContainer: {
       marginHorizontal: 15,
       flex: 1,
-      justifyContent: 'center',
+      justifyContent: 'top',
+      paddingTop: 0,
       alignItems: 'center',
     },
     image: {

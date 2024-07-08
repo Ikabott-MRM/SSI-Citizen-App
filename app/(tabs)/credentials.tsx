@@ -33,9 +33,22 @@ const { width } = Dimensions.get('window');
 
 // Function to map credentials to the required format
 const mapCredentials = (credentials: Credential[], styles) => {
-  return credentials.map(credential => ({
+  return credentials.map((credential) => ({
     id: credential.verifiableCredential.vcDataModel.id,
-    title: 'Licencia de Conducir',
+    title: (
+      <View>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 16,
+            fontWeight: 'bold',
+            textTransform: 'uppercase',
+          }}
+        >
+          Licencia de Conducir
+        </Text>
+      </View>
+    ),
     content: (
       <View style={styles.credentialContainer}>
         <View style={styles.qrCodeContainer}>
@@ -44,7 +57,7 @@ const mapCredentials = (credentials: Credential[], styles) => {
         {credential.verifiableCredential.vcDataModel.credentialSubject
           .firstname && (
           <Text style={styles.credentialText}>
-            Nombre:{' '}
+            <Text style={styles.labelText}>Nombre: </Text>
             {
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .firstname
@@ -54,7 +67,7 @@ const mapCredentials = (credentials: Credential[], styles) => {
         {credential.verifiableCredential.vcDataModel.credentialSubject
           .lastname && (
           <Text style={styles.credentialText}>
-            Apellido:{' '}
+            <Text style={styles.labelText}>Apellido: </Text>
             {
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .lastname
@@ -63,23 +76,23 @@ const mapCredentials = (credentials: Credential[], styles) => {
         )}
         {credential.verifiableCredential.vcDataModel.issuanceDate && (
           <Text style={styles.credentialText}>
-            Emitida el{' '}
+            <Text style={styles.labelText}>Emitida el: </Text>
             {format(
               new Date(
-                credential.verifiableCredential.vcDataModel.issuanceDate,
+                credential.verifiableCredential.vcDataModel.issuanceDate
               ),
-              'dd/MM/yyyy',
+              'dd/MM/yyyy'
             )}
           </Text>
         )}
         {credential.verifiableCredential.vcDataModel.expirationDate && (
           <Text style={styles.credentialText}>
-            Expira el{' '}
+            <Text style={styles.labelText}>Expira el: </Text>
             {format(
               new Date(
-                credential.verifiableCredential.vcDataModel.expirationDate,
+                credential.verifiableCredential.vcDataModel.expirationDate
               ),
-              'dd/MM/yyyy',
+              'dd/MM/yyyy'
             )}
           </Text>
         )}
@@ -100,16 +113,16 @@ const insertCredentials = async (credentials: Credential[]) => {
         id,
         issuer,
         expirationDate,
-        expirationDate,
+        expirationDate
       );
     }
   }
 };
 
 const mapDatabaseCredentials = (
-  dbCredentials: DBCredentials,
+  dbCredentials: DBCredentials
 ): MappedCredential[] => {
-  return dbCredentials.map(dbCredential => ({
+  return dbCredentials.map((dbCredential) => ({
     verifiableCredential: {
       vcDataModel: {
         id: dbCredential.dataModelId,
@@ -176,16 +189,27 @@ export default function Credentials() {
           <Text style={styles.h1}>Tus Credenciales</Text>
         </View>
         {credentials.length === 0 && (
-          <Text
-            style={{
-              color: theme.colors.typography.secondary,
-              textAlign: 'center',
-              fontSize: 18,
-            }}
-          >
-            Actualmente no tienes ninguna credencial, solicitá una nueva
-            utilizando el botón '+'.
-          </Text>
+          <View>
+            <Text
+              style={{
+                color: theme.colors.typography.secondary,
+                textAlign: 'center',
+                fontSize: 18,
+              }}
+            >
+              Actualmente no tienes ninguna credencial.
+            </Text>
+            <Text
+              style={{
+                color: theme.colors.typography.secondary,
+                textAlign: 'center',
+                fontSize: 18,
+                marginTop: 15,
+              }}
+            >
+              Solicita una nueva credencial utilizando el botón +.
+            </Text>
+          </View>
         )}
         <List data={credentials} />
       </ScrollView>
@@ -203,44 +227,50 @@ const stylesFnc = (css: any) =>
       paddingTop: 25,
       marginBottom: 0,
     },
+
     scrollView: {
       marginTop: 10,
       marginBottom: 0,
     },
+
     credentialContainer: {
       backgroundColor: '#444',
+      marginTop: 0,
+      paddingBottom: 20,
     },
+
     credentialTitle: {
       fontSize: 18,
       fontWeight: 'bold',
-      marginBottom: 10,
+      marginBottom: 0,
       color: '#333333',
       paddingHorizontal: 5,
     },
+
     credentialText: {
-      fontSize: 18,
+      fontSize: 16,
       lineHeight: 24,
       fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
+      color: '#fff',
+      textAlign: 'left',
+      marginLeft: 5,
+    },
+
+    labelText: {
+      fontWeight: 'bold',
       color: '#CCC',
-      textAlign: 'center',
     },
+
     qrCodeContainer: {
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#ccc',
       alignItems: 'center',
-      paddingVertical: 30,
+      paddingVertical: 5,
+      paddingHorizontal: 5,
       marginBottom: 10,
+      borderRadius: 5,
+      marginTop: -25,
     },
-    button: {
-      marginTop: 20,
-      width: 200,
-      height: 50,
-      justifyContent: 'center',
-      alignSelf: 'center',
-      borderRadius: 25,
-      fontSize: 16,
-      fontFamily: 'Roboto',
-      color:'#444',
-    },
+
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
@@ -249,25 +279,14 @@ const stylesFnc = (css: any) =>
       marginBottom: 20,
       fontFamily: 'Roboto',
     },
+
     text: {
       fontSize: 16,
       lineHeight: 24,
-      textAlign: 'center',
+      textAlign: 'left',
       marginBottom: 20,
       paddingHorizontal: 20,
       fontFamily: 'Roboto',
       color: '#333',
-    },
-    accordionContainer: {
-      marginBottom: 10,
-      backgroundColor: '#f9f9f9',
-      borderRadius: 5,
-    },
-    accordionTitle: {
-      fontSize: 18,
-      color: '#CCC',
-      paddingVertical: 10,
-      paddingHorizontal: 15,
-      marginBottom: 5,
     },
   });
