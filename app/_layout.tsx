@@ -107,6 +107,7 @@ export default function RootLayout() {
                         name="home-outline"
                         size={24}
                         color={theme.colors.typography.secondary}
+                        style={{ marginBottom: 10 }}
                       />
                     )}
                     onPress={() => router.back()}
