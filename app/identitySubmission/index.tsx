@@ -57,7 +57,7 @@ export default function Identity() {
       isValidSize = validateImageSize(result.assets[0].fileSize);
     }
 
-    if (!isValidSize) {
+    if (!result.canceled && !isValidSize) {
       Toast.show('El tamaño de la imagen supera el límite máximo de 3 MB', {
         duration: Toast.durations.LONG,
         position: Toast.positions.BOTTOM,

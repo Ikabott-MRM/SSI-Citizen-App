@@ -1,4 +1,6 @@
-# Welcome to your Expo app 👋
+# Welcome to IDA 👋
+
+"IDA Ciudadano" is a Self-Sovereign Identity (SSI) application designed to enable citizens to manage and present their digital credentials securely and autonomously, without the need for internet connectivity for validation. This application is part of a broader system aimed at demonstrating the potential and practicality of SSI technology in real-world situations.
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
@@ -25,26 +27,18 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## Contributing
 
-When you're ready, run:
+The main purpose of this repository is to continue evolving IDA, making it faster and easier to use. Development of IDA happens in the open on GitHub, and we are grateful to the community for contributing bugfixes and improvements. Read below to learn how you can take part in improving it.
 
-```bash
-npm run reset-project
-```
+### Code of Conduct
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+IDA has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](./CODE_OF_CONDUCT.md) so that you can understand what actions will and will not be tolerated.
 
-## Learn more
+### Contributing Guide
 
-To learn more about developing your project with Expo, look at the following resources:
+Read our [contributing guide](./CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to IDA.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### License
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+React is [Apache 2.0](./LICENSE).
