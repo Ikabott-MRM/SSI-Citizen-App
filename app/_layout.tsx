@@ -15,6 +15,8 @@ import { deleteCredentials, initDatabase } from '@/database/db';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { ModalProvider } from '@/providers/ModalProvider';
+import { Modal } from '@/components/Modal';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -81,44 +83,47 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <PaperProvider theme={theme}>
-        <RootSiblingParent>
-          <Stack
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: '#343434',
-              },
-              headerTintColor: '#4c4c4c',
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              },
-              headerTitleAlign: 'center',
-              headerTitle: () => (
-                <Image
-                  source={require('../assets/images/logo-iovf.png')}
-                  style={{ width: 80, height: 30 }}
-                />
-              ),
-              headerLeft: () =>
-                segments.length > 0 &&
-                segments[0] === 'identitySubmission' && (
-                  <IconButton
-                    icon={() => (
-                      <Ionicons
-                        name="home-outline"
-                        size={24}
-                        color={theme.colors.typography.secondary}
-                        style={{ marginBottom: 10 }}
-                      />
-                    )}
-                    onPress={() => router.back()}
+        <ModalProvider>
+          <RootSiblingParent>
+            <Stack
+              screenOptions={{
+                headerStyle: {
+                  backgroundColor: '#343434',
+                },
+                headerTintColor: '#4c4c4c',
+                headerTitleStyle: {
+                  fontWeight: 'bold',
+                },
+                headerTitleAlign: 'center',
+                headerTitle: () => (
+                  <Image
+                    source={require('../assets/images/logo-iovf.png')}
+                    style={{ width: 80, height: 30 }}
                   />
                 ),
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </RootSiblingParent>
+                headerLeft: () =>
+                  segments.length > 0 &&
+                  segments[0] === 'identitySubmission' && (
+                    <IconButton
+                      icon={() => (
+                        <Ionicons
+                          name="home-outline"
+                          size={24}
+                          color={theme.colors.typography.secondary}
+                          style={{ marginBottom: 10 }}
+                        />
+                      )}
+                      onPress={() => router.back()}
+                    />
+                  ),
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </RootSiblingParent>
+          <Modal />
+        </ModalProvider>
       </PaperProvider>
     </QueryClientProvider>
   );

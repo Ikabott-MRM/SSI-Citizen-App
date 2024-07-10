@@ -12,6 +12,8 @@ import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import { deleteCredentials } from '@/database/db';
+import { useModal } from '@/providers/ModalProvider';
 
 const { width } = Dimensions.get('window');
 const storedDid =
@@ -37,6 +39,13 @@ const Accordion = ({ styles, title, children, isOpen = false }) => {
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const { showModal } = useModal({
+    onClose: async () => {
+      await deleteCredentials();
+      await SecureStore.deleteItemAsync(KEY_DID_SECURE_STORE);
+      setDid(null);
+    },
+  });
   const { createDid, isPending } = useDidMutation();
   const [did, setDid] = useState<string | null>(storedDid);
   const styles = stylesFnc({
@@ -59,11 +68,17 @@ export default function HomeScreen() {
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: (data) => {
+      onSuccess: data => {
         SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
         setDid(data.uri);
       },
     });
+  };
+
+  const handleDeleteDid = async () => {
+    showModal(
+      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',
+    );
   };
 
   return (
@@ -100,6 +115,18 @@ export default function HomeScreen() {
             onPress={handleCreateDid}
           >
             Crea tu DID
+          </Button>
+        </>
+      )}
+      {!isPending && did && (
+        <>
+          <Button
+            labelStyle={styles.buttonLabel}
+            style={styles.button}
+            mode="contained"
+            onPress={handleDeleteDid}
+          >
+            Borrar tu DID
           </Button>
         </>
       )}
