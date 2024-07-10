@@ -13,7 +13,6 @@ import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
-const { width } = Dimensions.get('window');
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
@@ -59,7 +58,7 @@ export default function HomeScreen() {
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: (data) => {
+      onSuccess: data => {
         SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
         setDid(data.uri);
       },

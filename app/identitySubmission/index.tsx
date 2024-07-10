@@ -6,7 +6,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import { Stack } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -114,7 +114,7 @@ export default function Identity() {
               });
             }
           },
-        }
+        },
       );
     }
   };
@@ -178,29 +178,15 @@ export default function Identity() {
         </View>
       )}
       {isPending && <ActivityIndicator size="large" />}
-      {!did && (
-        <View style={styles.container}>
-          <Text variant="titleLarge" style={{ marginBottom: 20 }}>
-            Para poder solicitar una credencial debes tener primero un DID
-            creado en la sección Identidad.
-          </Text>
-          <Link href="/" asChild>
-            <Button style={styles.button} mode="contained">
-              Ir a Identidad
-            </Button>
-          </Link>
-        </View>
-      )}
     </View>
   );
 }
 
-const styleFnc = (css) =>
+const styleFnc = css =>
   StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'top',
       paddingTop: 150,
       backgroundColor: css.container.backgroundColor,
     },

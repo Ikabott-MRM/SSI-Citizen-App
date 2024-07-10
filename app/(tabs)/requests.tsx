@@ -14,9 +14,7 @@ import { List } from '@/components/List';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
-
-const storedDid =
-  Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) || '' : '';
+import { NoDID } from '@/components/NoDID';
 
 const CREDENTIAL_TYPES = {
   drivers_license: 'Licencia de Conducir',
@@ -32,7 +30,7 @@ const mapRequests = (requests, styles) => {
   const dimensions = Dimensions.get('window');
   const imageHeight = Math.round((dimensions.width * 9) / 16);
 
-  return requests.map((request) => ({
+  return requests.map(request => ({
     id: request.id,
     title: (
       <View style={styles.requestTitleContainer}>
@@ -77,10 +75,15 @@ const mapRequests = (requests, styles) => {
 };
 
 export default function Credentials() {
+  const storedDid =
+    Platform.OS !== 'web'
+      ? SecureStore.getItem(KEY_DID_SECURE_STORE) || ''
+      : '';
+
   const theme = useTheme();
   const styles = stylesFnc(theme.colors);
   const { requests, refetch } = useRequestsQuery(storedDid, {
-    select: (data) => mapRequests(data, styles),
+    select: data => mapRequests(data, styles),
   });
   const [refreshing, setRefreshing] = useState(false);
 
@@ -98,25 +101,26 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <Text style={styles.h1}>Tus Solicitudes</Text>
-        {requests?.length === 0 && (
+        {storedDid && <Text style={styles.h1}>Tus Solicitudes</Text>}
+        {requests?.length === 0 && storedDid && (
           <Text style={styles.noRequestText}>
             Actualmente no tienes ninguna solicitud.
           </Text>
         )}
-        <List data={requests} />
+        {storedDid && <List data={requests} />}
+        {!storedDid && <NoDID />}
       </ScrollView>
     </View>
   );
 }
 
-const stylesFnc = (colors) =>
+const stylesFnc = colors =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background.primary,
       paddingHorizontal: 20,
-      paddingTop: 50,
+      paddingTop: 25,
     },
     scrollView: {
       marginTop: 10,
