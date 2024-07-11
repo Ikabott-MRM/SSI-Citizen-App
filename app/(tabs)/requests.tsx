@@ -112,6 +112,7 @@ export default function Credentials() {
   const { requests, refetch } = useRequestsQuery(storedDid, {
     select: (data: Request[]) => mapRequests(data, styles),
   });
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {

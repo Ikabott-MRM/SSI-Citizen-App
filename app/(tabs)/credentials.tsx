@@ -78,6 +78,16 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
             }
           </Text>
         )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject
+          .licenseCategory && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>Categoría: </Text>
+            {
+              credential.verifiableCredential.vcDataModel.credentialSubject
+                .licenseCategory
+            }
+          </Text>
+        )}
         {credential.verifiableCredential.vcDataModel.issuanceDate && (
           <Text style={styles.credentialText}>
             <Text style={styles.labelText}>Emitida el: </Text>
