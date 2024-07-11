@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 import { DevSettings, Image } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
+import { deleteDatabase, initDatabase } from '@/database/db';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Ionicons from '@expo/vector-icons/Ionicons';
