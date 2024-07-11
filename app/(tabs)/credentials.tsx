@@ -3,16 +3,12 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  Dimensions,
-  TouchableOpacity,
   RefreshControl,
 } from 'react-native';
 import QRCode from 'react-qr-code';
 import { Text, useTheme } from 'react-native-paper';
 import FabWithMenu from '@/components/FabWithMenu';
 import { Stack } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { Credential } from '@/@types/credential';
 import { format } from 'date-fns';
 import { useNetInfo } from '@/hooks/useNetInfo';
@@ -25,15 +21,13 @@ import {
 } from '@/database/db';
 import credential from '@/services/credential';
 import { IList, List } from '@/components/List';
-
-const storedDid =
-  Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
-
-const { width } = Dimensions.get('window');
+import { NoDID } from '@/components/NoDID';
+import * as SecureStore from 'expo-secure-store';
+import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
 // Function to map credentials to the required format
 const mapCredentials = (credentials: Credential[], styles) => {
-  return credentials.map((credential) => ({
+  return credentials.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
     title: (
       <View>
@@ -79,9 +73,9 @@ const mapCredentials = (credentials: Credential[], styles) => {
             <Text style={styles.labelText}>Emitida el: </Text>
             {format(
               new Date(
-                credential.verifiableCredential.vcDataModel.issuanceDate
+                credential.verifiableCredential.vcDataModel.issuanceDate,
               ),
-              'dd/MM/yyyy'
+              'dd/MM/yyyy',
             )}
           </Text>
         )}
@@ -90,9 +84,9 @@ const mapCredentials = (credentials: Credential[], styles) => {
             <Text style={styles.labelText}>Expira el: </Text>
             {format(
               new Date(
-                credential.verifiableCredential.vcDataModel.expirationDate
+                credential.verifiableCredential.vcDataModel.expirationDate,
               ),
-              'dd/MM/yyyy'
+              'dd/MM/yyyy',
             )}
           </Text>
         )}
@@ -113,16 +107,16 @@ const insertCredentials = async (credentials: Credential[]) => {
         id,
         issuer,
         expirationDate,
-        expirationDate
+        expirationDate,
       );
     }
   }
 };
 
 const mapDatabaseCredentials = (
-  dbCredentials: DBCredentials
+  dbCredentials: DBCredentials,
 ): MappedCredential[] => {
-  return dbCredentials.map((dbCredential) => ({
+  return dbCredentials.map(dbCredential => ({
     verifiableCredential: {
       vcDataModel: {
         id: dbCredential.dataModelId,
@@ -136,6 +130,9 @@ const mapDatabaseCredentials = (
 };
 
 export default function Credentials() {
+  const storedDid =
+    Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
+
   const theme = useTheme();
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
@@ -185,10 +182,12 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.container}>
-          <Text style={styles.h1}>Tus Credenciales</Text>
-        </View>
-        {credentials.length === 0 && (
+        {storedDid && (
+          <View style={styles.container}>
+            <Text style={styles.h1}>Tus Credenciales</Text>
+          </View>
+        )}
+        {credentials.length === 0 && storedDid && (
           <View>
             <Text
               style={{
@@ -211,9 +210,10 @@ export default function Credentials() {
             </Text>
           </View>
         )}
+        {!storedDid && <NoDID />}
         <List data={credentials} />
       </ScrollView>
-      <FabWithMenu />
+      {storedDid && <FabWithMenu />}
     </View>
   );
 }

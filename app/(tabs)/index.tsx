@@ -15,7 +15,6 @@ import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { deleteCredentials } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
 
-const { width } = Dimensions.get('window');
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
