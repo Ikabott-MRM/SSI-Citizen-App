@@ -3,45 +3,44 @@ import { Button, Text, useTheme } from 'react-native-paper';
 import { Link } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
-
-const did =
-  Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
+import { CustomTheme } from '@/@types/theme';
 
 const NoDID = () => {
-  const theme = useTheme();
+  const theme = useTheme<CustomTheme>();
   const styles = styleFnc({
     container: {
-      backgroundColor: theme.colors.background.primary,
+      backgroundColor: theme.customColors.background.primary,
     },
     title: {
-      color: theme.colors.typography.secondary,
+      color: theme.customColors.typography.secondary,
     },
   });
 
   return (
-    !did && (
-      <View style={styles.container}>
-        <Text variant="titleLarge" style={styles.title}>
-          Para solicitar una nueva credencial, primero necesitas crear un
-          Identificador Digital Descentralizado (DID) en la sección 'Identidad'.
-        </Text>
-        <Link href="/" asChild>
-          <Button
-            labelStyle={styles.buttonLabel}
-            style={styles.button}
-            mode="contained"
-          >
-            Ir a Identidad
-          </Button>
-        </Link>
-      </View>
-    )
+    <View style={styles.container}>
+      <Text variant="titleLarge" style={styles.title}>
+        Para solicitar una nueva credencial, primero necesitas crear un
+        Identificador Digital Descentralizado (DID) en la sección 'Identidad'.
+      </Text>
+      <Link href="/" asChild>
+        <Button
+          labelStyle={styles.buttonLabel}
+          style={styles.button}
+          mode="contained"
+        >
+          Ir a Identidad
+        </Button>
+      </Link>
+    </View>
   );
 };
 
 export { NoDID };
 
-const styleFnc = css =>
+const styleFnc = (css: {
+  container: { backgroundColor: string };
+  title: { color: string };
+}) =>
   StyleSheet.create({
     container: {
       flex: 1,

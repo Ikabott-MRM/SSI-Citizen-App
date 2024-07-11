@@ -19,6 +19,7 @@ import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Toast from 'react-native-root-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
+import { CustomTheme } from '@/@types/theme';
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
@@ -33,12 +34,12 @@ const validateImageSize = (fileSize: number) => {
 export default function Identity() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const theme = useTheme();
+  const theme = useTheme<CustomTheme>();
   const [image, setImage] = useState<string | null>(null);
   const { uploadDocumentFile, isPending } = useIdentityMutation();
   const styles = styleFnc({
     container: {
-      backgroundColor: theme.colors.background.primary,
+      backgroundColor: theme.customColors.background.primary,
     },
   });
   const did =
@@ -101,7 +102,6 @@ export default function Identity() {
                 refetchType: 'all',
               })
               .then(() => {
-                console.log('dale');
                 router.navigate('/requests');
                 setImage(null);
               });
@@ -127,7 +127,7 @@ export default function Identity() {
           headerTitle: 'Subir Prueba de Identidad',
           headerBackTitle: '',
           headerTitleStyle: {
-            color: theme.colors.typography.secondary,
+            color: theme.customColors.typography.secondary,
           },
         }}
       />
@@ -182,7 +182,7 @@ export default function Identity() {
   );
 }
 
-const styleFnc = css =>
+const styleFnc = (css: { container: { backgroundColor: string } }) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -205,7 +205,6 @@ const styleFnc = css =>
     imageContainer: {
       marginHorizontal: 15,
       flex: 1,
-      justifyContent: 'top',
       paddingTop: 0,
       alignItems: 'center',
     },

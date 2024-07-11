@@ -4,6 +4,8 @@ import {
   StyleSheet,
   View,
   RefreshControl,
+  TextStyle,
+  ViewStyle,
 } from 'react-native';
 import QRCode from 'react-qr-code';
 import { Text, useTheme } from 'react-native-paper';
@@ -21,19 +23,27 @@ import {
 } from '@/database/db';
 import credential from '@/services/credential';
 import { IList, List } from '@/components/List';
+import { CustomTheme } from '@/@types/theme';
 import { NoDID } from '@/components/NoDID';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 
+interface Styles {
+  credentialContainer: ViewStyle;
+  qrCodeContainer: ViewStyle;
+  credentialText: TextStyle;
+  labelText: TextStyle;
+}
+
 // Function to map credentials to the required format
-const mapCredentials = (credentials: Credential[], styles) => {
+const mapCredentials = (credentials: Credential[], styles: Styles) => {
   return credentials.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
     title: (
       <View>
         <Text
           style={{
-            color: '#fff',
+            color: '#CCC',
             fontSize: 16,
             fontWeight: 'bold',
             textTransform: 'uppercase',
@@ -106,7 +116,7 @@ const insertCredentials = async (credentials: Credential[]) => {
         cred.vcJwt,
         id,
         issuer,
-        expirationDate,
+        issuanceDate,
         expirationDate,
       );
     }
@@ -130,16 +140,16 @@ const mapDatabaseCredentials = (
 };
 
 export default function Credentials() {
+  const theme = useTheme<CustomTheme>();
   const storedDid =
     Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
-  const theme = useTheme();
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const styles = stylesFnc({
     container: {
-      backgroundColor: theme.colors.background.primary,
+      backgroundColor: theme.customColors.background.primary,
     },
   });
 
@@ -191,7 +201,7 @@ export default function Credentials() {
           <View>
             <Text
               style={{
-                color: theme.colors.typography.secondary,
+                color: theme.customColors.typography.secondary,
                 textAlign: 'center',
                 fontSize: 18,
               }}
@@ -200,7 +210,7 @@ export default function Credentials() {
             </Text>
             <Text
               style={{
-                color: theme.colors.typography.secondary,
+                color: theme.customColors.typography.secondary,
                 textAlign: 'center',
                 fontSize: 18,
                 marginTop: 15,
@@ -210,15 +220,15 @@ export default function Credentials() {
             </Text>
           </View>
         )}
+        {storedDid && <List data={credentials} />}
         {!storedDid && <NoDID />}
-        <List data={credentials} />
       </ScrollView>
       {storedDid && <FabWithMenu />}
     </View>
   );
 }
 
-const stylesFnc = (css: any) =>
+const stylesFnc = (css: { container: { backgroundColor: string } }) =>
   StyleSheet.create({
     container: {
       flex: 1,

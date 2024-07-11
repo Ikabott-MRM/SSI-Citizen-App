@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { FAB, useTheme, Portal, Modal, Text, Button } from 'react-native-paper';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { CustomTheme } from '@/@types/theme';
 
 const FabWithMenu = () => {
-  const theme = useTheme();
+  const theme = useTheme<CustomTheme>();
   const router = useRouter();
   const [visible, setVisible] = React.useState(false);
   const toggleModal = () => {
@@ -33,7 +34,7 @@ const FabWithMenu = () => {
           visible={visible}
           onDismiss={() => setVisible(false)}
           contentContainerStyle={{
-            backgroundColor: theme.colors.background.color4,
+            backgroundColor: theme.customColors.background.color4,
             width: 350,
             alignSelf: 'center',
             paddingVertical: 20,
@@ -42,7 +43,7 @@ const FabWithMenu = () => {
         >
           <Text
             style={{
-              color: theme.colors.typography.primary,
+              color: theme.customColors.typography.primary,
               textAlign: 'center',
               fontSize: 24,
             }}
@@ -56,7 +57,7 @@ const FabWithMenu = () => {
             style={styles.button}
             mode="contained"
             onPress={() => handleNewCredential()}
-            textColor={theme.colors.typography.color3}
+            textColor={theme.customColors.typography.color3}
           >
             Licencia de Conducir
           </Button>
@@ -66,7 +67,7 @@ const FabWithMenu = () => {
             }}
             style={styles.buttonDisabled}
             mode="contained"
-            textColor={theme.colors.typography.color3}
+            textColor={theme.customColors.typography.color3}
             disabled={true}
           >
             Pasaporte
@@ -77,7 +78,7 @@ const FabWithMenu = () => {
             }}
             style={styles.buttonDisabled}
             mode="contained"
-            textColor={theme.colors.typography.color3}
+            textColor={theme.customColors.typography.color3}
             disabled={true}
           >
             Documento de Identidad

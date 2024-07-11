@@ -15,6 +15,7 @@ import { deleteCredentials, initDatabase } from '@/database/db';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
 
@@ -32,6 +33,9 @@ const theme = {
     ...DefaultTheme.colors,
     primary: '#00ff85',
     secondary: '#535353',
+    background: '#444',
+  },
+  customColors: {
     typography: {
       primary: '#FFF',
       secondary: '#CCC',
@@ -44,7 +48,7 @@ const theme = {
       color4: '#2c2c2c',
     },
   },
-};
+} as CustomTheme;
 
 export default function RootLayout() {
   const queryClient = new QueryClient();
@@ -109,7 +113,7 @@ export default function RootLayout() {
                         <Ionicons
                           name="home-outline"
                           size={24}
-                          color={theme.colors.typography.secondary}
+                          color={theme.customColors.typography.secondary}
                           style={{ marginBottom: 10 }}
                         />
                       )}

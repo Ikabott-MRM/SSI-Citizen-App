@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { List as ListPaper, useTheme, IconButton } from 'react-native-paper';
+import { CustomTheme } from '@/@types/theme';
 
 const Details = ({ content }: { content: React.ReactNode }) => {
   return <View>{content}</View>;
@@ -8,13 +9,13 @@ const Details = ({ content }: { content: React.ReactNode }) => {
 
 export interface IList {
   id: string | number;
-  title: string;
+  title: React.ReactNode;
   content: React.ReactNode;
 }
 
 const List = ({ data }: { data: IList[] }) => {
   const [expandedId, setExpandedId] = React.useState<string | number>('');
-  const theme = useTheme();
+  const theme = useTheme<CustomTheme>();
 
   const handleAccordionPress = (newExpandedId: string | number) => {
     setExpandedId(expandedId === newExpandedId ? '' : newExpandedId);
@@ -23,7 +24,7 @@ const List = ({ data }: { data: IList[] }) => {
   const CustomChevron = ({ isExpanded }: { isExpanded: boolean }) => (
     <IconButton
       icon={isExpanded ? 'chevron-up' : 'chevron-down'}
-      iconColor={theme.colors.typography.secondary}
+      iconColor={theme.customColors.typography.secondary}
       size={24}
       style={{ height: 24, width: 24 }}
     />
@@ -50,7 +51,7 @@ const List = ({ data }: { data: IList[] }) => {
                 title={item.title}
                 id={item.id.toString()}
                 titleStyle={{
-                  color: theme.colors.typography.secondary,
+                  color: theme.customColors.typography.secondary,
                 }}
                 right={() => <CustomChevron isExpanded={isOpened} />}
               >
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   accordionClosed: {
-    minHeight: 40, // Adjust this value as needed
+    minHeight: 40,
   },
 });
 

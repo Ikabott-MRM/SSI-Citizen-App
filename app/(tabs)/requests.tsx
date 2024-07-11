@@ -7,26 +7,53 @@ import {
   View,
   RefreshControl,
   Text,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
-import { Image } from 'expo-image';
+import { Image, ImageStyle } from 'expo-image';
 import { useTheme } from 'react-native-paper';
 import { List } from '@/components/List';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
 import { NoDID } from '@/components/NoDID';
+import { CustomTheme } from '@/@types/theme';
 
-const CREDENTIAL_TYPES = {
+const CREDENTIAL_TYPES: { [key in Request['schema_id']]: string } = {
   drivers_license: 'Licencia de Conducir',
 };
-const STATUS_CONFIG = {
+const STATUS_CONFIG: {
+  [key in Request['status']]: { color: string; text: string };
+} = {
   pending: { color: 'orange', text: 'PENDIENTE' },
   rejected: { color: 'red', text: 'NO APROBADO' },
   approved: { color: 'green', text: 'APROBADO' },
 };
 
+interface Request {
+  id: string;
+  code: string;
+  status: string;
+  schema_id: string;
+  document_url: string;
+}
+
+interface Styles {
+  requestTitleContainer: ViewStyle;
+  statusDot: ViewStyle;
+  requestTitleText: TextStyle;
+  requestContentContainer: ViewStyle;
+  credentialTypeLabel: TextStyle;
+  credentialType: TextStyle;
+  statusLabel: TextStyle;
+  statusBadge: ViewStyle;
+  statusText: TextStyle;
+  documentImageContainer: ViewStyle;
+  documentImage: ImageStyle;
+}
+
 // Function to map credentials to the required format
-const mapRequests = (requests, styles) => {
+const mapRequests = (requests: Request[], styles: Styles) => {
   const dimensions = Dimensions.get('window');
   const imageHeight = Math.round((dimensions.width * 9) / 16);
 
@@ -80,10 +107,10 @@ export default function Credentials() {
       ? SecureStore.getItem(KEY_DID_SECURE_STORE) || ''
       : '';
 
-  const theme = useTheme();
-  const styles = stylesFnc(theme.colors);
+  const theme = useTheme<CustomTheme>();
+  const styles = stylesFnc(theme.customColors);
   const { requests, refetch } = useRequestsQuery(storedDid, {
-    select: data => mapRequests(data, styles),
+    select: (data: Request[]) => mapRequests(data, styles),
   });
   const [refreshing, setRefreshing] = useState(false);
 
@@ -118,7 +145,10 @@ export default function Credentials() {
   );
 }
 
-const stylesFnc = colors =>
+const stylesFnc = (colors: {
+  background: { primary: string };
+  typography: { secondary: string };
+}) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -152,7 +182,7 @@ const stylesFnc = colors =>
       marginRight: 5,
     },
     requestTitleText: {
-      color: '#fff',
+      color: '#CCC',
       fontSize: 16,
       fontWeight: 'bold',
       textTransform: 'uppercase',

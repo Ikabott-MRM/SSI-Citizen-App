@@ -5,21 +5,37 @@ import {
   Platform,
   Text,
   TouchableOpacity,
-  Dimensions,
   TextInput,
+  TextStyle,
 } from 'react-native';
 import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import { CustomTheme } from '@/@types/theme';
 import { deleteCredentials } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
+type Styles = {
+  accordionContainer: object;
+  accordionTitle: TextStyle;
+};
+
 // Accordion component - show/hide DID - Open by default
-const Accordion = ({ styles, title, children, isOpen = false }) => {
+const Accordion = ({
+  styles,
+  title,
+  children,
+  isOpen = false,
+}: {
+  styles: Styles;
+  title: string;
+  children: React.ReactNode;
+  isOpen: boolean;
+}) => {
   const [isExpanded, setIsExpanded] = useState(isOpen);
 
   const toggleAccordion = () => {
@@ -37,7 +53,7 @@ const Accordion = ({ styles, title, children, isOpen = false }) => {
 };
 
 export default function HomeScreen() {
-  const theme = useTheme();
+  const theme = useTheme<CustomTheme>();
   const { showModal } = useModal({
     onClose: async () => {
       await deleteCredentials();
@@ -49,19 +65,19 @@ export default function HomeScreen() {
   const [did, setDid] = useState<string | null>(storedDid);
   const styles = stylesFnc({
     container: {
-      backgroundColor: theme.colors.background.primary,
+      backgroundColor: theme.customColors.background.primary,
     },
     text: {
-      color: theme.colors.typography.secondary,
+      color: theme.customColors.typography.secondary,
     },
     accordionTitle: {
       color: theme.colors.primary,
     },
     didContainer: {
-      backgroundColor: theme.colors.background.color3,
+      backgroundColor: theme.customColors.background.color3,
     },
     didTextInput: {
-      color: theme.colors.typography.secondary,
+      color: theme.customColors.typography.secondary,
     },
   });
 
@@ -122,7 +138,6 @@ export default function HomeScreen() {
           <Button
             labelStyle={styles.buttonLabel}
             style={styles.buttonDelete}
-            contentStyle={styles.buttonContent}
             mode="contained"
             onPress={handleDeleteDid}
           >
@@ -135,7 +150,13 @@ export default function HomeScreen() {
   );
 }
 
-const stylesFnc = (css?: any) =>
+const stylesFnc = (css: {
+  container: { backgroundColor: string };
+  text: { color: string };
+  accordionTitle: { color: string };
+  didContainer: { backgroundColor: string };
+  didTextInput: { color: string };
+}) =>
   StyleSheet.create({
     container: {
       flex: 1,
