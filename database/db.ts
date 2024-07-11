@@ -80,8 +80,8 @@ export const getCredentials = async (): Promise<DBCredentials> => {
   return await SQLiteDatabase.getAllAsync(`SELECT * FROM credential`);
 };
 
-export const deleteCredentials = async (): Promise<DBCredentials> => {
-  return await SQLiteDatabase.getAllAsync('DELETE FROM credential');
+export const deleteCredentials = async () => {
+  await SQLiteDatabase.runAsync('DELETE FROM credential');
 };
 
 export const deleteDatabase = async () => {
