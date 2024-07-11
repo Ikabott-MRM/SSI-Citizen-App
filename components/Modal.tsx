@@ -8,15 +8,56 @@ const Modal = () => {
   return (
     <Portal>
       <Dialog visible={modalVisible} onDismiss={hideModal}>
-        <Dialog.Title>Atención</Dialog.Title>
+        <Dialog.Title
+          style={{
+            textAlign: 'center',
+            fontWeight: 'bold',
+          }}
+        >
+          Atención
+        </Dialog.Title>
         <Dialog.Content>
-          <Text>{modalMessage}</Text>
+          <Text
+            style={{
+              fontSize: 16,
+              lineHeight: 24,
+              textAlign: 'center',
+              marginBottom: 20,
+            }}
+          >
+            {modalMessage}
+          </Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={hideModal} mode="contained-tonal">
-            Si, quiero eliminar
+          <Button
+            style={{
+              margin: 10,
+              paddingVertical: 5,
+              paddingHorizontal: 10,
+              justifyContent: 'center',
+              alignSelf: 'center',
+              borderRadius: 25,
+              backgroundColor: '#CCC',
+            }}
+            onPress={hideModal}
+            mode="contained-tonal"
+          >
+            Sí, eliminar todo
           </Button>
-          <Button onPress={cancelModal} mode="contained">
+          <Button
+            style={{
+              margin: 10,
+              paddingVertical: 5,
+              paddingHorizontal: 10,
+              justifyContent: 'center',
+              alignSelf: 'center',
+              borderRadius: 25,
+              backgroundColor: '#00ff85',
+            }}
+            labelStyle={{ color: '#444' }}
+            onPress={cancelModal}
+            mode="contained"
+          >
             Cancelar
           </Button>
         </Dialog.Actions>

@@ -121,11 +121,12 @@ export default function HomeScreen() {
         <>
           <Button
             labelStyle={styles.buttonLabel}
-            style={styles.button}
+            style={styles.buttonDelete}
+            contentStyle={styles.buttonContent}
             mode="contained"
             onPress={handleDeleteDid}
           >
-            Borrar tu DID
+            Borrar tu DID {'\n'}(Solo para Test)
           </Button>
         </>
       )}
@@ -155,6 +156,16 @@ const stylesFnc = (css?: any) =>
       alignSelf: 'center',
       borderRadius: 25,
       color: '#444',
+    },
+    buttonDelete: {
+      marginTop: 20,
+      width: 200,
+      height: 50,
+      justifyContent: 'center',
+      alignSelf: 'center',
+      borderRadius: 25,
+      color: '#444',
+      backgroundColor: '#888',
     },
     h1: {
       fontSize: 24,
@@ -198,5 +209,9 @@ const stylesFnc = (css?: any) =>
       color: css.didTextInput.color,
       textAlign: 'center',
       paddingHorizontal: 10,
+    },
+    textSmall: {
+      fontSize: 12,
+      textAlign: 'center',
     },
   });

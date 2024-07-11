@@ -46,7 +46,9 @@ const styleFnc = css =>
     container: {
       flex: 1,
       alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: css.container.backgroundColor,
+      marginTop: 100,
     },
     button: {
       width: 200,

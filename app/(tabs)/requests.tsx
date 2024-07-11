@@ -101,7 +101,11 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {storedDid && <Text style={styles.h1}>Tus Solicitudes</Text>}
+        {storedDid && (
+          <View style={styles.container}>
+            <Text style={styles.h1}>Tus Solicitudes</Text>
+          </View>
+        )}
         {requests?.length === 0 && storedDid && (
           <Text style={styles.noRequestText}>
             Actualmente no tienes ninguna solicitud.
