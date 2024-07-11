@@ -13,7 +13,7 @@ import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
-import { deleteCredentials } from '@/database/db';
+import { deleteDatabase } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
 
 const storedDid =
@@ -56,7 +56,7 @@ export default function HomeScreen() {
   const theme = useTheme<CustomTheme>();
   const { showModal } = useModal({
     onClose: async () => {
-      await deleteCredentials();
+      await deleteDatabase();
       await SecureStore.deleteItemAsync(KEY_DID_SECURE_STORE);
       setDid(null);
     },

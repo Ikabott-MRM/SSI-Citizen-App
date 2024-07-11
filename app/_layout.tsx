@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 import { DevSettings, Image } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { deleteCredentials, initDatabase } from '@/database/db';
+import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -64,7 +64,7 @@ export default function RootLayout() {
       if (__DEV__) {
         DevSettings.addMenuItem('Clear Data', async function clearData() {
           console.log('Clear Data');
-          await deleteCredentials();
+          await deleteDatabase();
           await SecureStore.deleteItemAsync(KEY_DID_SECURE_STORE);
           DevSettings.reload();
         });

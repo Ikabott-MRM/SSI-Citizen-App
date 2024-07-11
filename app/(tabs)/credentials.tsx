@@ -118,16 +118,33 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
 // Function to insert credentials
 const insertCredentials = async (credentials: Credential[]) => {
   for (const cred of credentials) {
-    const { id, issuer, expirationDate, issuanceDate } =
-      cred.verifiableCredential.vcDataModel;
+    const {
+      id,
+      issuer,
+      expirationDate,
+      issuanceDate,
+      credentialSubject: { firstname, lastname, licenseCategory },
+    } = cred.verifiableCredential.vcDataModel;
 
-    if ((cred.vcJwt, id, issuer, issuanceDate, expirationDate)) {
+    if (
+      (cred.vcJwt,
+      id,
+      issuer,
+      issuanceDate,
+      expirationDate,
+      firstname,
+      lastname,
+      licenseCategory)
+    ) {
       await insertCredential(
         cred.vcJwt,
         id,
         issuer,
         issuanceDate,
         expirationDate,
+        firstname,
+        lastname,
+        licenseCategory,
       );
     }
   }
@@ -143,6 +160,11 @@ const mapDatabaseCredentials = (
         issuanceDate: dbCredential.issuanceDate,
         expirationDate: dbCredential.expirationDate,
         issuer: dbCredential.issuer,
+        credentialSubject: {
+          firstName: dbCredential.firstName,
+          lastName: dbCredential.lastName,
+          licenseCategory: dbCredential.licenseCategory,
+        },
       },
     },
     vcJwt: dbCredential.jwt,
