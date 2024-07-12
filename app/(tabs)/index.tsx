@@ -18,9 +18,6 @@ import { useModal } from '@/providers/ModalProvider';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 
-const storedDid =
-  Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
-
 type Styles = {
   accordionContainer: object;
   accordionTitle: TextStyle;
@@ -55,6 +52,9 @@ const Accordion = ({
 };
 
 export default function HomeScreen() {
+  const storedDid =
+    Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
+
   const theme = useTheme<CustomTheme>();
   const { showModal } = useModal({
     onClose: async () => {
