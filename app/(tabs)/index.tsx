@@ -5,7 +5,7 @@ import {
   Platform,
   Text,
   TouchableOpacity,
-  TextInput,
+  Alert,
   TextStyle,
 } from 'react-native';
 import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
@@ -15,6 +15,8 @@ import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
 import { deleteDatabase } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Clipboard from 'expo-clipboard';
 
 const storedDid =
   Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
@@ -96,6 +98,12 @@ export default function HomeScreen() {
     );
   };
 
+  const copyToClipboard = async () => {
+    if (!storedDid) return;
+    await Clipboard.setStringAsync(storedDid);
+    Alert.alert('Copied to clipboard', storedDid);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.h1}>Bienvenidos a IDA DEMO</Text>
@@ -106,13 +114,13 @@ export default function HomeScreen() {
           isOpen={true}
         >
           <View style={styles.didContainer}>
-            <TextInput
-              style={styles.didTextInput}
-              value={did}
-              editable={true}
-              selectTextOnFocus={true}
-              multiline={true}
-            />
+            <Text style={styles.didTextInput}>{did}</Text>
+            <TouchableOpacity
+              onPress={copyToClipboard}
+              style={styles.iconContainer}
+            >
+              <Ionicons name="copy-outline" size={20} color="#CCC" />
+            </TouchableOpacity>
           </View>
         </Accordion>
       )}
@@ -222,6 +230,12 @@ const stylesFnc = (css: {
       paddingVertical: 10,
       borderRadius: 5,
       margin: 10,
+    },
+    iconContainer: {
+      position: 'absolute',
+      right: 5,
+      bottom: 5,
+      cursor: 'pointer',
     },
     didTextInput: {
       fontSize: 16,
