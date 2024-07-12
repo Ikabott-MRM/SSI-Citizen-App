@@ -13,7 +13,7 @@ import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
-import { deleteDatabase } from '@/database/db';
+import { deleteCredentials, deleteDatabase } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
@@ -58,6 +58,7 @@ export default function HomeScreen() {
   const theme = useTheme<CustomTheme>();
   const { showModal } = useModal({
     onClose: async () => {
+      await deleteCredentials();
       await deleteDatabase();
       await SecureStore.deleteItemAsync(KEY_DID_SECURE_STORE);
       setDid(null);

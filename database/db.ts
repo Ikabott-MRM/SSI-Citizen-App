@@ -10,8 +10,8 @@ type DBCredential = {
   issuer: string;
   issuanceDate: string;
   expirationDate: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   licenseCategory: string;
 };
 
@@ -23,8 +23,8 @@ export type MappedCredential = {
       expirationDate: string;
       issuer: string;
       credentialSubject: {
-        firstName: string;
-        lastName: string;
+        firstname: string;
+        lastname: string;
         licenseCategory: string;
       };
     };
@@ -44,8 +44,8 @@ export async function initDatabase() {
       issuer TEXT NOT NULL, 
       issuanceDate TEXT NOT NULL, 
       expirationDate TEXT NOT NULL,
-      firstName TEXT NOT NULL,
-      lastName TEXT NOT NULL,
+      firstname TEXT NOT NULL,
+      lastname TEXT NOT NULL,
       licenseCategory TEXT NOT NULL
     );
   `);
@@ -57,21 +57,21 @@ export const insertCredential = async (
   issuer: string,
   issuanceDate: string,
   expirationDate: string,
-  firstName: string,
-  lastName: string,
+  firstname: string,
+  lastname: string,
   licenseCategory: string,
 ) => {
   await SQLiteDatabase.runAsync(
     `
-    INSERT INTO credential (jwt, dataModelId, issuer, issuanceDate, expirationDate, firstName, lastName, licenseCategory) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO credential (jwt, dataModelId, issuer, issuanceDate, expirationDate, firstname, lastname, licenseCategory) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `,
     jwt,
     dataModelId,
     issuer,
     issuanceDate,
     expirationDate,
-    firstName,
-    lastName,
+    firstname,
+    lastname,
     licenseCategory,
   );
 };
@@ -92,4 +92,12 @@ export const deleteDatabase = async () => {
   } catch (error) {
     console.error('Error deleting database:', error);
   }
+};
+
+export const checkIfCredentialExists = async (dataModelId: string) => {
+  const result = await SQLiteDatabase.getAllAsync(
+    'SELECT * FROM credential WHERE dataModelId = ?',
+    dataModelId,
+  );
+  return result.length > 0;
 };

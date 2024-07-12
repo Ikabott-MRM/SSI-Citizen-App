@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { useNetInfo } from '@/hooks/useNetInfo';
 import { useEffect, useState } from 'react';
 import {
+  checkIfCredentialExists,
   DBCredentials,
   getCredentials,
   insertCredential,
@@ -118,34 +119,40 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
 // Function to insert credentials
 const insertCredentials = async (credentials: Credential[]) => {
   for (const cred of credentials) {
-    const {
-      id,
-      issuer,
-      expirationDate,
-      issuanceDate,
-      credentialSubject: { firstname, lastname, licenseCategory },
-    } = cred.verifiableCredential.vcDataModel;
+    const exists = await checkIfCredentialExists(
+      cred.verifiableCredential.vcDataModel.id,
+    );
 
-    if (
-      (cred.vcJwt,
-      id,
-      issuer,
-      issuanceDate,
-      expirationDate,
-      firstname,
-      lastname,
-      licenseCategory)
-    ) {
-      await insertCredential(
-        cred.vcJwt,
+    if (!exists) {
+      const {
+        id,
+        issuer,
+        expirationDate,
+        issuanceDate,
+        credentialSubject: { firstname, lastname, licenseCategory },
+      } = cred.verifiableCredential.vcDataModel;
+
+      if (
+        (cred.vcJwt,
         id,
         issuer,
         issuanceDate,
         expirationDate,
         firstname,
         lastname,
-        licenseCategory,
-      );
+        licenseCategory)
+      ) {
+        await insertCredential(
+          cred.vcJwt,
+          id,
+          issuer,
+          issuanceDate,
+          expirationDate,
+          firstname,
+          lastname,
+          licenseCategory,
+        );
+      }
     }
   }
 };
@@ -161,8 +168,8 @@ const mapDatabaseCredentials = (
         expirationDate: dbCredential.expirationDate,
         issuer: dbCredential.issuer,
         credentialSubject: {
-          firstName: dbCredential.firstName,
-          lastName: dbCredential.lastName,
+          firstname: dbCredential.firstname,
+          lastname: dbCredential.lastname,
           licenseCategory: dbCredential.licenseCategory,
         },
       },
@@ -188,6 +195,7 @@ export default function Credentials() {
   const fetchData = async () => {
     try {
       let data;
+
       if (isConnected && storedDid) {
         data = await credential.getCredentials(storedDid);
         await insertCredentials(data);
@@ -195,6 +203,7 @@ export default function Credentials() {
         const dbData = await getCredentials();
         data = mapDatabaseCredentials(dbData);
       }
+
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       const mappedData = mapCredentials(data, styles);
