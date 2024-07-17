@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   Platform,
@@ -18,6 +18,7 @@ import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
 import { NoDID } from '@/components/NoDID';
 import { CustomTheme } from '@/@types/theme';
+import Toast from 'react-native-root-toast';
 
 const CREDENTIAL_TYPES: { [key in Request['schema_id']]: string } = {
   drivers_license: 'Licencia de Conducir',
@@ -109,9 +110,18 @@ export default function Credentials() {
 
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
-  const { requests, refetch } = useRequestsQuery(storedDid, {
+  const { requests, refetch, error } = useRequestsQuery(storedDid, {
     select: (data: Request[]) => mapRequests(data, styles),
   });
+
+  useEffect(() => {
+    if (error && typeof error === 'string') {
+      Toast.show(error, {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+    }
+  }, [error]);
 
   const [refreshing, setRefreshing] = useState(false);
 

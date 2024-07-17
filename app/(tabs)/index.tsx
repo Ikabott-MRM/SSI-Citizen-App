@@ -13,10 +13,11 @@ import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
-import { deleteCredentials, deleteDatabase } from '@/database/db';
+import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-root-toast';
 
 type Styles = {
   accordionContainer: object;
@@ -86,9 +87,18 @@ export default function HomeScreen() {
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: data => {
+      onSuccess: async data => {
         SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
         setDid(data.uri);
+        await initDatabase();
+      },
+      onError: error => {
+        if (typeof error === 'string') {
+          Toast.show(error, {
+            duration: Toast.durations.LONG,
+            position: Toast.positions.BOTTOM,
+          });
+        }
       },
     });
   };

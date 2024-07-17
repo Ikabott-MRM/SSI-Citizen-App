@@ -28,6 +28,7 @@ import { CustomTheme } from '@/@types/theme';
 import { NoDID } from '@/components/NoDID';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import Toast from 'react-native-root-toast';
 
 interface Styles {
   credentialContainer: ViewStyle;
@@ -38,7 +39,7 @@ interface Styles {
 
 // Function to map credentials to the required format
 const mapCredentials = (credentials: Credential[], styles: Styles) => {
-  return credentials.map(credential => ({
+  return credentials?.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
     title: (
       <View>
@@ -118,6 +119,8 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
 
 // Function to insert credentials
 const insertCredentials = async (credentials: Credential[]) => {
+  if (!credentials?.length) return;
+
   for (const cred of credentials) {
     const exists = await checkIfCredentialExists(
       cred.verifiableCredential.vcDataModel.id,
@@ -197,8 +200,15 @@ export default function Credentials() {
       let data;
 
       if (isConnected && storedDid) {
-        data = await credential.getCredentials(storedDid);
-        await insertCredentials(data);
+        try {
+          data = await credential.getCredentials(storedDid);
+          await insertCredentials(data);
+        } catch (err) {
+          Toast.show(err as string, {
+            duration: Toast.durations.LONG,
+            position: Toast.positions.BOTTOM,
+          });
+        }
       } else {
         const dbData = await getCredentials();
         data = mapDatabaseCredentials(dbData);
@@ -238,7 +248,7 @@ export default function Credentials() {
             <Text style={styles.h1}>Tus Credenciales</Text>
           </View>
         )}
-        {credentials.length === 0 && storedDid && (
+        {credentials?.length === 0 && storedDid && (
           <View>
             <Text
               style={{
