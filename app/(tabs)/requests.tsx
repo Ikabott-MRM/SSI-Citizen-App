@@ -19,16 +19,27 @@ import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
 import { NoDID } from '@/components/NoDID';
 import { CustomTheme } from '@/@types/theme';
 import Toast from 'react-native-root-toast';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
-const CREDENTIAL_TYPES: { [key in Request['schema_id']]: string } = {
-  drivers_license: 'Licencia de Conducir',
+const getCredentialTypes = (
+  t: (key: string) => string,
+): { [key in Request['schema_id']]: string } => {
+  return {
+    drivers_license: t('Driver license'),
+  };
 };
-const STATUS_CONFIG: {
+
+const getStatusConfig = (
+  t: (key: string) => string,
+): {
   [key in Request['status']]: { color: string; text: string };
-} = {
-  pending: { color: 'orange', text: 'PENDIENTE' },
-  rejected: { color: 'red', text: 'NO APROBADO' },
-  approved: { color: 'green', text: 'APROBADO' },
+} => {
+  return {
+    pending: { color: 'orange', text: t('Pending') },
+    rejected: { color: 'red', text: t('Rejected') },
+    approved: { color: 'green', text: t('Approved') },
+  };
 };
 
 interface Request {
@@ -54,7 +65,11 @@ interface Styles {
 }
 
 // Function to map credentials to the required format
-const mapRequests = (requests: Request[], styles: Styles) => {
+const mapRequests = (
+  requests: Request[],
+  styles: Styles,
+  t: TFunction<'translation', undefined>,
+) => {
   const dimensions = Dimensions.get('window');
   const imageHeight = Math.round((dimensions.width * 9) / 16);
 
@@ -65,29 +80,31 @@ const mapRequests = (requests: Request[], styles: Styles) => {
         <View
           style={[
             styles.statusDot,
-            { backgroundColor: STATUS_CONFIG[request.status].color },
+            { backgroundColor: getStatusConfig(t)[request.status].color },
           ]}
         />
-        <Text style={styles.requestTitleText}>Solicitud #{request.code}</Text>
+        <Text style={styles.requestTitleText}>
+          {t('Request')} #{request.code}
+        </Text>
       </View>
     ),
     content: (
       <View style={styles.requestContentContainer}>
         <Text style={styles.credentialTypeLabel}>
-          Tipo de Credencial Solicitada
+          {t('Type of credential requested')}
         </Text>
         <Text style={styles.credentialType}>
-          {CREDENTIAL_TYPES[request.schema_id]}
+          {getCredentialTypes(t)[request.schema_id]}
         </Text>
-        <Text style={styles.statusLabel}>Estado</Text>
+        <Text style={styles.statusLabel}>{t('Status')}</Text>
         <View
           style={[
             styles.statusBadge,
-            { backgroundColor: STATUS_CONFIG[request.status].color },
+            { backgroundColor: getStatusConfig(t)[request.status].color },
           ]}
         >
           <Text style={styles.statusText}>
-            {STATUS_CONFIG[request.status].text}
+            {getStatusConfig(t)[request.status].text}
           </Text>
         </View>
         <View style={styles.documentImageContainer}>
@@ -103,6 +120,7 @@ const mapRequests = (requests: Request[], styles: Styles) => {
 };
 
 export default function Credentials() {
+  const { t } = useTranslation();
   const storedDid =
     Platform.OS !== 'web'
       ? SecureStore.getItem(KEY_DID_SECURE_STORE) || ''
@@ -111,7 +129,7 @@ export default function Credentials() {
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
   const { requests, refetch, error } = useRequestsQuery(storedDid, {
-    select: (data: Request[]) => mapRequests(data, styles),
+    select: (data: Request[]) => mapRequests(data, styles, t),
   });
 
   useEffect(() => {
@@ -141,12 +159,12 @@ export default function Credentials() {
       >
         {storedDid && (
           <View style={styles.container}>
-            <Text style={styles.h1}>Tus Solicitudes</Text>
+            <Text style={styles.h1}>{t('Your requests')}</Text>
           </View>
         )}
         {requests?.length === 0 && storedDid && (
           <Text style={styles.noRequestText}>
-            Actualmente no tienes ninguna solicitud.
+            {t('You currently have no requests')}
           </Text>
         )}
         {storedDid && <List data={requests} />}
@@ -232,6 +250,7 @@ const stylesFnc = (colors: {
       color: 'white',
       fontSize: 16,
       fontWeight: 'bold',
+      textTransform: 'uppercase',
     },
     documentImageContainer: {
       borderWidth: 4,

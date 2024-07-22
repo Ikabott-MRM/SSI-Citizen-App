@@ -3,8 +3,10 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { FAB, useTheme, Portal, Modal, Text, Button } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { CustomTheme } from '@/@types/theme';
+import { useTranslation } from 'react-i18next';
 
 const FabWithMenu = () => {
+  const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
   const router = useRouter();
   const [visible, setVisible] = React.useState(false);
@@ -48,7 +50,7 @@ const FabWithMenu = () => {
               fontSize: 24,
             }}
           >
-            Solicitar Nueva Credencial
+            {t('Request new credential')}
           </Text>
           <Button
             labelStyle={{
@@ -59,7 +61,7 @@ const FabWithMenu = () => {
             onPress={() => handleNewCredential()}
             textColor={theme.customColors.typography.color3}
           >
-            Licencia de Conducir
+            {t('Driver license')}
           </Button>
           <Button
             labelStyle={{
@@ -70,7 +72,7 @@ const FabWithMenu = () => {
             textColor={theme.customColors.typography.color3}
             disabled={true}
           >
-            Pasaporte
+            {t('Passport')}
           </Button>
           <Button
             labelStyle={{
@@ -81,7 +83,7 @@ const FabWithMenu = () => {
             textColor={theme.customColors.typography.color3}
             disabled={true}
           >
-            Documento de Identidad
+            {t('Identification document')}
           </Button>
         </Modal>
       </Portal>

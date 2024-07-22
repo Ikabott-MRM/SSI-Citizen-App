@@ -20,6 +20,7 @@ import Toast from 'react-native-root-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 import { CustomTheme } from '@/@types/theme';
+import { useTranslation } from 'react-i18next';
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
@@ -32,6 +33,7 @@ const validateImageSize = (fileSize: number) => {
 };
 
 export default function Identity() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const router = useRouter();
   const theme = useTheme<CustomTheme>();
@@ -59,7 +61,7 @@ export default function Identity() {
     }
 
     if (!result.canceled && !isValidSize) {
-      Toast.show('El tamaño de la imagen supera el límite máximo de 3 MB', {
+      Toast.show(t('Image size limit'), {
         duration: Toast.durations.LONG,
         position: Toast.positions.BOTTOM,
       });
@@ -92,7 +94,7 @@ export default function Identity() {
         },
         {
           onSuccess: () => {
-            Toast.show('Credencial solicitada exitosamente', {
+            Toast.show(t('Credential requested successfully'), {
               duration: Toast.durations.LONG,
               position: Toast.positions.BOTTOM,
             });
@@ -124,7 +126,7 @@ export default function Identity() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: 'Subir Prueba de Identidad',
+          headerTitle: t('Upload identity proof'),
           headerBackTitle: '',
           headerTitleStyle: {
             color: theme.customColors.typography.secondary,
@@ -140,7 +142,7 @@ export default function Identity() {
               color={theme.colors.primary}
             />
             <Button style={styles.button} mode="contained" textColor="#444">
-              Cargar Imagen
+              {t('Upload image')}
             </Button>
           </View>
         </TouchableOpacity>
@@ -148,7 +150,7 @@ export default function Identity() {
       {image && !isPending && did && (
         <View style={styles.imageContainer}>
           <Text style={styles.text} variant="titleLarge">
-            ¿Desea confirmar la imagen seleccionada?
+            {t('Do you want to confirm the selected image?')}
           </Text>
           <Image
             source={{ uri: image }}
@@ -163,7 +165,7 @@ export default function Identity() {
               style={styles.actionBtn}
               mode="contained"
             >
-              No
+              {t('No')}
             </Button>
             <Button
               style={styles.actionBtn}
@@ -172,7 +174,7 @@ export default function Identity() {
               disabled={!image}
               textColor="#444"
             >
-              Confirmar
+              {t('Confirm')}
             </Button>
           </View>
         </View>
