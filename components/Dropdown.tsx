@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { useTheme } from 'react-native-paper';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Language } from '@/@types/language';
+import { version } from '../package.json';
 
 type Option = {
   label: string;
@@ -25,28 +26,42 @@ const Dropdown = ({ items, onValueChange, value }: DropdownProps) => {
   const styles = stylesFnc(theme.customColors);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{t('Select a language')}:</Text>
-      <RNPickerSelect
-        value={value}
-        placeholder={{}} // Keep it here as an empty {} to remove the placeholder
-        onValueChange={onValueChange}
-        items={items}
-        useNativeAndroidPickerStyle={false}
-        Icon={() => {
-          return <Ionicons name="caret-down" size={16} color="#CCC" />;
-        }}
-        style={dropStyles}
-      />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.label}>{t('Select a language')}:</Text>
+        <RNPickerSelect
+          value={value}
+          placeholder={{}} // Keep it here as an empty {} to remove the placeholder
+          onValueChange={onValueChange}
+          items={items}
+          useNativeAndroidPickerStyle={false}
+          Icon={() => {
+            return <Ionicons name="caret-down" size={16} color="#CCC" />;
+          }}
+          style={dropStyles}
+        />
+      </ScrollView>
+      <View style={styles.aboutContainer}>
+        <Text style={styles.aboutText}>
+          {t('App Version')}: {version}
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 };
 
-const stylesFnc = (colors: { typography: { secondary: string } }) => {
+const stylesFnc = (colors: {
+  typography: { secondary: string };
+  background: { secondary: string };
+}) => {
   return StyleSheet.create({
     container: {
-      flex: 1,
+      alignContent: 'center',
       justifyContent: 'center',
+      flex: 1,
+    },
+    content: {
+      flex: 1,
       padding: 16,
     },
     label: {
@@ -57,6 +72,17 @@ const stylesFnc = (colors: { typography: { secondary: string } }) => {
     selectedValue: {
       marginTop: 16,
       fontSize: 18,
+    },
+    aboutContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background.secondary,
+      padding: 10,
+      marginTop: 50,
+    },
+    aboutText: {
+      fontSize: 14,
+      color: colors.typography.secondary,
     },
   });
 };
