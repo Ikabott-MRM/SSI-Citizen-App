@@ -12,7 +12,7 @@
     },
     "preview": {
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle"
       },
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/"
