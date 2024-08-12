@@ -1,7 +1,9 @@
 import * as SQLite from 'expo-sqlite';
 import * as FileSystem from 'expo-file-system';
 
-export const SQLiteDatabase = SQLite.openDatabaseSync('iovf.db');
+async function getDBConnection() {
+  return await SQLite.openDatabaseAsync('iovf.db');
+}
 
 type DBCredential = {
   id: number;
@@ -35,7 +37,9 @@ export type MappedCredential = {
 export type DBCredentials = DBCredential[];
 
 export async function initDatabase() {
-  await SQLiteDatabase.execAsync(`
+  const db = await getDBConnection();
+  try {
+    await db.execAsync(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS credential (
       id INTEGER PRIMARY KEY NOT NULL, 
@@ -49,6 +53,9 @@ export async function initDatabase() {
       licenseCategory TEXT NOT NULL
     );
   `);
+  } catch (err) {
+    console.log('Error creating table', err);
+  }
 }
 
 export const insertCredential = async (
@@ -61,32 +68,51 @@ export const insertCredential = async (
   lastname: string,
   licenseCategory: string,
 ) => {
-  await SQLiteDatabase.runAsync(
-    `
+  const db = await getDBConnection();
+  try {
+    await db.runAsync(
+      `
     INSERT INTO credential (jwt, dataModelId, issuer, issuanceDate, expirationDate, firstname, lastname, licenseCategory) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `,
-    jwt,
-    dataModelId,
-    issuer,
-    issuanceDate,
-    expirationDate,
-    firstname,
-    lastname,
-    licenseCategory,
-  );
+      jwt,
+      dataModelId,
+      issuer,
+      issuanceDate,
+      expirationDate,
+      firstname,
+      lastname,
+      licenseCategory,
+    );
+  } catch (err) {
+    console.log('Error inserting table', err);
+  }
 };
 
 export const getCredentials = async (): Promise<DBCredentials> => {
-  return await SQLiteDatabase.getAllAsync(`SELECT * FROM credential`);
+  const db = await getDBConnection();
+  try {
+    return await db.getAllAsync(`SELECT * FROM credential`);
+  } catch (err) {
+    console.log('Error getting credential', err);
+  }
+
+  return [];
 };
 
 export const deleteCredentials = async () => {
-  await SQLiteDatabase.runAsync('DELETE FROM credential');
+  const db = await getDBConnection();
+  try {
+    await db.runAsync('DELETE FROM credential');
+  } catch (err) {
+    console.log('Error deleting credential', err);
+  }
 };
 
 export const deleteDatabase = async () => {
   const dbPath = `${FileSystem.documentDirectory}SQLite/iovf.db`;
   try {
+    const db = await getDBConnection();
+    await db.closeAsync();
     await FileSystem.deleteAsync(dbPath);
     console.log('Database deleted successfully');
   } catch (error) {
@@ -95,7 +121,8 @@ export const deleteDatabase = async () => {
 };
 
 export const checkIfCredentialExists = async (dataModelId: string) => {
-  const result = await SQLiteDatabase.getAllAsync(
+  const db = await getDBConnection();
+  const result = await db.getAllAsync(
     'SELECT * FROM credential WHERE dataModelId = ?',
     dataModelId,
   );

@@ -28,6 +28,9 @@ import { CustomTheme } from '@/@types/theme';
 import { NoDID } from '@/components/NoDID';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
+import Toast from 'react-native-root-toast';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 interface Styles {
   credentialContainer: ViewStyle;
@@ -37,7 +40,11 @@ interface Styles {
 }
 
 // Function to map credentials to the required format
-const mapCredentials = (credentials: Credential[], styles: Styles) => {
+const mapCredentials = (
+  credentials: Credential[],
+  styles: Styles,
+  t: TFunction<'translation', undefined>,
+) => {
   return credentials.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
     title: (
@@ -50,7 +57,7 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
             textTransform: 'uppercase',
           }}
         >
-          Licencia de Conducir
+          {t('Driver license')}
         </Text>
       </View>
     ),
@@ -62,7 +69,7 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
         {credential.verifiableCredential.vcDataModel.credentialSubject
           .firstname && (
           <Text style={styles.credentialText}>
-            <Text style={styles.labelText}>Nombre: </Text>
+            <Text style={styles.labelText}>{t('Name')}: </Text>
             {
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .firstname
@@ -72,7 +79,7 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
         {credential.verifiableCredential.vcDataModel.credentialSubject
           .lastname && (
           <Text style={styles.credentialText}>
-            <Text style={styles.labelText}>Apellido: </Text>
+            <Text style={styles.labelText}>{t('Last name')}: </Text>
             {
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .lastname
@@ -82,7 +89,7 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
         {credential.verifiableCredential.vcDataModel.credentialSubject
           .licenseCategory && (
           <Text style={styles.credentialText}>
-            <Text style={styles.labelText}>Categoría: </Text>
+            <Text style={styles.labelText}>{t('Category')}: </Text>
             {
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .licenseCategory
@@ -91,7 +98,7 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
         )}
         {credential.verifiableCredential.vcDataModel.issuanceDate && (
           <Text style={styles.credentialText}>
-            <Text style={styles.labelText}>Emitida el: </Text>
+            <Text style={styles.labelText}>{t('Issued on')}: </Text>
             {format(
               new Date(
                 credential.verifiableCredential.vcDataModel.issuanceDate,
@@ -102,7 +109,7 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
         )}
         {credential.verifiableCredential.vcDataModel.expirationDate && (
           <Text style={styles.credentialText}>
-            <Text style={styles.labelText}>Expira el: </Text>
+            <Text style={styles.labelText}>{t('Expires on')}: </Text>
             {format(
               new Date(
                 credential.verifiableCredential.vcDataModel.expirationDate,
@@ -118,6 +125,8 @@ const mapCredentials = (credentials: Credential[], styles: Styles) => {
 
 // Function to insert credentials
 const insertCredentials = async (credentials: Credential[]) => {
+  if (!credentials?.length) return;
+
   for (const cred of credentials) {
     const exists = await checkIfCredentialExists(
       cred.verifiableCredential.vcDataModel.id,
@@ -179,6 +188,7 @@ const mapDatabaseCredentials = (
 };
 
 export default function Credentials() {
+  const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
   const storedDid =
     Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
@@ -197,8 +207,15 @@ export default function Credentials() {
       let data;
 
       if (isConnected && storedDid) {
-        data = await credential.getCredentials(storedDid);
-        await insertCredentials(data);
+        try {
+          data = await credential.getCredentials(storedDid);
+          await insertCredentials(data);
+        } catch (err) {
+          Toast.show(err as string, {
+            duration: Toast.durations.LONG,
+            position: Toast.positions.BOTTOM,
+          });
+        }
       } else {
         const dbData = await getCredentials();
         data = mapDatabaseCredentials(dbData);
@@ -206,7 +223,7 @@ export default function Credentials() {
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      const mappedData = mapCredentials(data, styles);
+      const mappedData = mapCredentials(data, styles, t);
 
       setCredentials(mappedData);
     } catch (error) {
@@ -235,10 +252,10 @@ export default function Credentials() {
       >
         {storedDid && (
           <View style={styles.container}>
-            <Text style={styles.h1}>Tus Credenciales</Text>
+            <Text style={styles.h1}>{t('Your credentials')}</Text>
           </View>
         )}
-        {credentials.length === 0 && storedDid && (
+        {credentials?.length === 0 && storedDid && (
           <View>
             <Text
               style={{
@@ -247,7 +264,7 @@ export default function Credentials() {
                 fontSize: 18,
               }}
             >
-              Actualmente no tienes ninguna credencial.
+              {t('You currently do not have any credentials')}
             </Text>
             <Text
               style={{
@@ -257,7 +274,7 @@ export default function Credentials() {
                 marginTop: 15,
               }}
             >
-              Solicita una nueva credencial utilizando el botón +.
+              {t('Request a new credential using the + button')}
             </Text>
           </View>
         )}

@@ -7,7 +7,7 @@ const Modal = () => {
 
   return (
     <Portal>
-      <Dialog visible={modalVisible} onDismiss={hideModal}>
+      <Dialog visible={modalVisible} onDismiss={cancelModal}>
         <Dialog.Title
           style={{
             textAlign: 'center',

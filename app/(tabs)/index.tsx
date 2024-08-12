@@ -13,10 +13,12 @@ import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
-import { deleteCredentials, deleteDatabase } from '@/database/db';
+import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-root-toast';
 
 type Styles = {
   accordionContainer: object;
@@ -52,6 +54,7 @@ const Accordion = ({
 };
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const storedDid =
     Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
 
@@ -86,9 +89,18 @@ export default function HomeScreen() {
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: data => {
+      onSuccess: async data => {
         SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
         setDid(data.uri);
+        await initDatabase();
+      },
+      onError: error => {
+        if (typeof error === 'string') {
+          Toast.show(error, {
+            duration: Toast.durations.LONG,
+            position: Toast.positions.BOTTOM,
+          });
+        }
       },
     });
   };
@@ -102,15 +114,15 @@ export default function HomeScreen() {
   const copyToClipboard = async () => {
     if (!storedDid) return;
     await Clipboard.setStringAsync(storedDid);
-    Alert.alert('Copied to clipboard', storedDid);
+    Alert.alert(t('Copied to clipboard'), storedDid);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.h1}>Bienvenidos a IDA DEMO</Text>
+      <Text style={styles.h1}>{t('Welcome to IDA DEMO')}</Text>
       {did && (
         <Accordion
-          title="Identificador Descentralizado (DID)"
+          title={t('Decentralized identifier (DID)')}
           styles={styles}
           isOpen={true}
         >
@@ -127,18 +139,14 @@ export default function HomeScreen() {
       )}
       {!isPending && !did && (
         <>
-          <Text style={styles.text}>
-            Primero se debe generar un Identificador Descentralizado (DID) que
-            te identificará al momento de recibir credenciales de los emisores
-            confiables.
-          </Text>
+          <Text style={styles.text}>{t('Welcome description')}</Text>
           <Button
             labelStyle={styles.buttonLabel}
             style={styles.button}
             mode="contained"
             onPress={handleCreateDid}
           >
-            Crea tu DID
+            {t('Create DID')}
           </Button>
         </>
       )}

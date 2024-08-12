@@ -4,8 +4,10 @@ import { Link } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
+import { useTranslation } from 'react-i18next';
 
 const NoDID = () => {
+  const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
   const styles = styleFnc({
     container: {
@@ -19,8 +21,7 @@ const NoDID = () => {
   return (
     <View style={styles.container}>
       <Text variant="titleLarge" style={styles.title}>
-        Para solicitar una nueva credencial, primero necesitas crear un
-        Identificador Digital Descentralizado (DID) en la sección 'Identidad'.
+        {t('No DID description')}
       </Text>
       <Link href="/" asChild>
         <Button
@@ -28,7 +29,7 @@ const NoDID = () => {
           style={styles.button}
           mode="contained"
         >
-          Ir a Identidad
+          {t('Go to identity')}
         </Button>
       </Link>
     </View>
