@@ -2,7 +2,6 @@ import { MMKV } from 'react-native-mmkv';
 import * as ExpoSecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 
-// MMKV implementation
 export class SecureMMKV {
   private storage: MMKV;
 
@@ -40,7 +39,6 @@ export class ExpoSecureStorage {
   }
 }
 
-// Utility functions
 export async function generateSecureRandomKey(
   length: number = 32,
 ): Promise<string> {
@@ -48,7 +46,6 @@ export async function generateSecureRandomKey(
   return Buffer.from(randomBytes).toString('hex');
 }
 
-// Function to get or create an encryption key using Expo SecureStore
 export async function getOrCreateEncryptionKey(): Promise<string> {
   const expoStorage = new ExpoSecureStorage();
   let key = await expoStorage.getItem('mmkv-encryption-key');
@@ -59,11 +56,9 @@ export async function getOrCreateEncryptionKey(): Promise<string> {
   return key;
 }
 
-// Function to create a SecureMMKV instance with a key
 export async function createSecureMMKV(): Promise<SecureMMKV> {
   const encryptionKey = await getOrCreateEncryptionKey();
   return new SecureMMKV(encryptionKey);
 }
 
-// Export individual implementations for flexibility
 export { ExpoSecureStore };
