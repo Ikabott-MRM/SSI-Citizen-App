@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,16 +12,15 @@ import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import { Stack } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
 import { Colors } from '@/constants/Colors';
 import { useIdentityMutation } from '@/hooks/mutations/useIdentityMutation';
-import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Toast from 'react-native-root-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
+import { createSecureMMKV, SecureMMKV } from '@/services/secure-store';
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
@@ -38,14 +38,27 @@ export default function Identity() {
   const router = useRouter();
   const theme = useTheme<CustomTheme>();
   const [image, setImage] = useState<string | null>(null);
+  const [did, setDid] = useState<string | null>(null);
+  const [secureStore, setSecureStore] = useState<SecureMMKV | null>(null);
   const { uploadDocumentFile, isPending } = useIdentityMutation();
   const styles = styleFnc({
     container: {
       backgroundColor: theme.customColors.background.primary,
     },
   });
-  const did =
-    Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
+
+  useEffect(() => {
+    const initializeSecureStore = async () => {
+      if (Platform.OS !== 'web') {
+        const store = await createSecureMMKV();
+        setSecureStore(store);
+        const storedDid = await store.getItem(KEY_DID_SECURE_STORE);
+        setDid(storedDid);
+      }
+    };
+
+    initializeSecureStore();
+  }, []);
 
   const pickImage = async () => {
     let isValidSize = false;
@@ -73,7 +86,7 @@ export default function Identity() {
   };
 
   const uploadImage = () => {
-    if (!image) {
+    if (!image || !did) {
       return;
     }
 
@@ -86,39 +99,37 @@ export default function Identity() {
       name: 'document-image',
     });
 
-    if (formData && did) {
-      uploadDocumentFile(
-        {
-          did,
-          formData,
+    uploadDocumentFile(
+      {
+        did,
+        formData,
+      },
+      {
+        onSuccess: () => {
+          Toast.show(t('Credential requested successfully'), {
+            duration: Toast.durations.LONG,
+            position: Toast.positions.BOTTOM,
+          });
+          queryClient
+            .invalidateQueries({
+              queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS],
+              refetchType: 'all',
+            })
+            .then(() => {
+              router.navigate('/requests');
+              setImage(null);
+            });
         },
-        {
-          onSuccess: () => {
-            Toast.show(t('Credential requested successfully'), {
+        onError: (error: string | Error) => {
+          if (typeof error === 'string') {
+            Toast.show(error, {
               duration: Toast.durations.LONG,
               position: Toast.positions.BOTTOM,
             });
-            queryClient
-              .invalidateQueries({
-                queryKey: [REQUESTS_QUERY_KEYS.GET_REQUESTS],
-                refetchType: 'all',
-              })
-              .then(() => {
-                router.navigate('/requests');
-                setImage(null);
-              });
-          },
-          onError: (error: string | Error) => {
-            if (typeof error === 'string') {
-              Toast.show(error, {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-              });
-            }
-          },
+          }
         },
-      );
-    }
+      },
+    );
   };
 
   return (

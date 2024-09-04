@@ -1,4 +1,4 @@
-rootProject.name = 'driver-license-mobile'
+rootProject.name = 'IDA Ciudadano'
 
 dependencyResolutionManagement {
   versionCatalogs {
