@@ -7,7 +7,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/"
+        "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/",
+        "EXPO_PUBLIC_API_KEY":"8a5e66195337b0eccdddbce894579f97"
       }
     },
     "preview": {
@@ -15,12 +16,15 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/"
+        "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/",
+        "EXPO_PUBLIC_API_KEY":"8a5e66195337b0eccdddbce894579f97"
+
       }
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/"
+        "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/",
+        "EXPO_PUBLIC_API_KEY":"8a5e66195337b0eccdddbce894579f97"
       }
     }
   },
