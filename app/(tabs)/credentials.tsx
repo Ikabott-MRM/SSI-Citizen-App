@@ -203,31 +203,33 @@ export default function Credentials() {
   });
 
   const fetchData = async () => {
-    try {
+    
       let data;
 
-      if (isConnected && storedDid) {
         try {
+      if (isConnected && storedDid) {
           data = await credential.getCredentials(storedDid);
           await insertCredentials(data);
-        } catch (err) {
-          Toast.show(err as string, {
-            duration: Toast.durations.LONG,
-            position: Toast.positions.BOTTOM,
-          });
+        } else {
+          const dbData = await getCredentials();
+          data = mapDatabaseCredentials(dbData);
         }
-      } else {
-        const dbData = await getCredentials();
-        data = mapDatabaseCredentials(dbData);
-      }
-
+      
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      
+      if(Boolean(data)){
       // @ts-expect-error
       const mappedData = mapCredentials(data, styles, t);
-
       setCredentials(mappedData);
+      }
+
     } catch (error) {
-      console.error(error);
+      if (error && typeof error === 'string') {
+      Toast.show(error as string, {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+    }
     }
   };
 
