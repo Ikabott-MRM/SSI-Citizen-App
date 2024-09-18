@@ -18,7 +18,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
-import { createSecureMMKV, SecureMMKV } from '../../services/secure-store';
+import { SecureMMKV } from '../../services/secure-store';
+import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 type Styles = {
   accordionContainer: object;
@@ -56,12 +57,13 @@ const Accordion = ({
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
+  const secureStoreInstance = useSecureStore();
   const { showModal } = useModal({
     onClose: async () => {
       await deleteCredentials();
       await deleteDatabase();
-      if (secureStore) {
-        await secureStore.deleteItem(KEY_DID_SECURE_STORE);
+      if (secureStoreInstance) {
+        secureStoreInstance.deleteItem(KEY_DID_SECURE_STORE);
       }
       setDid(null);
     },
@@ -89,16 +91,15 @@ export default function HomeScreen() {
   });
 
   useEffect(() => {
-    const initializeSecureStore = async () => {
-      if (Platform.OS !== 'web') {
-        const store = await createSecureMMKV();
-        setSecureStore(store);
-        const storedDid = await store.getItem(KEY_DID_SECURE_STORE);
+    const fetchStoredDid = async () => {
+      // const secureStoreInstance = useSecureStore();
+      if (secureStoreInstance && Platform.OS !== 'web') {
+        const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
       }
     };
-
-    initializeSecureStore();
+  
+    fetchStoredDid();
   }, []);
 
   const handleCreateDid = async () => {

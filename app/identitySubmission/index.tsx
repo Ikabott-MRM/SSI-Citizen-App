@@ -20,7 +20,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
-import { createSecureMMKV, SecureMMKV } from '@/services/secure-store';
+import { getSecureMMKVInstance, SecureMMKV } from '@/services/secure-store';
+import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
@@ -47,18 +48,31 @@ export default function Identity() {
     },
   });
 
-  useEffect(() => {
-    const initializeSecureStore = async () => {
-      if (Platform.OS !== 'web') {
-        const store = await createSecureMMKV();
-        setSecureStore(store);
-        const storedDid = await store.getItem(KEY_DID_SECURE_STORE);
-        setDid(storedDid);
-      }
-    };
+  // useEffect(() => {
+  //   const initializeSecureStore = async () => {
+  //     if (Platform.OS !== 'web') {
+  //       const store = await getSecureMMKVInstance();
+  //       setSecureStore(store);
+  //       const storedDid = await store.getItem(KEY_DID_SECURE_STORE);
+  //       setDid(storedDid);
+  //     }
+  //   };
 
-    initializeSecureStore();
-  }, []);
+  //   initializeSecureStore();
+  // }, []);
+
+
+useEffect(() => {
+  const fetchStoredDid = async () => {
+    const secureStoreInstance = useSecureStore();
+    if (secureStoreInstance && Platform.OS !== 'web') {
+      const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+      setDid(storedDid);
+    }
+  };
+
+  fetchStoredDid();
+}, []);
 
   const pickImage = async () => {
     let isValidSize = false;

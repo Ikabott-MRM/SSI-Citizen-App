@@ -1,6 +1,9 @@
 import { MMKV } from 'react-native-mmkv';
 import * as ExpoSecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
+let secureStoreInstance: SecureMMKV | null = null;
+import {Buffer} from 'buffer'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export class SecureMMKV {
   private storage: MMKV;
@@ -12,15 +15,15 @@ export class SecureMMKV {
     });
   }
 
-  async setItem(key: string, value: string): Promise<void> {
+  setItem(key: string, value: string): void {
     this.storage.set(key, value);
   }
 
-  async getItem(key: string): Promise<string | null> {
+  getItem(key: string): string | null {
     return this.storage.getString(key) || null;
   }
 
-  async deleteItem(key: string): Promise<void> {
+  deleteItem(key: string): void {
     this.storage.delete(key);
   }
 }
@@ -39,26 +42,40 @@ export class ExpoSecureStorage {
   }
 }
 
-export async function generateSecureRandomKey(
+async function generateSecureRandomKey(
   length: number = 32,
 ): Promise<string> {
   const randomBytes = await Crypto.getRandomBytesAsync(length);
   return Buffer.from(randomBytes).toString('hex');
 }
 
-export async function getOrCreateEncryptionKey(): Promise<string> {
-  const expoStorage = new ExpoSecureStorage();
-  let key = await expoStorage.getItem('mmkv-encryption-key');
-  if (!key) {
-    key = await generateSecureRandomKey();
-    await expoStorage.setItem('mmkv-encryption-key', key);
+
+async function getOrCreateEncryptionKey(): Promise<string> {
+  try {
+    let key = await AsyncStorage.getItem('mmkv-encryption-key');
+    
+    if (!key) {
+      const generatedKey = await generateSecureRandomKey();
+      await AsyncStorage.setItem('mmkv-encryption-key', generatedKey);
+      key = generatedKey;
+    }
+    
+    return key;
+  } catch (error) {
+    console.error('Failed to access or create encryption key:', error);
+    throw new Error("Error generating or accessing the encryption key");
   }
-  return key;
 }
 
-export async function createSecureMMKV(): Promise<SecureMMKV> {
-  const encryptionKey = await getOrCreateEncryptionKey();
-  return new SecureMMKV(encryptionKey);
+export async function getSecureMMKVInstance(): Promise<SecureMMKV | null> {
+  try {
+    if (!secureStoreInstance) {
+      const encryptionKey = await getOrCreateEncryptionKey();
+      secureStoreInstance = new SecureMMKV(encryptionKey);
+    }
+    return secureStoreInstance;
+  } catch (error) {
+    console.error('Error initializing SecureMMKV instance:', error);
+    return null; 
+  }
 }
-
-export { ExpoSecureStore };

@@ -21,7 +21,8 @@ import { CustomTheme } from '@/@types/theme';
 import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { createSecureMMKV, SecureMMKV } from '../../services/secure-store';
+import { getSecureMMKVInstance, SecureMMKV } from '../../services/secure-store';
+import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 const getCredentialTypes = (
   t: (key: string) => string,
@@ -129,18 +130,18 @@ export default function Credentials() {
   const { requests, refetch, error } = useRequestsQuery(did || '', {
     select: (data: Request[]) => mapRequests(data, styles, t),
   });
-
+  const secureStoreInstance = useSecureStore();
+  
   useEffect(() => {
-    const initializeSecureStore = async () => {
-      if (Platform.OS !== 'web') {
-        const store = await createSecureMMKV();
-        setSecureStore(store);
-        const storedDid = await store.getItem(KEY_DID_SECURE_STORE);
+    const fetchStoredDid = async () => {
+      // const secureStoreInstance = useSecureStore();
+      if (secureStoreInstance && Platform.OS !== 'web') {
+        const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
       }
     };
-
-    initializeSecureStore();
+  
+    fetchStoredDid();
   }, []);
 
   useEffect(() => {

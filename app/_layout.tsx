@@ -17,7 +17,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
-import { createSecureMMKV, SecureMMKV } from '@/services/secure-store'; // Import the new secure store
+import { getSecureMMKVInstance, SecureMMKV } from '@/services/secure-store'; // Import the new secure store
+import { SecureStoreProvider, useSecureStore } from '@/providers/SecureStoreProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,19 +60,22 @@ export default function RootLayout() {
   const segments = useSegments();
   const router = useRouter();
   const [secureStore, setSecureStore] = useState<SecureMMKV | null>(null);
+  const secureStoreInstance = useSecureStore();
 
   useEffect(() => {
     (async function initializeApp() {
       if (__DEV__) {
-        const store = await createSecureMMKV();
-        setSecureStore(store);
+        // const store = await getSecureMMKVInstance();
+        // setSecureStore(store);
+        // const secureStoreInstance = useSecureStore();
+
 
         DevSettings.addMenuItem('Clear Data', async function clearData() {
           console.log('Clear Data');
           await deleteCredentials();
           await deleteDatabase();
-          if (store) {
-            await store.deleteItem(KEY_DID_SECURE_STORE);
+          if (secureStoreInstance) {
+            secureStoreInstance.deleteItem(KEY_DID_SECURE_STORE);
           }
           DevSettings.reload();
         });
@@ -92,6 +96,7 @@ export default function RootLayout() {
   }
 
   return (
+    <SecureStoreProvider>
     <QueryClientProvider client={queryClient}>
       <PaperProvider theme={theme}>
         <ModalProvider>
@@ -137,5 +142,6 @@ export default function RootLayout() {
         </ModalProvider>
       </PaperProvider>
     </QueryClientProvider>
+    </SecureStoreProvider>
   );
 }
