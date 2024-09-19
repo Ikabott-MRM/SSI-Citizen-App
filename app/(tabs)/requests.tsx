@@ -126,12 +126,11 @@ export default function Credentials() {
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
   const [did, setDid] = useState<string | null>(null);
-  const [secureStore, setSecureStore] = useState<SecureMMKV | null>(null);
   const { requests, refetch, error } = useRequestsQuery(did || '', {
     select: (data: Request[]) => mapRequests(data, styles, t),
   });
   const secureStoreInstance = useSecureStore();
-  
+
   useEffect(() => {
     const fetchStoredDid = async () => {
       if (secureStoreInstance && Platform.OS !== 'web') {
