@@ -134,15 +134,14 @@ export default function Credentials() {
   
   useEffect(() => {
     const fetchStoredDid = async () => {
-      // const secureStoreInstance = useSecureStore();
       if (secureStoreInstance && Platform.OS !== 'web') {
         const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
       }
     };
-  
+
     fetchStoredDid();
-  }, []);
+  }, [secureStoreInstance]);
 
   useEffect(() => {
     if (error && typeof error === 'string') {
