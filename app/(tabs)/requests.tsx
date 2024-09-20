@@ -13,7 +13,6 @@ import {
 import { Image, ImageStyle } from 'expo-image';
 import { useTheme } from 'react-native-paper';
 import { List } from '@/components/List';
-import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
 import { NoDID } from '@/components/NoDID';
@@ -21,7 +20,6 @@ import { CustomTheme } from '@/@types/theme';
 import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { getSecureMMKVInstance, SecureMMKV } from '../../services/secure-store';
 import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 const getCredentialTypes = (
@@ -136,6 +134,9 @@ export default function Credentials() {
       if (secureStoreInstance && Platform.OS !== 'web') {
         const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
+      }
+      if (!secureStoreInstance) {
+        return <Text>Loading...</Text>; 
       }
     };
 

@@ -203,9 +203,13 @@ export default function Credentials() {
 
   const secureStoreInstance = useSecureStore();
 
+  console.log(secureStoreInstance);
+  
   useEffect(() => {
     const fetchStoredDid = async () => {
+      console.log(Boolean(secureStoreInstance))
       if (secureStoreInstance && Platform.OS !== 'web') {
+        console.log(`hace fetch del did`)
         const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setStoredDid(storedDid);
       }

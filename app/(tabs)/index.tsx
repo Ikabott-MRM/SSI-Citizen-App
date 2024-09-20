@@ -70,7 +70,6 @@ export default function HomeScreen() {
   });
   const { createDid, isPending } = useDidMutation();
   const [did, setDid] = useState<string | null>(null);
-  const [secureStore, setSecureStore] = useState<SecureMMKV | null>(null);
 
   const styles = stylesFnc({
     container: {
@@ -92,7 +91,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const fetchStoredDid = async () => {
-      // const secureStoreInstance = useSecureStore();
       if (secureStoreInstance && Platform.OS !== 'web') {
         const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
@@ -100,13 +98,13 @@ export default function HomeScreen() {
     };
   
     fetchStoredDid();
-  }, []);
+  }, [secureStoreInstance]);
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
       onSuccess: async data => {
-        if (secureStore) {
-          await secureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
+        if (secureStoreInstance) {
+           secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
         }
         setDid(data.uri);
         await initDatabase();

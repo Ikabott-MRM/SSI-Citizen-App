@@ -53,11 +53,13 @@ async function generateSecureRandomKey(
 async function getOrCreateEncryptionKey(): Promise<string> {
   try {
     let key = await AsyncStorage.getItem('mmkv-encryption-key');
+    console.log(key)
     
     if (!key) {
       const generatedKey = await generateSecureRandomKey();
       await AsyncStorage.setItem('mmkv-encryption-key', generatedKey);
       key = generatedKey;
+      console.log(key)
     }
     
     return key;
