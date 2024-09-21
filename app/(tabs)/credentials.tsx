@@ -6,6 +6,7 @@ import {
   RefreshControl,
   TextStyle,
   ViewStyle,
+  Alert,
 } from 'react-native';
 import QRCode from 'react-qr-code';
 import { Text, useTheme } from 'react-native-paper';
@@ -207,16 +208,17 @@ export default function Credentials() {
   
   useEffect(() => {
     const fetchStoredDid = async () => {
-      console.log(Boolean(secureStoreInstance))
+      Alert.alert(t('Hace el fetch'));
       if (secureStoreInstance && Platform.OS !== 'web') {
-        console.log(`hace fetch del did`)
+      Alert.alert(t('Hace el fetch pq hay instance'));
         const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+      Alert.alert(t('el did es',storedDid??'no hay did'));
         setStoredDid(storedDid);
       }
     };
 
     fetchStoredDid();
-  }, [secureStoreInstance]);
+  }, [secureStoreInstance, t]);
 
   const fetchData = async () => {
     let data;

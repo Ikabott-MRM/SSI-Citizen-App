@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getSecureMMKVInstance, SecureMMKV } from '@/services/secure-store';
 import {
+  Alert,
     Platform,
   } from 'react-native';
   
@@ -14,12 +15,24 @@ export const SecureStoreProvider = ({ children }: { children: React.ReactNode })
   useEffect(() => {
     const initializeSecureStore = async () => {
       if (Platform.OS !== 'web') {
-        const store = await getSecureMMKVInstance();
-        setSecureStore(store);
+        try {
+          const store = await getSecureMMKVInstance();
+          if (store) {
+            setSecureStore(store);
+          } else {
+            Alert.alert('Error', 'Failed to initialize secure storage.');
+          }
+        } catch (error) {
+          console.error('Failed to initialize secure store:', error);
+          Alert.alert('Error', 'An unexpected error occurred.');
+        }
+      } else {
+        console.warn('Secure storage is not available on the web platform.');
       }
     };
 
     initializeSecureStore();
+
   }, []);
 
   return (

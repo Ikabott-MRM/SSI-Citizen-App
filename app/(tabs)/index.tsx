@@ -104,7 +104,9 @@ export default function HomeScreen() {
     await createDid(undefined, {
       onSuccess: async data => {
         if (secureStoreInstance) {
+          Alert.alert(t('Hay instance'));
            secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
+           Alert.alert(t('guarda did'), secureStoreInstance.getItem(KEY_DID_SECURE_STORE)??'no guardo did');
         }
         setDid(data.uri);
         await initDatabase();
