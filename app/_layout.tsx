@@ -17,7 +17,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
-import { getSecureMMKVInstance, SecureMMKV } from '@/services/secure-store'; // Import the new secure store
+import { SecureMMKV } from '@/services/secure-store'; // Import the new secure store
 import { SecureStoreProvider, useSecureStore } from '@/providers/SecureStoreProvider';
 
 export {

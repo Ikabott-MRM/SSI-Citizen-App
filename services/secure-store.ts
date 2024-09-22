@@ -5,7 +5,14 @@ let secureStoreInstance: SecureMMKV | null = null;
 import {Buffer} from 'buffer'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export class SecureMMKV {
+
+export interface SecureStore {
+  setItem: (key: string, value: string) => Promise<void>;
+  getItem: (key: string) => Promise<string | null>;
+  deleteItem: (key: string) => Promise<void>;
+}
+
+export class SecureMMKV implements SecureStore {
   private storage: MMKV;
 
   constructor(encryptionKey: string) {
@@ -15,20 +22,20 @@ export class SecureMMKV {
     });
   }
 
-  setItem(key: string, value: string): void {
+  async setItem(key: string, value: string): Promise<void> {
     this.storage.set(key, value);
   }
 
-  getItem(key: string): string | null {
+  async getItem(key: string): Promise<string | null> {
     return this.storage.getString(key) || null;
   }
 
-  deleteItem(key: string): void {
+  async deleteItem(key: string): Promise<void> {
     this.storage.delete(key);
   }
 }
 
-export class ExpoSecureStorage {
+export class ExpoSecureStorage implements SecureStore {
   async setItem(key: string, value: string): Promise<void> {
     await ExpoSecureStore.setItemAsync(key, value);
   }

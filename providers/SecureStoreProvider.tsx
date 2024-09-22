@@ -1,20 +1,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getSecureMMKVInstance, SecureMMKV } from '@/services/secure-store';
-import {
-    Platform,
-  } from 'react-native';
-  
-const SecureStoreContext = createContext<SecureMMKV | null>(null);
+import { ExpoSecureStorage, SecureStore } from '@/services/secure-store';
+import { Platform } from 'react-native';
+
+const SecureStoreContext = createContext<SecureStore | null>(null);
 
 export const useSecureStore = () => useContext(SecureStoreContext);
 
-export const SecureStoreProvider = ({ children }: { children: React.ReactNode }) => {
-  const [secureStore, setSecureStore] = useState<SecureMMKV | null>(null);
+export const SecureStoreProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [secureStore, setSecureStore] = useState<SecureStore | null>(null);
 
   useEffect(() => {
     const initializeSecureStore = async () => {
       if (Platform.OS !== 'web') {
-        const store = await getSecureMMKVInstance();
+        const store = new ExpoSecureStorage();
         setSecureStore(store);
       }
     };
