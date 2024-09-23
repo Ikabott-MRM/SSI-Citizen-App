@@ -1,7 +1,6 @@
 import { MMKV } from 'react-native-mmkv';
-import * as ExpoSecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
-let secureStoreInstance: SecureMMKV | null = null;
+let secureStoreInstance: SecureMMKV | MMKVFaker | null = null;
 import {Buffer} from 'buffer'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -28,17 +27,19 @@ export class SecureMMKV {
   }
 }
 
-export class ExpoSecureStorage {
-  async setItem(key: string, value: string): Promise<void> {
-    await ExpoSecureStore.setItemAsync(key, value);
+export class MMKVFaker {
+  private data: { [key: string]: string | null } = {};
+  
+  getItem(key: string): string | null {
+  return this.data[key];
   }
-
-  async getItem(key: string): Promise<string | null> {
-    return await ExpoSecureStore.getItemAsync(key);
+  
+  setItem(key: string, value: string): void {
+  this.data[key] = value;
   }
-
-  async deleteItem(key: string): Promise<void> {
-    await ExpoSecureStore.deleteItemAsync(key);
+  
+  deleteItem(key: string): void {
+  delete this.data[key];
   }
 }
 
@@ -69,11 +70,15 @@ async function getOrCreateEncryptionKey(): Promise<string> {
   }
 }
 
-export async function getSecureMMKVInstance(): Promise<SecureMMKV | null> {
+export async function getSecureMMKVInstance(): Promise<SecureMMKV | MMKVFaker | null> {
   try {
     if (!secureStoreInstance) {
+      if(__DEV__) {
+       secureStoreInstance = new MMKVFaker()
+      }else{
       const encryptionKey = await getOrCreateEncryptionKey();
       secureStoreInstance = new SecureMMKV(encryptionKey);
+      }
     }
     return secureStoreInstance;
   } catch (error) {
