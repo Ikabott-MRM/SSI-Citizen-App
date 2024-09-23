@@ -2,7 +2,6 @@
   "expo": {
     "name": "IDA Ciudadano",
     "slug": "ida-ciudadano",
-    "jsEngine": "hermes",
     "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
