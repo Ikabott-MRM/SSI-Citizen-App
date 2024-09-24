@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ExpoSecureStorage, SecureStore } from '@/services/secure-store';
+import {
+  getEncryptedAsyncStorageInstance,
+  SecureStore,
+} from '@/services/secure-store';
 import { Platform } from 'react-native';
 
 const SecureStoreContext = createContext<SecureStore | null>(null);
@@ -16,7 +19,7 @@ export const SecureStoreProvider = ({
   useEffect(() => {
     const initializeSecureStore = async () => {
       if (Platform.OS !== 'web') {
-        const store = new ExpoSecureStorage();
+        const store = await getEncryptedAsyncStorageInstance();
         setSecureStore(store);
       }
     };
