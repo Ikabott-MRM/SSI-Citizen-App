@@ -4,13 +4,28 @@ import {
   Alert,
     Platform,
   } from 'react-native';
+import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
   
-const SecureStoreContext = createContext<SecureMMKV | MMKVFaker| null>(null);
 
-export const useSecureStore = () => useContext(SecureStoreContext);
+ type SecureStoreContextType = {
+   secureStoreInstance: SecureMMKV | MMKVFaker| null;
+   did: string | null;
+   setDid: React.Dispatch<React.SetStateAction<string | null>>;
+ };
+
+const SecureStoreContext = createContext<SecureStoreContextType | undefined>(undefined);
+
+export const useSecureStore = () => {
+  const context = useContext(SecureStoreContext);
+  if (!context) {
+    throw new Error('useSecureStore must be used within a SecureStoreProvider');
+  }
+  return context;
+};
 
 export const SecureStoreProvider = ({ children }: { children: React.ReactNode }) => {
-  const [secureStore, setSecureStore] = useState<SecureMMKV | MMKVFaker| null>(null);
+  const [secureStoreInstance, setSecureStore] = useState<SecureMMKV | MMKVFaker| null>(null);
+  const [did, setDid] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeSecureStore = async () => {
@@ -19,6 +34,10 @@ export const SecureStoreProvider = ({ children }: { children: React.ReactNode })
           const store = await getSecureMMKVInstance();
           if (store) {
             setSecureStore(store);
+            const storedDid = store!.getItem(KEY_DID_SECURE_STORE);
+            if (storedDid) {
+              setDid(storedDid);
+            }
           } else {
             Alert.alert('Error', 'Failed to initialize secure storage.');
           }
@@ -36,7 +55,7 @@ export const SecureStoreProvider = ({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <SecureStoreContext.Provider value={secureStore}>
+    <SecureStoreContext.Provider value={{ secureStoreInstance, did, setDid }} >
       {children}
     </SecureStoreContext.Provider>
   );

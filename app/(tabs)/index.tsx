@@ -57,7 +57,7 @@ const Accordion = ({
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const secureStoreInstance = useSecureStore();
+  const {secureStoreInstance, did, setDid} = useSecureStore();
   const { showModal } = useModal({
     onClose: async () => {
       await deleteCredentials();
@@ -69,7 +69,7 @@ export default function HomeScreen() {
     },
   });
   const { createDid, isPending } = useDidMutation();
-  const [did, setDid] = useState<string | null>(null);
+  // const [did, setDid] = useState<string | null>(null);
 
   const styles = stylesFnc({
     container: {
@@ -102,11 +102,11 @@ export default function HomeScreen() {
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: async data => {
+      onSuccess: async (data: { uri: string; }) => {
         if (secureStoreInstance) {
-          Alert.alert(t('Hay instance'));
+         console.log(t('Hay instance'));
            secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
-           Alert.alert(t('guarda did'), secureStoreInstance.getItem(KEY_DID_SECURE_STORE)??'no guardo did');
+           console.log(t('guarda did'), secureStoreInstance.getItem(KEY_DID_SECURE_STORE)??'no guardo did');
         }
         setDid(data.uri);
         await initDatabase();

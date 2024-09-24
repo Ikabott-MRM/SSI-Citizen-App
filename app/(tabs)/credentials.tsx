@@ -6,7 +6,6 @@ import {
   RefreshControl,
   TextStyle,
   ViewStyle,
-  Alert,
 } from 'react-native';
 import QRCode from 'react-qr-code';
 import { Text, useTheme } from 'react-native-paper';
@@ -191,7 +190,7 @@ const mapDatabaseCredentials = (
 export default function Credentials() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const [storedDid, setStoredDid] = useState<string | null>(null);
+  const {secureStoreInstance, did, setDid} = useSecureStore();
 
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
@@ -202,18 +201,19 @@ export default function Credentials() {
     },
   });
 
-  const secureStoreInstance = useSecureStore();
 
+  console.log(`esto es secure instance`)
   console.log(secureStoreInstance);
   
   useEffect(() => {
     const fetchStoredDid = async () => {
-      Alert.alert(t('Hace el fetch'));
+      console.log(t('Hace el fetch'));
       if (secureStoreInstance && Platform.OS !== 'web') {
-      Alert.alert(t('Hace el fetch pq hay instance'));
+        console.log(t('Hace el fetch pq hay instance'));
         const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-      Alert.alert(t('el did es',storedDid??'no hay did'));
-        setStoredDid(storedDid);
+        console.log(storedDid);        
+        console.log(t('el did es',storedDid??'no hay did'));
+        setDid(storedDid);
       }
     };
 
@@ -224,8 +224,8 @@ export default function Credentials() {
     let data;
 
     try {
-      if (isConnected && storedDid) {
-        data = await credential.getCredentials(storedDid);
+      if (isConnected && did) {
+        data = await credential.getCredentials(did);
         await insertCredentials(data);
       } else {
         const dbData = await getCredentials();
@@ -266,12 +266,12 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {storedDid && (
+        {did && (
           <View style={styles.container}>
             <Text style={styles.h1}>{t('Your credentials')}</Text>
           </View>
         )}
-        {credentials?.length === 0 && storedDid && (
+        {credentials?.length === 0 && did && (
           <View>
             <Text
               style={{
@@ -294,10 +294,10 @@ export default function Credentials() {
             </Text>
           </View>
         )}
-        {storedDid && <List data={credentials} />}
-        {!storedDid && <NoDID />}
+        {did && <List data={credentials} />}
+        {!did && <NoDID />}
       </ScrollView>
-      {storedDid && <FabWithMenu />}
+      {did && <FabWithMenu />}
     </View>
   );
 }

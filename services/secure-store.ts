@@ -39,7 +39,7 @@ export class MMKVFaker {
   }
   
   deleteItem(key: string): void {
-  delete this.data[key];
+    this.data[key] = null;
   }
 }
 

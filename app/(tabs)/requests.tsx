@@ -123,17 +123,16 @@ export default function Credentials() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
-  const [did, setDid] = useState<string | null>(null);
+  // const [userDid, setDid] = useState<string | null>(null);
+  const {secureStoreInstance, did, setDid} = useSecureStore();
   const { requests, refetch, error } = useRequestsQuery(did || '', {
     select: (data: Request[]) => mapRequests(data, styles, t),
   });
-  const secureStoreInstance = useSecureStore();
 
   useEffect(() => {
     const fetchStoredDid = async () => {
       if (secureStoreInstance && Platform.OS !== 'web') {
-        const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-        setDid(storedDid);
+        setDid(did);
       }
       if (!secureStoreInstance) {
         return <Text>Loading...</Text>; 
@@ -141,7 +140,7 @@ export default function Credentials() {
     };
 
     fetchStoredDid();
-  }, [secureStoreInstance]);
+  }, [secureStoreInstance, did]);
 
   useEffect(() => {
     if (error && typeof error === 'string') {
