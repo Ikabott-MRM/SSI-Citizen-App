@@ -12,5 +12,9 @@ web-build/
 .env
 .idea
 
+ios/*
+android/*
 # macOS
 .DS_Store
+
+*.apk

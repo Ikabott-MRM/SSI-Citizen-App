@@ -13,7 +13,6 @@ import {
 import { Image, ImageStyle } from 'expo-image';
 import { useTheme } from 'react-native-paper';
 import { List } from '@/components/List';
-import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { useRequestsQuery } from '@/hooks/queries/useRequestsQuery';
 import { NoDID } from '@/components/NoDID';
@@ -21,6 +20,7 @@ import { CustomTheme } from '@/@types/theme';
 import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
+import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 const getCredentialTypes = (
   t: (key: string) => string,
@@ -121,16 +121,25 @@ const mapRequests = (
 
 export default function Credentials() {
   const { t } = useTranslation();
-  const storedDid =
-    Platform.OS !== 'web'
-      ? SecureStore.getItem(KEY_DID_SECURE_STORE) || ''
-      : '';
-
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
-  const { requests, refetch, error } = useRequestsQuery(storedDid, {
+  const [did, setDid] = useState<string | null>(null);
+  const { requests, refetch, error } = useRequestsQuery(did || '', {
     select: (data: Request[]) => mapRequests(data, styles, t),
   });
+  const secureStoreInstance = useSecureStore();
+
+  useEffect(() => {
+    const fetchStoredDid = async () => {
+      if (secureStoreInstance && Platform.OS !== 'web') {
+        const storedDid =
+          await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+        setDid(storedDid);
+      }
+    };
+
+    fetchStoredDid();
+  }, [secureStoreInstance]);
 
   useEffect(() => {
     if (error && typeof error === 'string') {
@@ -157,18 +166,18 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {storedDid && (
+        {did && (
           <View style={styles.container}>
             <Text style={styles.h1}>{t('Your requests')}</Text>
           </View>
         )}
-        {requests?.length === 0 && storedDid && (
+        {requests?.length === 0 && did && (
           <Text style={styles.noRequestText}>
             {t('You currently have no requests')}
           </Text>
         )}
-        {storedDid && <List data={requests} />}
-        {!storedDid && <NoDID />}
+        {did && <List data={requests} />}
+        {!did && <NoDID />}
       </ScrollView>
     </View>
   );

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import 'react-native-get-random-values';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,7 +11,6 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
-import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
 import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
@@ -19,6 +19,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
+import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 type Styles = {
   accordionContainer: object;
@@ -55,20 +56,21 @@ const Accordion = ({
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const storedDid =
-    Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
-
   const theme = useTheme<CustomTheme>();
+  const secureStoreInstance = useSecureStore();
   const { showModal } = useModal({
     onClose: async () => {
       await deleteCredentials();
       await deleteDatabase();
-      await SecureStore.deleteItemAsync(KEY_DID_SECURE_STORE);
+      if (secureStoreInstance) {
+        secureStoreInstance.deleteItem(KEY_DID_SECURE_STORE);
+      }
       setDid(null);
     },
   });
   const { createDid, isPending } = useDidMutation();
-  const [did, setDid] = useState<string | null>(storedDid);
+  const [did, setDid] = useState<string | null>(null);
+
   const styles = stylesFnc({
     container: {
       backgroundColor: theme.customColors.background.primary,
@@ -87,10 +89,25 @@ export default function HomeScreen() {
     },
   });
 
+  useEffect(() => {
+    const fetchStoredDid = async () => {
+      if (secureStoreInstance && Platform.OS !== 'web') {
+        const storedDid =
+          await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+        setDid(storedDid);
+      }
+    };
+
+    fetchStoredDid();
+  }, [secureStoreInstance]);
+
   const handleCreateDid = async () => {
     await createDid(undefined, {
       onSuccess: async data => {
-        SecureStore.setItem(KEY_DID_SECURE_STORE, data.uri);
+        if (secureStoreInstance) {
+          await secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
+        }
+
         setDid(data.uri);
         await initDatabase();
       },
@@ -112,9 +129,9 @@ export default function HomeScreen() {
   };
 
   const copyToClipboard = async () => {
-    if (!storedDid) return;
-    await Clipboard.setStringAsync(storedDid);
-    Alert.alert(t('Copied to clipboard'), storedDid);
+    if (!did) return;
+    await Clipboard.setStringAsync(did);
+    Alert.alert(t('Copied to clipboard'), did);
   };
 
   return (

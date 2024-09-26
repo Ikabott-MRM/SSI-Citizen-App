@@ -26,11 +26,11 @@ import credential from '@/services/credential';
 import { IList, List } from '@/components/List';
 import { CustomTheme } from '@/@types/theme';
 import { NoDID } from '@/components/NoDID';
-import * as SecureStore from 'expo-secure-store';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
+import { useSecureStore } from '../../providers/SecureStoreProvider';
 
 interface Styles {
   credentialContainer: ViewStyle;
@@ -190,8 +190,7 @@ const mapDatabaseCredentials = (
 export default function Credentials() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const storedDid =
-    Platform.OS !== 'web' ? SecureStore.getItem(KEY_DID_SECURE_STORE) : '';
+  const [storedDid, setStoredDid] = useState<string | null>(null);
 
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
@@ -202,34 +201,43 @@ export default function Credentials() {
     },
   });
 
-  const fetchData = async () => {
-    
-      let data;
+  const secureStoreInstance = useSecureStore();
 
-        try {
+  useEffect(() => {
+    const fetchDid = async () => {
+      if (secureStoreInstance) {
+        const did = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+        setStoredDid(did);
+      }
+    };
+
+    fetchDid();
+  }, [secureStoreInstance]);
+
+  const fetchData = async () => {
+    let data;
+
+    try {
       if (isConnected && storedDid) {
-          data = await credential.getCredentials(storedDid);
-          await insertCredentials(data);
-        } else {
-          const dbData = await getCredentials();
-          data = mapDatabaseCredentials(dbData);
-        }
-      
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      
-      if(Boolean(data)){
-      // @ts-expect-error
-      const mappedData = mapCredentials(data, styles, t);
-      setCredentials(mappedData);
+        data = await credential.getCredentials(storedDid);
+        await insertCredentials(data);
+      } else {
+        const dbData = await getCredentials();
+        data = mapDatabaseCredentials(dbData);
       }
 
+      if (data) {
+        // @ts-expect-error
+        const mappedData = mapCredentials(data, styles, t);
+        setCredentials(mappedData);
+      }
     } catch (error) {
       if (error && typeof error === 'string') {
-      Toast.show(error as string, {
-        duration: Toast.durations.LONG,
-        position: Toast.positions.BOTTOM,
-      });
-    }
+        Toast.show(error as string, {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
+      }
     }
   };
 

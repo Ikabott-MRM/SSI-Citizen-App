@@ -7,7 +7,6 @@ interface ErrorResponse {
   message: string;
 }
 
-
 const instance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
 });
@@ -19,28 +18,25 @@ instance.interceptors.response.use(
     return response;
   },
   error => {
+    let errorMessage = 'An unexpected error occurred.';
+
     if (isAxiosError(error)) {
-      const err: ErrorResponse = error.response?.data;;
+      const err: ErrorResponse | undefined = error.response?.data;
       const status = error.response?.status;
-     
-      const errorMessageFromStatus = status? errorCodes[status]?.es : '';
-    
-      if (Boolean(errorMessageFromStatus)) {
-        error.message = errorMessageFromStatus;
-      }else{
-        error.message =  (err.message || 'An unexpected error occurred.');
+
+      const errorMessageFromStatus = status ? errorCodes[status]?.es : '';
+
+      if (errorMessageFromStatus) {
+        errorMessage = errorMessageFromStatus;
+      } else if (err && err.message) {
+        errorMessage = err.message;
       }
-      Toast.show(`API Error: ${error.message}` as string, {
-        duration: Toast.durations.LONG,
-        position: Toast.positions.BOTTOM,
-      });
-    } 
-    else {
-      // unexpected errors
-      Toast.show(`Unexpected Error: ${error.message}` as string, {
-        duration: Toast.durations.LONG,
-        position: Toast.positions.BOTTOM,
-      });    }
+    }
+
+    Toast.show(`API Error: ${errorMessage}`, {
+      duration: Toast.durations.LONG,
+      position: Toast.positions.BOTTOM,
+    });
 
     return Promise.reject(error);
   },
