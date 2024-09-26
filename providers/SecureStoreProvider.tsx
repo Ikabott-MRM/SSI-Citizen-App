@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getSecureMMKVInstance, MMKVFaker, SecureMMKV } from '@/services/secure-store';
 import {
   Alert,
     Platform,
   } from 'react-native';
 import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
   
+import {
+  getEncryptedAsyncStorageInstance,
+  SecureStore,
+} from '@/services/secure-store';
 
  type SecureStoreContextType = {
-   secureStoreInstance: SecureMMKV | MMKVFaker| null;
+   secureStoreInstance: SecureStore| null;
    did: string | null;
    setDid: React.Dispatch<React.SetStateAction<string | null>>;
  };
@@ -24,17 +27,17 @@ export const useSecureStore = () => {
 };
 
 export const SecureStoreProvider = ({ children }: { children: React.ReactNode }) => {
-  const [secureStoreInstance, setSecureStore] = useState<SecureMMKV | MMKVFaker| null>(null);
+  const [secureStoreInstance, setSecureStore] = useState<SecureStore| null>(null);
   const [did, setDid] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeSecureStore = async () => {
       if (Platform.OS !== 'web') {
         try {
-          const store = await getSecureMMKVInstance();
+          const store = await getEncryptedAsyncStorageInstance();
           if (store) {
             setSecureStore(store);
-            const storedDid = store!.getItem(KEY_DID_SECURE_STORE);
+            const storedDid = await store!.getItem(KEY_DID_SECURE_STORE);
             if (storedDid) {
               setDid(storedDid);
             }

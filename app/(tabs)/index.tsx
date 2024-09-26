@@ -1,3 +1,4 @@
+import 'react-native-get-random-values';
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
@@ -18,7 +19,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
-import { SecureMMKV } from '../../services/secure-store';
 import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 type Styles = {
@@ -92,11 +92,12 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchStoredDid = async () => {
       if (secureStoreInstance && Platform.OS !== 'web') {
-        const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+        const storedDid =
+          await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
       }
     };
-  
+
     fetchStoredDid();
   }, [secureStoreInstance]);
 
@@ -104,9 +105,7 @@ export default function HomeScreen() {
     await createDid(undefined, {
       onSuccess: async (data: { uri: string; }) => {
         if (secureStoreInstance) {
-         console.log(t('Hay instance'));
-           secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
-           console.log(t('guarda did'), secureStoreInstance.getItem(KEY_DID_SECURE_STORE)??'no guardo did');
+           await secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
         }
         setDid(data.uri);
         await initDatabase();

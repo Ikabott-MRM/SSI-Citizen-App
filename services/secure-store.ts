@@ -1,10 +1,16 @@
 import { MMKV } from 'react-native-mmkv';
-import * as Crypto from 'expo-crypto';
-let secureStoreInstance: SecureMMKV | MMKVFaker | null = null;
 import {Buffer} from 'buffer'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import QuickCrypto from 'react-native-quick-crypto';
 
-export class SecureMMKV {
+
+export interface SecureStore {
+  setItem: (key: string, value: string) => Promise<void>;
+  getItem: (key: string) => Promise<string | null>;
+  deleteItem: (key: string) => Promise<void>;
+}
+
+export class SecureMMKV implements SecureStore {
   private storage: MMKV;
 
   constructor(encryptionKey: string) {
@@ -14,75 +20,96 @@ export class SecureMMKV {
     });
   }
 
-  setItem(key: string, value: string): void {
+  async setItem(key: string, value: string): Promise<void> {
     this.storage.set(key, value);
   }
 
-  getItem(key: string): string | null {
+  async getItem(key: string): Promise<string | null> {
     return this.storage.getString(key) || null;
   }
 
-  deleteItem(key: string): void {
+  async deleteItem(key: string): Promise<void> {
     this.storage.delete(key);
   }
 }
 
-export class MMKVFaker {
-  private data: { [key: string]: string | null } = {};
-  
-  getItem(key: string): string | null {
-  return this.data[key];
+export class EncryptedAsyncStorage implements SecureStore {
+  private encryptionKey: Buffer;
+
+  constructor(encryptionKey: string) {
+    this.encryptionKey = Buffer.from(encryptionKey, 'hex');
   }
-  
-  setItem(key: string, value: string): void {
-  this.data[key] = value;
+
+  private encrypt(data: string): string {
+    const iv = QuickCrypto.randomBytes(16);
+    const cipher = QuickCrypto.createCipheriv(
+      'aes-256-cbc',
+      this.encryptionKey,
+      iv,
+    );
+    let encrypted = cipher.update(data, 'utf8', 'hex') as string;
+    encrypted += cipher.final('hex') as string;
+    return iv.toString('hex') + encrypted;
   }
-  
-  deleteItem(key: string): void {
-    this.data[key] = null;
+
+  private decrypt(encryptedData: string): string {
+    const ivHex = encryptedData.slice(0, 32);
+    const encryptedText = encryptedData.slice(32);
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = QuickCrypto.createDecipheriv(
+      'aes-256-cbc',
+      this.encryptionKey,
+      iv,
+    );
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8') as string;
+    decrypted += decipher.final('utf8') as string;
+    return decrypted;
+  }
+
+  async setItem(key: string, value: string): Promise<void> {
+    const encryptedValue = this.encrypt(value);
+    await AsyncStorage.setItem(key, encryptedValue);
+  }
+
+  async getItem(key: string): Promise<string | null> {
+    const encryptedValue = await AsyncStorage.getItem(key);
+    if (encryptedValue) {
+      return this.decrypt(encryptedValue);
+    }
+    return null;
+  }
+
+  async deleteItem(key: string): Promise<void> {
+    await AsyncStorage.removeItem(key);
   }
 }
 
-async function generateSecureRandomKey(
-  length: number = 32,
-): Promise<string> {
-  const randomBytes = await Crypto.getRandomBytesAsync(length);
-  return Buffer.from(randomBytes).toString('hex');
+function generatePseudoRandomKey(length: number = 32): string {
+  return QuickCrypto.randomBytes(length).toString('hex');
 }
 
+export async function getEncryptedAsyncStorageInstance(): Promise<EncryptedAsyncStorage> {
+  let encryptionKey = await AsyncStorage.getItem('encryption-key');
+  if (!encryptionKey) {
+    encryptionKey = generatePseudoRandomKey();
+    await AsyncStorage.setItem('encryption-key', encryptionKey);
+  }
+  return new EncryptedAsyncStorage(encryptionKey);
+}
 
 async function getOrCreateEncryptionKey(): Promise<string> {
   try {
     let key = await AsyncStorage.getItem('mmkv-encryption-key');
-    console.log(key)
-    
     if (!key) {
-      const generatedKey = await generateSecureRandomKey();
+      const generatedKey = generatePseudoRandomKey();
       await AsyncStorage.setItem('mmkv-encryption-key', generatedKey);
       key = generatedKey;
       console.log(key)
     }
-    
+
     return key;
   } catch (error) {
     console.error('Failed to access or create encryption key:', error);
-    throw new Error("Error generating or accessing the encryption key");
-  }
-}
-
-export async function getSecureMMKVInstance(): Promise<SecureMMKV | MMKVFaker | null> {
-  try {
-    if (!secureStoreInstance) {
-      if(__DEV__) {
-       secureStoreInstance = new MMKVFaker()
-      }else{
-      const encryptionKey = await getOrCreateEncryptionKey();
-      secureStoreInstance = new SecureMMKV(encryptionKey);
-      }
-    }
-    return secureStoreInstance;
-  } catch (error) {
-    console.error('Error initializing SecureMMKV instance:', error);
-    return null; 
+    throw new Error('Error generating or accessing the encryption key');
   }
 }

@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 import { Image } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
+import { initDatabase } from '@/database/db';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';

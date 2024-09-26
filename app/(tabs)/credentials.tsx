@@ -200,19 +200,11 @@ export default function Credentials() {
       backgroundColor: theme.customColors.background.primary,
     },
   });
-
-
-  console.log(`esto es secure instance`)
-  console.log(secureStoreInstance);
   
   useEffect(() => {
     const fetchStoredDid = async () => {
-      console.log(t('Hace el fetch'));
       if (secureStoreInstance && Platform.OS !== 'web') {
-        console.log(t('Hace el fetch pq hay instance'));
-        const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-        console.log(storedDid);        
-        console.log(t('el did es',storedDid??'no hay did'));
+        const storedDid = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
       }
     };

@@ -1,3 +1,8 @@
+import { install } from 'react-native-quick-crypto';
+
+install();
+
+import 'react-native-get-random-values';
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
@@ -49,7 +54,7 @@ export default function Identity() {
 useEffect(() => {
   const fetchStoredDid = async () => {
     if (secureStoreInstance && Platform.OS !== 'web') {
-      const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+      const storedDid = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
       setDid(storedDid);
     }
   };
