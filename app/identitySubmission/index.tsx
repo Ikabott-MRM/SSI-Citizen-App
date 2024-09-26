@@ -1,3 +1,7 @@
+import { install } from 'react-native-quick-crypto';
+
+install();
+
 import 'react-native-get-random-values';
 import React, { useState, useEffect } from 'react';
 import {
@@ -21,7 +25,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
-import { getSecureMMKVInstance, SecureMMKV } from '@/services/secure-store';
 import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 const dimensions = Dimensions.get('window');
@@ -41,38 +44,25 @@ export default function Identity() {
   const theme = useTheme<CustomTheme>();
   const [image, setImage] = useState<string | null>(null);
   const [did, setDid] = useState<string | null>(null);
-  const [secureStore, setSecureStore] = useState<SecureMMKV | null>(null);
   const { uploadDocumentFile, isPending } = useIdentityMutation();
+  const secureStoreInstance = useSecureStore();
   const styles = styleFnc({
     container: {
       backgroundColor: theme.customColors.background.primary,
     },
   });
 
-  // useEffect(() => {
-  //   const initializeSecureStore = async () => {
-  //     if (Platform.OS !== 'web') {
-  //       const store = await getSecureMMKVInstance();
-  //       setSecureStore(store);
-  //       const storedDid = await store.getItem(KEY_DID_SECURE_STORE);
-  //       setDid(storedDid);
-  //     }
-  //   };
-
-  //   initializeSecureStore();
-  // }, []);
-
   useEffect(() => {
     const fetchStoredDid = async () => {
-      const secureStoreInstance = useSecureStore();
       if (secureStoreInstance && Platform.OS !== 'web') {
-        const storedDid = secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+        const storedDid =
+          await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
         setDid(storedDid);
       }
     };
 
     fetchStoredDid();
-  }, []);
+  }, [secureStoreInstance]);
 
   const pickImage = async () => {
     let isValidSize = false;

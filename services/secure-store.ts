@@ -1,7 +1,7 @@
 import { MMKV } from 'react-native-mmkv';
 import * as ExpoSecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CryptoJS from 'crypto-js';
+import QuickCrypto from 'react-native-quick-crypto';
 
 let secureStoreInstance: SecureMMKV | null = null;
 
@@ -49,32 +49,36 @@ export class ExpoSecureStorage implements SecureStore {
 }
 
 export class EncryptedAsyncStorage implements SecureStore {
-  private encryptionKey: string;
+  private encryptionKey: Buffer;
 
   constructor(encryptionKey: string) {
-    this.encryptionKey = encryptionKey;
+    this.encryptionKey = Buffer.from(encryptionKey, 'hex');
   }
 
   private encrypt(data: string): string {
-    const iv = CryptoJS.lib.WordArray.random(16);
-    const encrypted = CryptoJS.AES.encrypt(data, this.encryptionKey, {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7,
-    });
-    return iv.toString(CryptoJS.enc.Hex) + encrypted.toString();
+    const iv = QuickCrypto.randomBytes(16);
+    const cipher = QuickCrypto.createCipheriv(
+      'aes-256-cbc',
+      this.encryptionKey,
+      iv,
+    );
+    let encrypted = cipher.update(data, 'utf8', 'hex') as string;
+    encrypted += cipher.final('hex') as string;
+    return iv.toString('hex') + encrypted;
   }
 
   private decrypt(encryptedData: string): string {
     const ivHex = encryptedData.slice(0, 32);
     const encryptedText = encryptedData.slice(32);
-    const iv = CryptoJS.enc.Hex.parse(ivHex);
-    const decrypted = CryptoJS.AES.decrypt(encryptedText, this.encryptionKey, {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7,
-    });
-    return decrypted.toString(CryptoJS.enc.Utf8);
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = QuickCrypto.createDecipheriv(
+      'aes-256-cbc',
+      this.encryptionKey,
+      iv,
+    );
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8') as string;
+    decrypted += decipher.final('utf8') as string;
+    return decrypted;
   }
 
   async setItem(key: string, value: string): Promise<void> {
@@ -85,7 +89,6 @@ export class EncryptedAsyncStorage implements SecureStore {
   async getItem(key: string): Promise<string | null> {
     const encryptedValue = await AsyncStorage.getItem(key);
     if (encryptedValue) {
-      console.log('encrypted value', encryptedValue);
       return this.decrypt(encryptedValue);
     }
     return null;
@@ -97,15 +100,7 @@ export class EncryptedAsyncStorage implements SecureStore {
 }
 
 function generatePseudoRandomKey(length: number = 32): string {
-  const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const timestamp = new Date().getTime().toString();
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * chars.length);
-    result += chars.charAt(randomIndex);
-  }
-  return CryptoJS.SHA256(result + timestamp).toString();
+  return QuickCrypto.randomBytes(length).toString('hex');
 }
 
 export async function getEncryptedAsyncStorageInstance(): Promise<EncryptedAsyncStorage> {

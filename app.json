@@ -20,7 +20,8 @@
       },
       "entitlements": {
         "aps-environment": "production"
-      }
+      },
+      "jsEngine": "hermes"
     },
     "android": {
       "versionCode": 2,

@@ -19,7 +19,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
-import { SecureMMKV } from '../../services/secure-store';
 import { useSecureStore } from '@/providers/SecureStoreProvider';
 
 type Styles = {
@@ -100,7 +99,7 @@ export default function HomeScreen() {
     };
 
     fetchStoredDid();
-  }, []);
+  }, [secureStoreInstance]);
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
