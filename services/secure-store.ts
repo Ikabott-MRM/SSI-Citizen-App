@@ -72,20 +72,3 @@ export async function getEncryptedAsyncStorageInstance(): Promise<EncryptedAsync
   }
   return new EncryptedAsyncStorage(encryptionKey);
 }
-
-async function getOrCreateEncryptionKey(): Promise<string> {
-  try {
-    let key = await AsyncStorage.getItem('mmkv-encryption-key');
-    if (!key) {
-      const generatedKey = generatePseudoRandomKey();
-      await AsyncStorage.setItem('mmkv-encryption-key', generatedKey);
-      key = generatedKey;
-      console.log(key)
-    }
-
-    return key;
-  } catch (error) {
-    console.error('Failed to access or create encryption key:', error);
-    throw new Error('Error generating or accessing the encryption key');
-  }
-}
