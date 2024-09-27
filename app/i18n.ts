@@ -14,17 +14,24 @@ const resources = {
   },
 };
 
-AsyncStorage.getItem(StorageKey.language).then(lng => {
+const initI18n = async () => {
+  let savedLanguage = await AsyncStorage.getItem(StorageKey.language);
+
+  if (!savedLanguage) {
+    savedLanguage = Language.en;
+  }
+
   i18n.use(initReactI18next).init({
+    compatibilityJSON: "v3",
     resources,
-    compatibilityJSON: 'v3',
-    fallbackLng: Language.en,
-    debug: false,
-    lng: lng || Language.en,
+    lng: savedLanguage,
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false,
     },
   });
-});
+};
+
+initI18n();
 
 export default i18n;

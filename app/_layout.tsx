@@ -17,6 +17,7 @@ import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
 import { SecureStoreProvider } from '@/providers/SecureStoreProvider';
+import './i18n';
 
 export {
   // Catch any errors thrown by the Layout component.
