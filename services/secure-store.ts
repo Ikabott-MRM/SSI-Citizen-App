@@ -1,4 +1,3 @@
-import { MMKV } from 'react-native-mmkv';
 import {Buffer} from 'buffer'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import QuickCrypto from 'react-native-quick-crypto';
@@ -8,29 +7,6 @@ export interface SecureStore {
   setItem: (key: string, value: string) => Promise<void>;
   getItem: (key: string) => Promise<string | null>;
   deleteItem: (key: string) => Promise<void>;
-}
-
-export class SecureMMKV implements SecureStore {
-  private storage: MMKV;
-
-  constructor(encryptionKey: string) {
-    this.storage = new MMKV({
-      id: 'ida-secure-storage',
-      encryptionKey,
-    });
-  }
-
-  async setItem(key: string, value: string): Promise<void> {
-    this.storage.set(key, value);
-  }
-
-  async getItem(key: string): Promise<string | null> {
-    return this.storage.getString(key) || null;
-  }
-
-  async deleteItem(key: string): Promise<void> {
-    this.storage.delete(key);
-  }
 }
 
 export class EncryptedAsyncStorage implements SecureStore {
