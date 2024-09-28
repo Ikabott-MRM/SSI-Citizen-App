@@ -1,8 +1,6 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { Link } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
 

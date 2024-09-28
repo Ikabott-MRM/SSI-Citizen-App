@@ -43,26 +43,24 @@ export default function Identity() {
   const router = useRouter();
   const theme = useTheme<CustomTheme>();
   const [image, setImage] = useState<string | null>(null);
-  const [did, setDid] = useState<string | null>(null);
+  const {secureStoreInstance, did, setDid} = useSecureStore();
   const { uploadDocumentFile, isPending } = useIdentityMutation();
-  const secureStoreInstance = useSecureStore();
   const styles = styleFnc({
     container: {
       backgroundColor: theme.customColors.background.primary,
     },
   });
 
-  useEffect(() => {
-    const fetchStoredDid = async () => {
-      if (secureStoreInstance && Platform.OS !== 'web') {
-        const storedDid =
-          await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-        setDid(storedDid);
-      }
-    };
+useEffect(() => {
+  const fetchStoredDid = async () => {
+    if (secureStoreInstance && Platform.OS !== 'web') {
+      const storedDid = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+      setDid(storedDid);
+    }
+  };
 
-    fetchStoredDid();
-  }, [secureStoreInstance]);
+  fetchStoredDid();
+}, []);
 
   const pickImage = async () => {
     let isValidSize = false;

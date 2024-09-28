@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "IDA Ciudadano",
-    "slug": "ida-ciudadano",
+    "slug": "driver-license-mobile",
     "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -33,7 +33,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store",
       [
         "expo-build-properties",
         {
@@ -51,10 +50,10 @@
         "origin": false
       },
       "eas": {
-        "projectId": "d2af94dd-a6e1-4586-852d-3c40b85f4d28"
+        "projectId": "67564153-fced-432c-b065-bc90c9cdd821"
       }
     },
-    "owner": "vincentes",
+    "owner": "iovf",
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/67564153-fced-432c-b065-bc90c9cdd821"

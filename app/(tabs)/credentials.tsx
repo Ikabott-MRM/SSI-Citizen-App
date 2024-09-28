@@ -190,7 +190,7 @@ const mapDatabaseCredentials = (
 export default function Credentials() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const [storedDid, setStoredDid] = useState<string | null>(null);
+  const {secureStoreInstance, did, setDid} = useSecureStore();
 
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
@@ -200,26 +200,24 @@ export default function Credentials() {
       backgroundColor: theme.customColors.background.primary,
     },
   });
-
-  const secureStoreInstance = useSecureStore();
-
+  
   useEffect(() => {
-    const fetchDid = async () => {
-      if (secureStoreInstance) {
-        const did = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-        setStoredDid(did);
+    const fetchStoredDid = async () => {
+      if (secureStoreInstance && Platform.OS !== 'web') {
+        const storedDid = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
+        setDid(storedDid);
       }
     };
 
-    fetchDid();
-  }, [secureStoreInstance]);
+    fetchStoredDid();
+  }, [secureStoreInstance, t]);
 
   const fetchData = async () => {
     let data;
 
     try {
-      if (isConnected && storedDid) {
-        data = await credential.getCredentials(storedDid);
+      if (isConnected && did) {
+        data = await credential.getCredentials(did);
         await insertCredentials(data);
       } else {
         const dbData = await getCredentials();
@@ -260,12 +258,12 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {storedDid && (
+        {did && (
           <View style={styles.container}>
             <Text style={styles.h1}>{t('Your credentials')}</Text>
           </View>
         )}
-        {credentials?.length === 0 && storedDid && (
+        {credentials?.length === 0 && did && (
           <View>
             <Text
               style={{
@@ -288,10 +286,10 @@ export default function Credentials() {
             </Text>
           </View>
         )}
-        {storedDid && <List data={credentials} />}
-        {!storedDid && <NoDID />}
+        {did && <List data={credentials} />}
+        {!did && <NoDID />}
       </ScrollView>
-      {storedDid && <FabWithMenu />}
+      {did && <FabWithMenu />}
     </View>
   );
 }
