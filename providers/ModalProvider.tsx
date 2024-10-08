@@ -9,7 +9,15 @@ import React, {
 interface ModalContextType {
   modalVisible: boolean;
   modalMessage: string;
-  showModal: (message: string) => void;
+  modalTitle: string; 
+  confirmButtonText: string; 
+  cancelButtonText: string; 
+  showModal: (
+    message: string,
+    title?: string,
+    confirmButtonText?: string,
+    cancelButtonText?: string
+  ) => void;
   hideModal: () => void;
   cancelModal: () => void;
   setCallback: (callback: () => void) => void;
@@ -18,10 +26,13 @@ interface ModalContextType {
 const ModalContext = createContext<ModalContextType>({
   modalVisible: false,
   modalMessage: '',
-  showModal: () => {},
-  hideModal: () => {},
-  cancelModal: () => {},
-  setCallback: () => {},
+  showModal: () => { },
+  hideModal: () => { },
+  cancelModal: () => { },
+  setCallback: () => { },
+  modalTitle: '',
+  confirmButtonText: '',
+  cancelButtonText: ''
 });
 
 interface ModalProviderProps {
@@ -31,12 +42,25 @@ interface ModalProviderProps {
 export const ModalProvider = ({ children }: ModalProviderProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [modalTitle, setModalTitle] = useState(''); 
+  const [confirmButtonText, setConfirmButtonText] = useState('Sí, eliminar todo');
+  const [cancelButtonText, setCancelButtonText] = useState('Cancelar');
   const callbackRef = useRef<() => void | undefined>();
 
-  const showModal = (message: string) => {
+
+  const showModal = (
+    message: string,
+    title = 'Atención',
+    confirmButton = 'Sí, eliminar todo', 
+    cancelButton = 'Cancelar' 
+  ) => {
     setModalMessage(message);
+    setModalTitle(title); 
+    setConfirmButtonText(confirmButton); 
+    setCancelButtonText(cancelButton);
     setModalVisible(true);
   };
+
 
   const hideModal = () => {
     setModalVisible(false);
@@ -58,6 +82,9 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
       value={{
         modalVisible,
         modalMessage,
+        modalTitle, 
+        confirmButtonText, 
+        cancelButtonText, 
         showModal,
         hideModal,
         cancelModal,

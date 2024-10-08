@@ -3,7 +3,15 @@ import { Portal, Dialog, Text, Button } from 'react-native-paper';
 import { useModal } from '@/providers/ModalProvider';
 
 const Modal = () => {
-  const { modalVisible, modalMessage, hideModal, cancelModal } = useModal();
+  const {
+    modalVisible,
+    modalMessage,
+    modalTitle, 
+    confirmButtonText, 
+    cancelButtonText, 
+    hideModal,
+    cancelModal,
+  } = useModal();
 
   return (
     <Portal>
@@ -14,7 +22,7 @@ const Modal = () => {
             fontWeight: 'bold',
           }}
         >
-          Atención
+          {modalTitle} 
         </Dialog.Title>
         <Dialog.Content>
           <Text
@@ -42,7 +50,7 @@ const Modal = () => {
             onPress={hideModal}
             mode="contained-tonal"
           >
-            Sí, eliminar todo
+            {confirmButtonText}
           </Button>
           <Button
             style={{
@@ -58,7 +66,7 @@ const Modal = () => {
             onPress={cancelModal}
             mode="contained"
           >
-            Cancelar
+            {cancelButtonText} 
           </Button>
         </Dialog.Actions>
       </Dialog>

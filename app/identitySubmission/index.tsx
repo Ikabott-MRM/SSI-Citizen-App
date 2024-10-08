@@ -3,13 +3,12 @@ import { install } from 'react-native-quick-crypto';
 install();
 
 import 'react-native-get-random-values';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   Image,
-  Platform,
   Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -19,13 +18,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '@/constants/Colors';
 import { useIdentityMutation } from '@/hooks/mutations/useIdentityMutation';
-import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Toast from 'react-native-root-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { REQUESTS_QUERY_KEYS } from '@/constants/queryKeys/requests';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
-import { useSecureStore } from '@/providers/SecureStoreProvider';
+import { useDid } from '@/providers/DidProvider';
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
@@ -43,24 +41,13 @@ export default function Identity() {
   const router = useRouter();
   const theme = useTheme<CustomTheme>();
   const [image, setImage] = useState<string | null>(null);
-  const {secureStoreInstance, did, setDid} = useSecureStore();
+  const { didUri } = useDid();
   const { uploadDocumentFile, isPending } = useIdentityMutation();
   const styles = styleFnc({
     container: {
       backgroundColor: theme.customColors.background.primary,
     },
   });
-
-useEffect(() => {
-  const fetchStoredDid = async () => {
-    if (secureStoreInstance && Platform.OS !== 'web') {
-      const storedDid = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-      setDid(storedDid);
-    }
-  };
-
-  fetchStoredDid();
-}, []);
 
   const pickImage = async () => {
     let isValidSize = false;
@@ -88,7 +75,7 @@ useEffect(() => {
   };
 
   const uploadImage = () => {
-    if (!image || !did) {
+    if (!image || !didUri) {
       return;
     }
 
@@ -103,7 +90,7 @@ useEffect(() => {
 
     uploadDocumentFile(
       {
-        did,
+        did: didUri,
         formData,
       },
       {
@@ -146,7 +133,7 @@ useEffect(() => {
           },
         }}
       />
-      {!image && did && (
+      {!image && didUri && (
         <TouchableOpacity onPress={pickImage}>
           <View style={styles.containerUpload}>
             <Ionicons
@@ -160,7 +147,7 @@ useEffect(() => {
           </View>
         </TouchableOpacity>
       )}
-      {image && !isPending && did && (
+      {image && !isPending && didUri && (
         <View style={styles.imageContainer}>
           <Text style={styles.text} variant="titleLarge">
             {t('Do you want to confirm the selected image?')}

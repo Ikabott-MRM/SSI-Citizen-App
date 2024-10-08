@@ -26,11 +26,10 @@ import credential from '@/services/credential';
 import { IList, List } from '@/components/List';
 import { CustomTheme } from '@/@types/theme';
 import { NoDID } from '@/components/NoDID';
-import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { useSecureStore } from '../../providers/SecureStoreProvider';
+import { useDid } from '../../providers/DidProvider';
 
 interface Styles {
   credentialContainer: ViewStyle;
@@ -190,7 +189,7 @@ const mapDatabaseCredentials = (
 export default function Credentials() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const {secureStoreInstance, did, setDid} = useSecureStore();
+  const { didUri } = useDid();
 
   const isConnected = useNetInfo();
   const [credentials, setCredentials] = useState<IList[]>([]);
@@ -200,24 +199,13 @@ export default function Credentials() {
       backgroundColor: theme.customColors.background.primary,
     },
   });
-  
-  useEffect(() => {
-    const fetchStoredDid = async () => {
-      if (secureStoreInstance && Platform.OS !== 'web') {
-        const storedDid = await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-        setDid(storedDid);
-      }
-    };
-
-    fetchStoredDid();
-  }, [secureStoreInstance, t]);
 
   const fetchData = async () => {
     let data;
 
     try {
-      if (isConnected && did) {
-        data = await credential.getCredentials(did);
+      if (isConnected && didUri) {
+        data = await credential.getCredentials(didUri);
         await insertCredentials(data);
       } else {
         const dbData = await getCredentials();
@@ -258,12 +246,12 @@ export default function Credentials() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {did && (
+        {didUri && (
           <View style={styles.container}>
             <Text style={styles.h1}>{t('Your credentials')}</Text>
           </View>
         )}
-        {credentials?.length === 0 && did && (
+        {credentials?.length === 0 && didUri && (
           <View>
             <Text
               style={{
@@ -286,10 +274,10 @@ export default function Credentials() {
             </Text>
           </View>
         )}
-        {did && <List data={credentials} />}
-        {!did && <NoDID />}
+        {didUri && <List data={credentials} />}
+        {!didUri && <NoDID />}
       </ScrollView>
-      {did && <FabWithMenu />}
+      {didUri && <FabWithMenu />}
     </View>
   );
 }

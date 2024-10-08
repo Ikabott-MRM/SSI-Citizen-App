@@ -1,5 +1,5 @@
 import 'react-native-get-random-values';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
-import { KEY_DID_SECURE_STORE } from '@/constants/secureStore';
 import { CustomTheme } from '@/@types/theme';
 import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
 import { useModal } from '@/providers/ModalProvider';
@@ -19,7 +18,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
-import { useSecureStore } from '@/providers/SecureStoreProvider';
+import { useDid } from '@/providers/DidProvider';
 
 type Styles = {
   accordionContainer: object;
@@ -57,19 +56,20 @@ const Accordion = ({
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const {secureStoreInstance, did, setDid} = useSecureStore();
+  const { didUri, setDidUri, setPortableDid } = useDid();
   const { showModal } = useModal({
     onClose: async () => {
-      await deleteCredentials();
-      await deleteDatabase();
-      if (secureStoreInstance) {
-        secureStoreInstance.deleteItem(KEY_DID_SECURE_STORE);
+      if (didUri) {
+        await deleteCredentials();
+        await deleteDatabase();
+        setDidUri('');
+      } else {
+        //TODO esto es provisorio mientras no se implementa el retrieve DID
+        undefined;
       }
-      setDid(null);
     },
   });
   const { createDid, isPending } = useDidMutation();
-  // const [did, setDid] = useState<string | null>(null);
 
   const styles = stylesFnc({
     container: {
@@ -89,25 +89,12 @@ export default function HomeScreen() {
     },
   });
 
-  useEffect(() => {
-    const fetchStoredDid = async () => {
-      if (secureStoreInstance && Platform.OS !== 'web') {
-        const storedDid =
-          await secureStoreInstance.getItem(KEY_DID_SECURE_STORE);
-        setDid(storedDid);
-      }
-    };
-
-    fetchStoredDid();
-  }, [secureStoreInstance]);
-
   const handleCreateDid = async () => {
     await createDid(undefined, {
-      onSuccess: async (data: { uri: string; }) => {
-        if (secureStoreInstance) {
-           await secureStoreInstance.setItem(KEY_DID_SECURE_STORE, data.uri);
-        }
-        setDid(data.uri);
+      onSuccess: async data => {
+        setDidUri(data.uri);
+        setPortableDid(JSON.stringify(data));
+        //TODO aca iria el proceso de encriptar
         await initDatabase();
       },
       onError: error => {
@@ -127,23 +114,27 @@ export default function HomeScreen() {
     );
   };
 
+  const handleRetrieveDid = async () => {
+    showModal('Recuperar DID','Recuperar DID','Ok');
+  };
+
   const copyToClipboard = async () => {
-    if (!did) return;
-    await Clipboard.setStringAsync(did);
-    Alert.alert(t('Copied to clipboard'), did);
+    if (!didUri) return;
+    await Clipboard.setStringAsync(didUri);
+    Alert.alert(t('Copied to clipboard'), didUri);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.h1}>{t('Welcome to IDA DEMO')}</Text>
-      {did && (
+      {didUri && (
         <Accordion
           title={t('Decentralized identifier (DID)')}
           styles={styles}
           isOpen={true}
         >
           <View style={styles.didContainer}>
-            <Text style={styles.didTextInput}>{did}</Text>
+            <Text style={styles.didTextInput}>{didUri}</Text>
             <TouchableOpacity
               onPress={copyToClipboard}
               style={styles.iconContainer}
@@ -153,7 +144,7 @@ export default function HomeScreen() {
           </View>
         </Accordion>
       )}
-      {!isPending && !did && (
+      {!isPending && !didUri && (
         <>
           <Text style={styles.text}>{t('Welcome description')}</Text>
           <Button
@@ -164,9 +155,17 @@ export default function HomeScreen() {
           >
             {t('Create DID')}
           </Button>
+          <Button
+            labelStyle={styles.buttonLabel}
+            style={styles.button}
+            mode="contained"
+            onPress={handleRetrieveDid}
+          >
+            {t('Do you already have a DID?\nRetrieve it.')}
+          </Button>
         </>
       )}
-      {!isPending && did && (
+      {!isPending && didUri && (
         <>
           <Button
             labelStyle={styles.buttonLabel}
@@ -198,17 +197,21 @@ const stylesFnc = (css: {
       paddingTop: 50,
       marginBottom: 0,
     },
-    buttonLabel: {
-      fontSize: 18,
-      color: '#444',
-    },
     button: {
+      paddingHorizontal: 10, 
+      width: 'auto', 
+      alignSelf: 'center',
       marginTop: 20,
-      width: 200,
       height: 50,
       justifyContent: 'center',
-      alignSelf: 'center',
       borderRadius: 25,
+      color: '#444',
+    },
+    buttonLabel: {
+      textAlign: 'center',
+      flexShrink: 1, 
+      flexWrap: 'wrap',
+      fontSize: 18,
       color: '#444',
     },
     buttonDelete: {

@@ -1,7 +1,7 @@
 {
   "Welcome to IDA DEMO": "Bienvenidos a IDA DEMO",
   "Welcome description": "Primero se debe generar un Identificador Descentralizado (DID) que te identificará al momento de recibir credenciales de los emisores confiables.",
-  "Create DID": "Crea tu DID",
+  "Create DID": "Crear DID",
   "Identity": "Identidad",
   "Credentials": "Credenciales",
   "Requests": "Solicitudes",
@@ -38,5 +38,6 @@
   "Copied to clipboard": "Copiado al portapapeles",
   "Settings": "Ajustes",
   "Select a language": "Selecciona un idioma",
-  "App Version": "App Versión"
+  "App Version": "App Versión",
+  "Do you already have a DID? Retrieve it.":"¿Ya tienes un DID? Recupéralo."
 }
