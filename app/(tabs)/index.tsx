@@ -219,8 +219,6 @@ const stylesFnc = (css: {
     },
     buttonLabel: {
       textAlign: 'center',
-      // flexShrink: 1,
-      // flexWrap: 'wrap',
       fontSize: 18,
       color: '#444',
     },
