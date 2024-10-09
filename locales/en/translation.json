@@ -39,5 +39,7 @@
   "Settings": "Settings",
   "Select a language": "Select a language",
   "App Version": "App Version",
-  "Do you already have a DID? Retrieve it.":"Do you already have a DID? Retrieve it."
+  "Have a DID? Retrieve it.":"Have a DID? Retrieve it.",
+  "An error occurred while decrypting the portableDid during the DID retrieval process.":"An error occurred while decrypting the portableDid during the DID retrieval process.",
+  "An error occurred while encrypting the portableDid during the DID creation process.":"An error occurred while encrypting the portableDid during the DID creation process."
 }

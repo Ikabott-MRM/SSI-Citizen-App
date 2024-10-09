@@ -6,9 +6,9 @@ const Modal = () => {
   const {
     modalVisible,
     modalMessage,
-    modalTitle, 
-    confirmButtonText, 
-    cancelButtonText, 
+    modalTitle,
+    confirmButtonText,
+    cancelButtonText,
     hideModal,
     cancelModal,
   } = useModal();
@@ -22,7 +22,7 @@ const Modal = () => {
             fontWeight: 'bold',
           }}
         >
-          {modalTitle} 
+          {modalTitle}
         </Dialog.Title>
         <Dialog.Content>
           <Text
@@ -66,7 +66,7 @@ const Modal = () => {
             onPress={cancelModal}
             mode="contained"
           >
-            {cancelButtonText} 
+            {cancelButtonText}
           </Button>
         </Dialog.Actions>
       </Dialog>
