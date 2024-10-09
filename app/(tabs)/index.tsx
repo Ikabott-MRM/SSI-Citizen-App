@@ -19,6 +19,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
+import { decryptData, encryptData } from '@/services/encryptionService';
 
 type Styles = {
   accordionContainer: object;
@@ -94,7 +95,16 @@ export default function HomeScreen() {
       onSuccess: async data => {
         setDidUri(data.uri);
         setPortableDid(JSON.stringify(data));
-        //TODO aca iria el proceso de encriptar
+
+        //TODO lo dejo con pwd hardcodeada y con logs y alerts para debug
+        const result = await encryptData(JSON.stringify(data), 'rulita');
+        console.log(result);
+        Alert.alert(`se encripto`);
+
+        const resultDecrypt = await decryptData(result!, 'rulita');
+        console.log(resultDecrypt);
+        Alert.alert(`se desencripto`);
+
         await initDatabase();
       },
       onError: error => {
@@ -115,7 +125,7 @@ export default function HomeScreen() {
   };
 
   const handleRetrieveDid = async () => {
-    showModal('Recuperar DID','Recuperar DID','Ok');
+    showModal('Recuperar DID', 'Recuperar DID', 'Ok');
   };
 
   const copyToClipboard = async () => {
@@ -161,7 +171,7 @@ export default function HomeScreen() {
             mode="contained"
             onPress={handleRetrieveDid}
           >
-            {t('Do you already have a DID?\nRetrieve it.')}
+            {t('Have a DID? Retrieve it.')}
           </Button>
         </>
       )}
@@ -198,19 +208,17 @@ const stylesFnc = (css: {
       marginBottom: 0,
     },
     button: {
-      paddingHorizontal: 10, 
-      width: 'auto', 
+      paddingHorizontal: 10,
+      width: 'auto',
       alignSelf: 'center',
       marginTop: 20,
-      height: 50,
+      height: 'auto',
       justifyContent: 'center',
       borderRadius: 25,
       color: '#444',
     },
     buttonLabel: {
       textAlign: 'center',
-      flexShrink: 1, 
-      flexWrap: 'wrap',
       fontSize: 18,
       color: '#444',
     },
