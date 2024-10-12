@@ -1,5 +1,5 @@
 import 'react-native-get-random-values';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -19,7 +19,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
-import { decryptData, encryptData } from '@/services/encryptionService';
+import { encryptData } from '@/services/encryptionService';
 
 type Styles = {
   accordionContainer: object;
@@ -57,20 +57,10 @@ const Accordion = ({
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const { didUri, setDidUri, setPortableDid } = useDid();
-  const { showModal } = useModal({
-    onClose: async () => {
-      if (didUri) {
-        await deleteCredentials();
-        await deleteDatabase();
-        setDidUri('');
-      } else {
-        //TODO esto es provisorio mientras no se implementa el retrieve DID
-        undefined;
-      }
-    },
-  });
+  const { didUri, setDidUri, setPortableDid, portableDid } = useDid();
+  const { showModal, showFormModal, hideModal } = useModal();
   const { createDid, isPending } = useDidMutation();
+  const [backupCode, setBackupCode] = useState('');
 
   const styles = stylesFnc({
     container: {
@@ -90,21 +80,45 @@ export default function HomeScreen() {
     },
   });
 
+  const deleteDid = async()=>{
+    await deleteCredentials();
+    await deleteDatabase();
+    setDidUri('');
+    hideModal();
+  }
+
+  const handleDidBackup = async(input1: string, input2?: string)=>{
+      console.log('Email:', input1);
+      console.log('Password:', input2);
+
+      const encryptedPortableDid = await encryptData(portableDid!, input2!,t);
+      //TODO aca se integraria con el endpoint del mail
+      //a la vuelta del endpoint se setea el codgo para compararlo
+      //cuando se setea ahi muestro otro modal con un input para comparar 
+      hideModal();
+
+      //TODO metodo para generar random five digit code 
+
+      //creo que es mejor guardarlo en async storage y comparar de ahi, sino cada vez que abro se va a mostrar el modal. ver como chequeo eso
+      setBackupCode('1234');
+
+  }
+
+  //TODO revisar si en todos mis onClose/onConfirm uso hideModal deberia de cambiar y me
+
+  const verifyCode = async (input1:string)=>{
+    console.log(`Mockeo verify code`, input1)
+
+    
+    hideModal();
+  }
+
+
   const handleCreateDid = async () => {
     await createDid(undefined, {
       onSuccess: async data => {
         setDidUri(data.uri);
         setPortableDid(JSON.stringify(data));
-
-        //TODO lo dejo con pwd hardcodeada y con logs y alerts para debug
-        const result = await encryptData(JSON.stringify(data), 'rulita');
-        console.log(result);
-        Alert.alert(`se encripto`);
-
-        const resultDecrypt = await decryptData(result!, 'rulita');
-        console.log(resultDecrypt);
-        Alert.alert(`se desencripto`);
-
         await initDatabase();
       },
       onError: error => {
@@ -118,14 +132,45 @@ export default function HomeScreen() {
     });
   };
 
+  //TODO mover estos metodos para un utils/helpers
+  const validateEmail = (input: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(input);
+  };
+
+  const validateFiveDigitCode = (input: string): boolean => {
+    const fiveDigitCodeRegex = /^\d{5}$/; 
+    return fiveDigitCodeRegex.test(input);
+  };
+
+  useEffect(() => {
+    if (backupCode) {
+      console.log('abre modal')
+      showFormModal(t('Backup code'), t('Verify'), t('Cancel'), verifyCode,validateFiveDigitCode,()=>true,undefined,undefined,"Code",'')}
+  }, [backupCode]);
+
+  useEffect(() => {
+    //TODO agrego ese chequeo apra que no se abra el modal cada vez que vea que portableDid no esta en false 
+    // si el codigo esta seteado es porque ya hizo backup 
+    //pero si no se setea codigo porque capaz al primera vez marca que no, no tiene que abrirse el mdoal cada vez que abra la app
+    //con que podria manejarse eso?
+    // capaz si responde que no se tendria que marcar algo que deje guardado que eligio no hacerlo y usar eso para mostrar el boton de hacer backup en inicio
+    if (portableDid && !backupCode) {
+      showModal(t('Do you want to backup your DID?'), t(''), t('Yes'), t('No'), () => {
+        showFormModal('DID Backup','Backup','Cancel',handleDidBackup,validateEmail,()=>true,"Invalid email",undefined,"Email","Password");
+    })}
+  }, [portableDid]);
+
   const handleDeleteDid = async () => {
     showModal(
-      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',
+      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',undefined,undefined,undefined,deleteDid
     );
   };
 
   const handleRetrieveDid = async () => {
-    showModal('Recuperar DID', 'Recuperar DID', 'Ok');
+    showModal('Recuperar DID', 'Recuperar DID', 'Ok',undefined, () => {
+      console.log('Modal closed. Just for testing the retrieve modal button.');
+    });
   };
 
   const copyToClipboard = async () => {

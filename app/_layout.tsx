@@ -18,6 +18,7 @@ import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
 import { DidProvider } from '@/providers/DidProvider';
 import './i18n';
+import { FormModal } from '@/components/FormModal';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -118,6 +119,7 @@ export default function RootLayout() {
                 <Stack.Screen name="+not-found" />
               </Stack>
             </RootSiblingParent>
+            <FormModal />
             <Modal />
           </ModalProvider>
         </PaperProvider>

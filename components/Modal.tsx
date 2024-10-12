@@ -9,9 +9,15 @@ const Modal = () => {
     modalTitle,
     confirmButtonText,
     cancelButtonText,
-    hideModal,
     cancelModal,
+    callbackRef
   } = useModal();
+
+  const confirmAction = () => {
+      if(callbackRef.current){
+      callbackRef.current();
+      }
+  };
 
   return (
     <Portal>
@@ -47,7 +53,7 @@ const Modal = () => {
               borderRadius: 25,
               backgroundColor: '#CCC',
             }}
-            onPress={hideModal}
+            onPress={confirmAction}
             mode="contained-tonal"
           >
             {confirmButtonText}
