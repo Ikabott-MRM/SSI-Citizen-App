@@ -7,9 +7,13 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  TextStyle,
 } from 'react-native';
-import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Button,
+  Snackbar,
+  useTheme,
+} from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import { CustomTheme } from '@/@types/theme';
 import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
@@ -20,47 +24,32 @@ import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
 import { encryptData } from '@/services/encryptionService';
+import {
+  generateRandomCode,
+  validateEmail,
+  validateFiveDigitCode,
+} from '@/utils/helpers';
 
-type Styles = {
-  accordionContainer: object;
-  accordionTitle: TextStyle;
-};
-
-// Accordion component - show/hide DID - Open by default
-const Accordion = ({
-  styles,
-  title,
-  children,
-  isOpen = false,
-}: {
-  styles: Styles;
-  title: string;
-  children: React.ReactNode;
-  isOpen: boolean;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(isOpen);
-
-  const toggleAccordion = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  return (
-    <View style={[styles.accordionContainer, { backgroundColor: '#444' }]}>
-      <TouchableOpacity onPress={toggleAccordion}>
-        <Text style={styles.accordionTitle}>{title}</Text>
-      </TouchableOpacity>
-      {isExpanded && <View>{children}</View>}
-    </View>
-  );
-};
+import { Accordion } from '@/components/Accordion';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const { didUri, setDidUri, setPortableDid, portableDid } = useDid();
+  const {
+    didUri,
+    setDidUri,
+    setPortableDid,
+    portableDid,
+    isBackupDeclined,
+    setIsBackupDeclined,
+  } = useDid();
   const { showModal, showFormModal, hideModal } = useModal();
   const { createDid, isPending } = useDidMutation();
-  const [backupCode, setBackupCode] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [vCodeAttempts, setVCodeAttempts] = useState(0);
 
   const styles = stylesFnc({
     container: {
@@ -80,39 +69,57 @@ export default function HomeScreen() {
     },
   });
 
-  const deleteDid = async()=>{
+  const setVerificationCodeAsync = async (code: string) => {
+    try {
+      await AsyncStorage.setItem('verificationCode', code);
+    } catch (error) {
+      console.error('Error saving verification code:', error);
+      setSnackbarMessage('Error saving verification code');
+      setSnackbarVisible(true);
+    }
+  };
+
+  const getVerificationCodeAsync = async () => {
+    try {
+      const code = await AsyncStorage.getItem('verificationCode');
+      return code || '';
+    } catch (error) {
+      console.error('Error retrieving verification code:', error);
+      setSnackbarMessage('Error retrieving verification code');
+      setSnackbarVisible(true);
+      return '';
+    }
+  };
+
+  const handleVerificationCodeUpdate = async (newVCode: string) => {
+    setVerificationCode(newVCode);
+    await setVerificationCodeAsync(newVCode);
+  };
+
+  const deleteDid = async () => {
     await deleteCredentials();
     await deleteDatabase();
     setDidUri('');
+    setIsBackupDeclined(false);
+    handleVerificationCodeUpdate('');
     hideModal();
-  }
+  };
 
-  const handleDidBackup = async(input1: string, input2?: string)=>{
-      console.log('Email:', input1);
-      console.log('Password:', input2);
+  const handleDeleteDid = async () => {
+    showModal(
+      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',
+      undefined,
+      undefined,
+      undefined,
+      deleteDid,
+    );
+  };
 
-      const encryptedPortableDid = await encryptData(portableDid!, input2!,t);
-      //TODO aca se integraria con el endpoint del mail
-      //a la vuelta del endpoint se setea el codgo para compararlo
-      //cuando se setea ahi muestro otro modal con un input para comparar 
-      hideModal();
-
-      //TODO metodo para generar random five digit code 
-
-      //creo que es mejor guardarlo en async storage y comparar de ahi, sino cada vez que abro se va a mostrar el modal. ver como chequeo eso
-      setBackupCode('1234');
-
-  }
-
-  //TODO revisar si en todos mis onClose/onConfirm uso hideModal deberia de cambiar y me
-
-  const verifyCode = async (input1:string)=>{
-    console.log(`Mockeo verify code`, input1)
-
-    
-    hideModal();
-  }
-
+  const handleRetrieveDid = async () => {
+    showModal('Recuperar DID', 'Recuperar DID', 'Ok', undefined, () => {
+      console.log('Modal closed. Just for testing the retrieve modal button.');
+    });
+  };
 
   const handleCreateDid = async () => {
     await createDid(undefined, {
@@ -132,46 +139,133 @@ export default function HomeScreen() {
     });
   };
 
-  //TODO mover estos metodos para un utils/helpers
-  const validateEmail = (input: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(input);
+  const handleDidBackup = async (input1: string, input2?: string) => {
+    console.log('Email:', input1);
+    console.log('Password:', input2);
+
+    const encryptedPortableDid = await encryptData(portableDid!, input2!, t);
+    const verificationCode = generateRandomCode();
+    //TODO aca se integraria con el endpoint del mail
+    //a la vuelta del endpoint se setea el codgo para compararlo
+    hideModal();
+    console.log(verificationCode);
+    handleVerificationCodeUpdate(verificationCode);
   };
 
-  const validateFiveDigitCode = (input: string): boolean => {
-    const fiveDigitCodeRegex = /^\d{5}$/; 
-    return fiveDigitCodeRegex.test(input);
-  };
-
-  useEffect(() => {
-    if (backupCode) {
-      console.log('abre modal')
-      showFormModal(t('Backup code'), t('Verify'), t('Cancel'), verifyCode,validateFiveDigitCode,()=>true,undefined,undefined,"Code",'')}
-  }, [backupCode]);
-
-  useEffect(() => {
-    //TODO agrego ese chequeo apra que no se abra el modal cada vez que vea que portableDid no esta en false 
-    // si el codigo esta seteado es porque ya hizo backup 
-    //pero si no se setea codigo porque capaz al primera vez marca que no, no tiene que abrirse el mdoal cada vez que abra la app
-    //con que podria manejarse eso?
-    // capaz si responde que no se tendria que marcar algo que deje guardado que eligio no hacerlo y usar eso para mostrar el boton de hacer backup en inicio
-    if (portableDid && !backupCode) {
-      showModal(t('Do you want to backup your DID?'), t(''), t('Yes'), t('No'), () => {
-        showFormModal('DID Backup','Backup','Cancel',handleDidBackup,validateEmail,()=>true,"Invalid email",undefined,"Email","Password");
-    })}
-  }, [portableDid]);
-
-  const handleDeleteDid = async () => {
-    showModal(
-      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',undefined,undefined,undefined,deleteDid
+  const showInvalidCodeAlert = () => {
+    Alert.alert(
+      'Invalid verification code',
+      'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+      [
+        {
+          text: 'Understood',
+          onPress: () => {
+            hideModal();
+            setVCodeAttempts(0);
+            handleVerificationCodeUpdate('');
+          },
+        },
+      ],
+      { cancelable: false },
     );
   };
 
-  const handleRetrieveDid = async () => {
-    showModal('Recuperar DID', 'Recuperar DID', 'Ok',undefined, () => {
-      console.log('Modal closed. Just for testing the retrieve modal button.');
-    });
+  const verifyCode = async (input1: string) => {
+    const validCode = input1 === verificationCode;
+    if (validCode) {
+      setSnackbarMessage('Your DID has been successfully backed up');
+      setSnackbarVisible(true);
+      hideModal();
+    } else {
+      setSnackbarMessage('Incorrect code, please try again');
+      setSnackbarVisible(true);
+      setVCodeAttempts(prevAttempts => prevAttempts + 1);
+    }
   };
+
+  const declineDidBackup = (): void => {
+    Alert.alert(
+      'Your DID won’t be backed up.',
+      'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
+      [
+        {
+          text: 'Understood',
+          onPress: () => {
+            setIsBackupDeclined(true);
+            setVCodeAttempts(0);
+            handleVerificationCodeUpdate('');
+            hideModal();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  useEffect(() => {
+    const fetchVerificationCode = async () => {
+      const storedCode = await getVerificationCodeAsync();
+      setVerificationCode(storedCode);
+    };
+
+    fetchVerificationCode();
+  }, []);
+
+  useEffect(() => {
+    if (vCodeAttempts >= 3) {
+      showInvalidCodeAlert();
+    }
+  }, [vCodeAttempts]);
+
+  //TODO aca para que solo se muestre si no se ha hecho backup aun es que
+  //tengo que usar ver si ademas hay una password seteada
+
+  useEffect(() => {
+    if (verificationCode) {
+      showFormModal(
+        t('Backup code'),
+        'Enter the code you have just received by email.',
+        t('Verify'),
+        t('Cancel'),
+        verifyCode,
+        validateFiveDigitCode,
+        () => true,
+        declineDidBackup,
+        'The code must be five digits.',
+        undefined,
+        'Code',
+        '',
+      );
+    }
+  }, [verificationCode]);
+
+  useEffect(() => {
+    if (portableDid && !verificationCode && !isBackupDeclined) {
+      showModal(
+        t('Do you want to backup your DID?'),
+        t(''),
+        t('Yes'),
+        t('No'),
+        () => {
+          showFormModal(
+            'DID Backup',
+            `Please enter the email address where you'd like to get your backup, along with a password for encryption.`,
+            'Backup',
+            'Cancel',
+            handleDidBackup,
+            validateEmail,
+            () => true,
+            declineDidBackup,
+            'Invalid email',
+            undefined,
+            'Email',
+            'Password',
+          );
+        },
+        declineDidBackup,
+      );
+    }
+  }, [portableDid]);
 
   const copyToClipboard = async () => {
     if (!didUri) return;
@@ -233,6 +327,13 @@ export default function HomeScreen() {
         </>
       )}
       {isPending && <ActivityIndicator size="large" />}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }

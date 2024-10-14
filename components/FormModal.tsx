@@ -9,12 +9,13 @@ const FormModal = () => {
     modalTitle,
     confirmButtonText,
     cancelButtonText,
-    cancelModal,
+    hideModal,
     formCallbackRef,
     inputTitle1Text,
     inputTitle2Text,
-    validateInput1, // validation function prop
-    errorMsgInput1
+    validateInput1,
+    errorMsgInput1,
+    cancelCallbackRef,
   } = useModal();
 
   const [input1, setInput1] = useState('');
@@ -26,9 +27,19 @@ const FormModal = () => {
       formCallbackRef.current(input1, input2);
       setInput1('');
       setInput2('');
+      setError('');
     }
   };
-  
+
+  const handleFormCancel = () => {
+    if (cancelCallbackRef.current) {
+      cancelCallbackRef.current();
+      setInput1('');
+      setInput2('');
+      setError('');
+    }
+  };
+
   const handleInputChange = (text: string) => {
     setInput1(text);
 
@@ -37,14 +48,14 @@ const FormModal = () => {
       if (!validateInput1(text)) {
         setError(errorMsgInput1);
       } else {
-        setError(''); // Clear error if valid
+        setError('');
       }
     }
   };
 
   return (
     <Portal>
-      <Dialog visible={formModalVisible} onDismiss={cancelModal}>
+      <Dialog visible={formModalVisible} onDismiss={hideModal}>
         <Dialog.Title>{modalTitle}</Dialog.Title>
         <Dialog.Content>
           <Text
@@ -58,7 +69,6 @@ const FormModal = () => {
             {modalMessage}
           </Text>
 
-          {/* Input 1 - Visible if input1Title is provided */}
           {inputTitle1Text && (
             <>
               <Text style={{ marginBottom: 10 }}>{inputTitle1Text}</Text>
@@ -69,14 +79,12 @@ const FormModal = () => {
                 placeholder={inputTitle1Text}
                 style={{ marginBottom: 20 }}
               />
-            {error ? (
+              {error ? (
                 <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
               ) : null}
             </>
-       
           )}
 
-          {/* Input 2 - Visible if input2Title is provided */}
           {inputTitle2Text && (
             <>
               <Text style={{ marginBottom: 10 }}>{inputTitle2Text}</Text>
@@ -102,6 +110,7 @@ const FormModal = () => {
               borderRadius: 25,
               backgroundColor: '#CCC',
             }}
+            disabled={error ? true : false}
             onPress={handleFormSubmit}
             mode="contained-tonal"
           >
@@ -118,7 +127,7 @@ const FormModal = () => {
               backgroundColor: '#00ff85',
             }}
             labelStyle={{ color: '#444' }}
-            onPress={cancelModal}
+            onPress={handleFormCancel}
             mode="contained"
           >
             {cancelButtonText}

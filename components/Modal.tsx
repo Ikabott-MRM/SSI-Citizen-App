@@ -9,19 +9,26 @@ const Modal = () => {
     modalTitle,
     confirmButtonText,
     cancelButtonText,
-    cancelModal,
-    callbackRef
+    hideModal,
+    callbackRef,
+    cancelCallbackRef,
   } = useModal();
 
   const confirmAction = () => {
-      if(callbackRef.current){
+    if (callbackRef.current) {
       callbackRef.current();
-      }
+    }
+  };
+
+  const cancelAction = () => {
+    if (cancelCallbackRef.current) {
+      cancelCallbackRef.current();
+    }
   };
 
   return (
     <Portal>
-      <Dialog visible={modalVisible} onDismiss={cancelModal}>
+      <Dialog visible={modalVisible} onDismiss={hideModal}>
         <Dialog.Title
           style={{
             textAlign: 'center',
@@ -69,7 +76,7 @@ const Modal = () => {
               backgroundColor: '#00ff85',
             }}
             labelStyle={{ color: '#444' }}
-            onPress={cancelModal}
+            onPress={cancelAction}
             mode="contained"
           >
             {cancelButtonText}

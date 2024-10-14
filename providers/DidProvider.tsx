@@ -6,8 +6,12 @@ import * as Keychain from 'react-native-keychain';
 type DidContextType = {
   didUri: string | null;
   portableDid: string | null;
+  isBackupDeclined: boolean;
+  pwdForEncryption: string | null;
   setDidUri: (value: string) => void;
   setPortableDid: (value: string) => void;
+  setIsBackupDeclined: (value: boolean) => void;
+  setPwdForEncryption: (value: string) => void;
 };
 
 const DidContext = createContext<DidContextType | undefined>(undefined);
@@ -23,6 +27,10 @@ export const useDid = () => {
 export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   const [portableDid, setPortableDidState] = useState<string | null>(null);
   const [didUri, setDidUriState] = useState<string | null>(null);
+  const [isBackupDeclined, setIsBackupDeclinedState] = useState<boolean>(false);
+  const [pwdForEncryption, setPwdForEncryptionState] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadDidData = async () => {
@@ -31,8 +39,12 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
         if (storedDidUri) {
           setDidUriState(storedDidUri);
           const portableDid = await Keychain.getGenericPassword();
+          const backupDeclined = await AsyncStorage.getItem('backupDeclined');
           if (portableDid) {
             setPortableDidState(portableDid.password);
+          }
+          if (backupDeclined) {
+            setIsBackupDeclinedState(true);
           }
         }
       } catch (error) {
@@ -57,6 +69,37 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const setPwdForEncryption = async (value: string) => {
+    try {
+      if (value) {
+        await AsyncStorage.setItem('user-pwd', value);
+        setDidUriState(value);
+      } else {
+        await AsyncStorage.removeItem('user-pwd');
+        setDidUriState(null);
+      }
+    } catch (error) {
+      console.error('Error saving user pwd to AsyncStorage', error);
+    }
+  };
+
+  const setIsBackupDeclined = async (value: boolean) => {
+    try {
+      if (value) {
+        await AsyncStorage.setItem('backupDeclined', 'declined');
+        setIsBackupDeclinedState(value);
+      } else {
+        await AsyncStorage.removeItem('backupDeclined');
+        setIsBackupDeclinedState(false);
+      }
+    } catch (error) {
+      console.error(
+        'Error saving user choice to decline backup to AsyncStorage',
+        error,
+      );
+    }
+  };
+
   const setPortableDid = async (value: string) => {
     try {
       if (value) {
@@ -73,7 +116,16 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <DidContext.Provider
-      value={{ portableDid, didUri, setDidUri, setPortableDid }}
+      value={{
+        portableDid,
+        didUri,
+        setDidUri,
+        setPortableDid,
+        isBackupDeclined,
+        setIsBackupDeclined,
+        pwdForEncryption,
+        setPwdForEncryption,
+      }}
     >
       {children}
     </DidContext.Provider>
