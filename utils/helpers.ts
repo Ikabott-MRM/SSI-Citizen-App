@@ -12,3 +12,9 @@ export const validateFiveDigitCode = (input: string): boolean => {
     const fiveDigitCodeRegex = /^\d{5}$/;
     return fiveDigitCodeRegex.test(input);
   };
+
+  export const validatePwd = (input: string): boolean => {
+    const passwordRegex = /^(?!\s*$).+/
+    return passwordRegex.test(input);
+  };
+

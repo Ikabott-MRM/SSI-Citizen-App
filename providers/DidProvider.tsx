@@ -69,27 +69,13 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const setPwdForEncryption = async (value: string) => {
-    try {
-      if (value) {
-        await AsyncStorage.setItem('user-pwd', value);
-        setDidUriState(value);
-      } else {
-        await AsyncStorage.removeItem('user-pwd');
-        setDidUriState(null);
-      }
-    } catch (error) {
-      console.error('Error saving user pwd to AsyncStorage', error);
-    }
-  };
-
   const setIsBackupDeclined = async (value: boolean) => {
     try {
       if (value) {
-        await AsyncStorage.setItem('backupDeclined', 'declined');
+        await AsyncStorage.setItem('backup-declined', 'declined');
         setIsBackupDeclinedState(value);
       } else {
-        await AsyncStorage.removeItem('backupDeclined');
+        await AsyncStorage.removeItem('backup-declined');
         setIsBackupDeclinedState(false);
       }
     } catch (error) {
@@ -103,14 +89,32 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   const setPortableDid = async (value: string) => {
     try {
       if (value) {
-        await Keychain.setGenericPassword('user', value);
+        await Keychain.setGenericPassword('user-portable-did', value, {
+          service: 'portable-did',
+        });
         setPortableDidState(value);
       } else {
-        await Keychain.resetGenericPassword();
+        await Keychain.resetGenericPassword({ service: 'portable-did' });
         setPortableDidState(null);
       }
     } catch (error) {
       console.error('Error saving portable did to Keychain', error);
+    }
+  };
+
+  const setPwdForEncryption = async (value: string) => {
+    try {
+      if (value) {
+        await Keychain.setGenericPassword('user-pwd', value, {
+          service: 'pwd',
+        });
+        setPwdForEncryptionState(value);
+      } else {
+        await Keychain.resetGenericPassword({ service: 'pwd' });
+        setPwdForEncryptionState(null);
+      }
+    } catch (error) {
+      console.error('Error saving user password to Keychain', error);
     }
   };
 

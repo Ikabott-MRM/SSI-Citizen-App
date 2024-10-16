@@ -28,7 +28,9 @@ import {
   generateRandomCode,
   validateEmail,
   validateFiveDigitCode,
+  validatePwd,
 } from '@/utils/helpers';
+import { useLocalSearchParams } from 'expo-router';
 
 import { Accordion } from '@/components/Accordion';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,9 +45,14 @@ export default function HomeScreen() {
     portableDid,
     isBackupDeclined,
     setIsBackupDeclined,
+    setPwdForEncryption,
+    pwdForEncryption,
   } = useDid();
+  const { startBackup } = useLocalSearchParams();
+
   const { showModal, showFormModal, hideModal } = useModal();
   const { createDid, isPending } = useDidMutation();
+  const [backupCompleted, setBackupCompleted] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -69,31 +76,35 @@ export default function HomeScreen() {
     },
   });
 
-  const setVerificationCodeAsync = async (code: string) => {
+  const setBackupStatusAsync = async (completed: string) => {
     try {
-      await AsyncStorage.setItem('verificationCode', code);
+      await AsyncStorage.setItem('backupStatus', completed);
     } catch (error) {
-      console.error('Error saving verification code:', error);
-      setSnackbarMessage('Error saving verification code');
+      console.error('Error saving backup status:', error);
+      setSnackbarMessage('Error saving backup status');
       setSnackbarVisible(true);
     }
   };
 
-  const getVerificationCodeAsync = async () => {
+  const getBackupStatus = async () => {
     try {
-      const code = await AsyncStorage.getItem('verificationCode');
-      return code || '';
+      const backupStatus = await AsyncStorage.getItem('backupStatus');
+      return backupStatus || '';
     } catch (error) {
-      console.error('Error retrieving verification code:', error);
-      setSnackbarMessage('Error retrieving verification code');
+      console.error('Error retrieving backup status:', error);
+      setSnackbarMessage('Error retrieving backup status');
       setSnackbarVisible(true);
       return '';
     }
   };
 
-  const handleVerificationCodeUpdate = async (newVCode: string) => {
-    setVerificationCode(newVCode);
-    await setVerificationCodeAsync(newVCode);
+  const handleBackupStatusUpdate = async (completed: boolean) => {
+    if (completed) {
+      await setBackupStatusAsync('completed');
+    } else {
+      await setBackupStatusAsync('');
+    }
+    setBackupCompleted(completed);
   };
 
   const deleteDid = async () => {
@@ -101,7 +112,10 @@ export default function HomeScreen() {
     await deleteDatabase();
     setDidUri('');
     setIsBackupDeclined(false);
-    handleVerificationCodeUpdate('');
+    setPortableDid('');
+    setPwdForEncryption('');
+    setVerificationCode('');
+    handleBackupStatusUpdate(false);
     hideModal();
   };
 
@@ -143,13 +157,14 @@ export default function HomeScreen() {
     console.log('Email:', input1);
     console.log('Password:', input2);
 
+    setPwdForEncryption(input2!);
     const encryptedPortableDid = await encryptData(portableDid!, input2!, t);
     const verificationCode = generateRandomCode();
     //TODO aca se integraria con el endpoint del mail
     //a la vuelta del endpoint se setea el codgo para compararlo
     hideModal();
     console.log(verificationCode);
-    handleVerificationCodeUpdate(verificationCode);
+    setVerificationCode(verificationCode);
   };
 
   const showInvalidCodeAlert = () => {
@@ -162,7 +177,8 @@ export default function HomeScreen() {
           onPress: () => {
             hideModal();
             setVCodeAttempts(0);
-            handleVerificationCodeUpdate('');
+            setVerificationCode('');
+            setPwdForEncryption('');
           },
         },
       ],
@@ -175,6 +191,7 @@ export default function HomeScreen() {
     if (validCode) {
       setSnackbarMessage('Your DID has been successfully backed up');
       setSnackbarVisible(true);
+      handleBackupStatusUpdate(true);
       hideModal();
     } else {
       setSnackbarMessage('Incorrect code, please try again');
@@ -193,7 +210,8 @@ export default function HomeScreen() {
           onPress: () => {
             setIsBackupDeclined(true);
             setVCodeAttempts(0);
-            handleVerificationCodeUpdate('');
+            setVerificationCode('');
+            setPwdForEncryption('');
             hideModal();
           },
         },
@@ -202,13 +220,47 @@ export default function HomeScreen() {
     );
   };
 
+  const promptDidBackup = () => {
+    showModal(
+      t('Do you want to backup your DID?'),
+      t(''),
+      t('Yes'),
+      t('No'),
+      () => {
+        showFormModal(
+          t('DID Backup'),
+          t(
+            "Please enter the email address where you'd like to receive your backup, along with a password for encryption.",
+          ),
+          t('Backup'),
+          t('Cancel'),
+          handleDidBackup,
+          validateEmail,
+          validatePwd,
+          declineDidBackup,
+          t('Invalid email'),
+          undefined,
+          t('Email'),
+          t('Password'),
+        );
+      },
+      declineDidBackup,
+    );
+  };
+
   useEffect(() => {
-    const fetchVerificationCode = async () => {
-      const storedCode = await getVerificationCodeAsync();
-      setVerificationCode(storedCode);
+    if (startBackup) {
+      promptDidBackup();
+    }
+  }, [startBackup]);
+
+  useEffect(() => {
+    const fetchBackupStatus = async () => {
+      const backupCompleted = await getBackupStatus();
+      if (backupCompleted) setBackupCompleted(true);
     };
 
-    fetchVerificationCode();
+    fetchBackupStatus();
   }, []);
 
   useEffect(() => {
@@ -217,11 +269,8 @@ export default function HomeScreen() {
     }
   }, [vCodeAttempts]);
 
-  //TODO aca para que solo se muestre si no se ha hecho backup aun es que
-  //tengo que usar ver si ademas hay una password seteada
-
   useEffect(() => {
-    if (verificationCode) {
+    if (verificationCode && !backupCompleted) {
       showFormModal(
         t('Backup code'),
         'Enter the code you have just received by email.',
@@ -241,29 +290,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (portableDid && !verificationCode && !isBackupDeclined) {
-      showModal(
-        t('Do you want to backup your DID?'),
-        t(''),
-        t('Yes'),
-        t('No'),
-        () => {
-          showFormModal(
-            'DID Backup',
-            `Please enter the email address where you'd like to get your backup, along with a password for encryption.`,
-            'Backup',
-            'Cancel',
-            handleDidBackup,
-            validateEmail,
-            () => true,
-            declineDidBackup,
-            'Invalid email',
-            undefined,
-            'Email',
-            'Password',
-          );
-        },
-        declineDidBackup,
-      );
+      promptDidBackup();
     }
   }, [portableDid]);
 
@@ -323,6 +350,18 @@ export default function HomeScreen() {
             onPress={handleDeleteDid}
           >
             Borrar tu DID {'\n'}(Solo para Test)
+          </Button>
+        </>
+      )}
+      {!isPending && didUri && isBackupDeclined && (
+        <>
+          <Button
+            labelStyle={styles.buttonLabel}
+            style={styles.buttonDelete}
+            mode="contained"
+            onPress={promptDidBackup}
+          >
+            {t('Backup your DID.')}
           </Button>
         </>
       )}

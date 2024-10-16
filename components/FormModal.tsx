@@ -14,6 +14,7 @@ const FormModal = () => {
     inputTitle1Text,
     inputTitle2Text,
     validateInput1,
+    validateInput2,
     errorMsgInput1,
     cancelCallbackRef,
   } = useModal();
@@ -40,12 +41,24 @@ const FormModal = () => {
     }
   };
 
-  const handleInputChange = (text: string) => {
+  const handleInput1Change = (text: string) => {
     setInput1(text);
 
     if (validateInput1) {
       // If validation function is passed, use it
       if (!validateInput1(text)) {
+        setError(errorMsgInput1);
+      } else {
+        setError('');
+      }
+    }
+  };
+
+  const handleInput2Change = (text: string) => {
+    setInput2(text);
+    if (validateInput2) {
+      // If validation function is passed, use it
+      if (!validateInput2(text)) {
         setError(errorMsgInput1);
       } else {
         setError('');
@@ -75,7 +88,7 @@ const FormModal = () => {
               <TextInput
                 mode="outlined"
                 value={input1}
-                onChangeText={handleInputChange}
+                onChangeText={handleInput1Change}
                 placeholder={inputTitle1Text}
                 style={{ marginBottom: 20 }}
               />
@@ -91,7 +104,7 @@ const FormModal = () => {
               <TextInput
                 mode="outlined"
                 value={input2}
-                onChangeText={setInput2}
+                onChangeText={handleInput2Change}
                 placeholder={inputTitle2Text}
                 secureTextEntry
                 style={{ marginBottom: 20 }}
