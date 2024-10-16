@@ -1,7 +1,5 @@
 import crypto from 'react-native-quick-crypto';
 import { Alert } from 'react-native';
-import { useTranslation } from 'react-i18next';
-const { t } = useTranslation();
 import { Buffer } from '@craftzdog/react-native-buffer';
 
 const generateSalt = () => {
@@ -15,8 +13,11 @@ const deriveKeyGivenPasswordAndSalt = (password: string, salt: Buffer) => {
 };
 
 //encrypt data using AES-256-CBC
-export const encryptData = async (data: string, password: string) => {
-  console.log(`data a encriptar`, data);
+export const encryptData = async (
+  data: string,
+  password: string,
+  t: (key: string) => string,
+) => {
   try {
     const salt = generateSalt();
     const encryptionKey = deriveKeyGivenPasswordAndSalt(password, salt);
@@ -46,13 +47,13 @@ export const encryptData = async (data: string, password: string) => {
       ),
     );
     console.error('Encryption Error:', error);
-
   }
 };
 
 export const decryptData = async (
   fileContent: { iv: string; encryptedData: string; salt: string },
   password: string,
+  t: (key: string) => string,
 ) => {
   try {
     const salt = Buffer.from(fileContent.salt, 'hex');
@@ -78,6 +79,5 @@ export const decryptData = async (
       ),
     );
     console.error('Decryption Error:', error);
-
   }
 };

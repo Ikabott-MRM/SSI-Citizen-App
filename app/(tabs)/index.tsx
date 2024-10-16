@@ -1,5 +1,5 @@
 import 'react-native-get-random-values';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,9 +7,13 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  TextStyle,
 } from 'react-native';
-import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Button,
+  Snackbar,
+  useTheme,
+} from 'react-native-paper';
 import { useDidMutation } from '@/hooks/mutations/useDidMutation';
 import { CustomTheme } from '@/@types/theme';
 import { deleteCredentials, deleteDatabase, initDatabase } from '@/database/db';
@@ -19,58 +23,40 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
-import { decryptData, encryptData } from '@/services/encryptionService';
+import { encryptData } from '@/services/encryptionService';
+import {
+  generateRandomCode,
+  validateEmail,
+  validateFiveDigitCode,
+  validatePwd,
+} from '@/utils/helpers';
+import { useLocalSearchParams } from 'expo-router';
 
-type Styles = {
-  accordionContainer: object;
-  accordionTitle: TextStyle;
-};
-
-// Accordion component - show/hide DID - Open by default
-const Accordion = ({
-  styles,
-  title,
-  children,
-  isOpen = false,
-}: {
-  styles: Styles;
-  title: string;
-  children: React.ReactNode;
-  isOpen: boolean;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(isOpen);
-
-  const toggleAccordion = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  return (
-    <View style={[styles.accordionContainer, { backgroundColor: '#444' }]}>
-      <TouchableOpacity onPress={toggleAccordion}>
-        <Text style={styles.accordionTitle}>{title}</Text>
-      </TouchableOpacity>
-      {isExpanded && <View>{children}</View>}
-    </View>
-  );
-};
+import { Accordion } from '@/components/Accordion';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
-  const { didUri, setDidUri, setPortableDid } = useDid();
-  const { showModal } = useModal({
-    onClose: async () => {
-      if (didUri) {
-        await deleteCredentials();
-        await deleteDatabase();
-        setDidUri('');
-      } else {
-        //TODO esto es provisorio mientras no se implementa el retrieve DID
-        undefined;
-      }
-    },
-  });
+  const {
+    didUri,
+    setDidUri,
+    setPortableDid,
+    portableDid,
+    isBackupDeclined,
+    setIsBackupDeclined,
+    setPwdForEncryption,
+    pwdForEncryption,
+  } = useDid();
+  const { startBackup } = useLocalSearchParams();
+
+  const { showModal, showFormModal, hideModal } = useModal();
   const { createDid, isPending } = useDidMutation();
+  const [backupCompleted, setBackupCompleted] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [vCodeAttempts, setVCodeAttempts] = useState(0);
 
   const styles = stylesFnc({
     container: {
@@ -90,21 +76,70 @@ export default function HomeScreen() {
     },
   });
 
+  const setBackupStatusAsync = async (completed: string) => {
+    try {
+      await AsyncStorage.setItem('backupStatus', completed);
+    } catch (error) {
+      console.error('Error saving backup status:', error);
+      setSnackbarMessage('Error saving backup status');
+      setSnackbarVisible(true);
+    }
+  };
+
+  const getBackupStatus = async () => {
+    try {
+      const backupStatus = await AsyncStorage.getItem('backupStatus');
+      return backupStatus || '';
+    } catch (error) {
+      console.error('Error retrieving backup status:', error);
+      setSnackbarMessage('Error retrieving backup status');
+      setSnackbarVisible(true);
+      return '';
+    }
+  };
+
+  const handleBackupStatusUpdate = async (completed: boolean) => {
+    if (completed) {
+      await setBackupStatusAsync('completed');
+    } else {
+      await setBackupStatusAsync('');
+    }
+    setBackupCompleted(completed);
+  };
+
+  const deleteDid = async () => {
+    await deleteCredentials();
+    await deleteDatabase();
+    setDidUri('');
+    setIsBackupDeclined(false);
+    setPortableDid('');
+    setPwdForEncryption('');
+    setVerificationCode('');
+    handleBackupStatusUpdate(false);
+    hideModal();
+  };
+
+  const handleDeleteDid = async () => {
+    showModal(
+      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',
+      undefined,
+      undefined,
+      undefined,
+      deleteDid,
+    );
+  };
+
+  const handleRetrieveDid = async () => {
+    showModal('Recuperar DID', 'Recuperar DID', 'Ok', undefined, () => {
+      console.log('Modal closed. Just for testing the retrieve modal button.');
+    });
+  };
+
   const handleCreateDid = async () => {
     await createDid(undefined, {
       onSuccess: async data => {
         setDidUri(data.uri);
         setPortableDid(JSON.stringify(data));
-
-        //TODO lo dejo con pwd hardcodeada y con logs y alerts para debug
-        const result = await encryptData(JSON.stringify(data), 'rulita');
-        console.log(result);
-        Alert.alert(`se encripto`);
-
-        const resultDecrypt = await decryptData(result!, 'rulita');
-        console.log(resultDecrypt);
-        Alert.alert(`se desencripto`);
-
         await initDatabase();
       },
       onError: error => {
@@ -118,15 +153,146 @@ export default function HomeScreen() {
     });
   };
 
-  const handleDeleteDid = async () => {
-    showModal(
-      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',
+  const handleDidBackup = async (input1: string, input2?: string) => {
+    console.log('Email:', input1);
+    console.log('Password:', input2);
+
+    setPwdForEncryption(input2!);
+    const encryptedPortableDid = await encryptData(portableDid!, input2!, t);
+    const verificationCode = generateRandomCode();
+    //TODO aca se integraria con el endpoint del mail
+    //a la vuelta del endpoint se setea el codgo para compararlo
+    hideModal();
+    console.log(verificationCode);
+    setVerificationCode(verificationCode);
+  };
+
+  const showInvalidCodeAlert = () => {
+    Alert.alert(
+      'Invalid verification code',
+      'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+      [
+        {
+          text: 'Understood',
+          onPress: () => {
+            hideModal();
+            setVCodeAttempts(0);
+            setVerificationCode('');
+            setPwdForEncryption('');
+          },
+        },
+      ],
+      { cancelable: false },
     );
   };
 
-  const handleRetrieveDid = async () => {
-    showModal('Recuperar DID', 'Recuperar DID', 'Ok');
+  const verifyCode = async (input1: string) => {
+    const validCode = input1 === verificationCode;
+    if (validCode) {
+      setSnackbarMessage('Your DID has been successfully backed up');
+      setSnackbarVisible(true);
+      handleBackupStatusUpdate(true);
+      hideModal();
+    } else {
+      setSnackbarMessage('Incorrect code, please try again');
+      setSnackbarVisible(true);
+      setVCodeAttempts(prevAttempts => prevAttempts + 1);
+    }
   };
+
+  const declineDidBackup = (): void => {
+    Alert.alert(
+      'Your DID won’t be backed up.',
+      'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
+      [
+        {
+          text: 'Understood',
+          onPress: () => {
+            setIsBackupDeclined(true);
+            setVCodeAttempts(0);
+            setVerificationCode('');
+            setPwdForEncryption('');
+            hideModal();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const promptDidBackup = () => {
+    showModal(
+      t('Do you want to backup your DID?'),
+      t(''),
+      t('Yes'),
+      t('No'),
+      () => {
+        showFormModal(
+          t('DID Backup'),
+          t(
+            "Please enter the email address where you'd like to receive your backup, along with a password for encryption.",
+          ),
+          t('Backup'),
+          t('Cancel'),
+          handleDidBackup,
+          validateEmail,
+          validatePwd,
+          declineDidBackup,
+          t('Invalid email'),
+          undefined,
+          t('Email'),
+          t('Password'),
+        );
+      },
+      declineDidBackup,
+    );
+  };
+
+  useEffect(() => {
+    if (startBackup) {
+      promptDidBackup();
+    }
+  }, [startBackup]);
+
+  useEffect(() => {
+    const fetchBackupStatus = async () => {
+      const backupCompleted = await getBackupStatus();
+      if (backupCompleted) setBackupCompleted(true);
+    };
+
+    fetchBackupStatus();
+  }, []);
+
+  useEffect(() => {
+    if (vCodeAttempts >= 3) {
+      showInvalidCodeAlert();
+    }
+  }, [vCodeAttempts]);
+
+  useEffect(() => {
+    if (verificationCode && !backupCompleted) {
+      showFormModal(
+        t('Backup code'),
+        'Enter the code you have just received by email.',
+        t('Verify'),
+        t('Cancel'),
+        verifyCode,
+        validateFiveDigitCode,
+        () => true,
+        declineDidBackup,
+        'The code must be five digits.',
+        undefined,
+        'Code',
+        '',
+      );
+    }
+  }, [verificationCode]);
+
+  useEffect(() => {
+    if (portableDid && !verificationCode && !isBackupDeclined) {
+      promptDidBackup();
+    }
+  }, [portableDid]);
 
   const copyToClipboard = async () => {
     if (!didUri) return;
@@ -187,7 +353,26 @@ export default function HomeScreen() {
           </Button>
         </>
       )}
+      {!isPending && didUri && isBackupDeclined && (
+        <>
+          <Button
+            labelStyle={styles.buttonLabel}
+            style={styles.buttonDelete}
+            mode="contained"
+            onPress={promptDidBackup}
+          >
+            {t('Backup your DID.')}
+          </Button>
+        </>
+      )}
       {isPending && <ActivityIndicator size="large" />}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }
