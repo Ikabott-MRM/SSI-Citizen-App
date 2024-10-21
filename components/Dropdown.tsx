@@ -55,7 +55,7 @@ const stylesFnc = (colors: {
       flex: 1,
     },
     content: {
-      marginBottom:40
+      marginBottom: 40,
     },
     label: {
       color: colors.typography.secondary,
@@ -91,7 +91,7 @@ const dropdownStylesFnc = (colors: {
       paddingHorizontal: 10,
       color: colors.typography.secondary,
       backgroundColor: colors.background.secondary,
-      paddingRight: 30, 
+      paddingRight: 30,
     },
     inputAndroid: {
       fontSize: 16,
@@ -99,7 +99,7 @@ const dropdownStylesFnc = (colors: {
       paddingVertical: 8,
       color: colors.typography.secondary,
       backgroundColor: colors.background.secondary,
-      paddingRight: 30, 
+      paddingRight: 30,
     },
     iconContainer: {
       top: 15,
