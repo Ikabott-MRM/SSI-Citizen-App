@@ -38,7 +38,6 @@ import { useMailMutation } from '@/hooks/mutations/useMailMutation';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const theme = useTheme<CustomTheme>();
   const {
     didUri,
     setDidUri,
@@ -49,6 +48,7 @@ export default function HomeScreen() {
     setPwdForEncryption,
     pwdForEncryption,
   } = useDid();
+  const theme = useTheme<CustomTheme>();
   const { startBackup } = useLocalSearchParams();
 
   const { showModal, showFormModal, hideModal, setLoading } = useModal();
@@ -333,13 +333,13 @@ export default function HomeScreen() {
         '',
       );
     }
-  }, [verificationCode]);
+  }, [verificationCode,backupCompleted]);
 
   useEffect(() => {
     if (portableDid && !verificationCode && !isBackupDeclined) {
       promptDidBackup();
     }
-  }, [portableDid]);
+  }, [portableDid, verificationCode, isBackupDeclined]);
 
   const copyToClipboard = async () => {
     if (!didUri) return;
