@@ -1,6 +1,6 @@
 import crypto from 'react-native-quick-crypto';
-import { Alert } from 'react-native';
 import { Buffer } from '@craftzdog/react-native-buffer';
+import Toast from 'react-native-root-toast';
 
 const generateSalt = () => {
   return crypto.randomBytes(16);
@@ -16,7 +16,6 @@ const deriveKeyGivenPasswordAndSalt = (password: string, salt: Buffer) => {
 export const encryptData = async (
   data: string,
   password: string,
-  t: (key: string) => string,
 ) => {
   try {
     const salt = generateSalt();
@@ -40,12 +39,10 @@ export const encryptData = async (
 
     return fileContent;
   } catch (error) {
-    Alert.alert(
-      'Error',
-      t(
-        'An error occurred while encrypting the portableDid during the DID creation process.',
-      ),
-    );
+    Toast.show('Encryption failed. Please try again.', {
+      duration: Toast.durations.LONG,
+      position: Toast.positions.BOTTOM,
+    });
     console.error('Encryption Error:', error);
   }
 };
@@ -53,7 +50,6 @@ export const encryptData = async (
 export const decryptData = async (
   fileContent: { iv: string; encryptedData: string; salt: string },
   password: string,
-  t: (key: string) => string,
 ) => {
   try {
     const salt = Buffer.from(fileContent.salt, 'hex');
@@ -72,12 +68,10 @@ export const decryptData = async (
 
     return decrypted;
   } catch (error) {
-    Alert.alert(
-      'Error',
-      t(
-        'An error occurred while decrypting the portableDid during the DID retrieval process.',
-      ),
-    );
+    Toast.show('Decryption failed. Please try again.', {
+      duration: Toast.durations.LONG,
+      position: Toast.positions.BOTTOM,
+    });
     console.error('Decryption Error:', error);
   }
 };

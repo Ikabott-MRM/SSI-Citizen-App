@@ -158,7 +158,7 @@ export default function HomeScreen() {
   const handleDidBackup = async (input1: string, input2?: string) => {
     setPwdForEncryption(input2!);
     setLoading(true);
-    const encryptedPortableDid = await encryptData(portableDid!, input2!, t);
+    const encryptedPortableDid = await encryptData(portableDid!, input2!);
     const verificationCode = generateRandomCode();
 
     if (!encryptedPortableDid) {
