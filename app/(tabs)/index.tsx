@@ -38,7 +38,6 @@ import { useMailMutation } from '@/hooks/mutations/useMailMutation';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const theme = useTheme<CustomTheme>();
   const {
     didUri,
     setDidUri,
@@ -49,6 +48,7 @@ export default function HomeScreen() {
     setPwdForEncryption,
     pwdForEncryption,
   } = useDid();
+  const theme = useTheme<CustomTheme>();
   const { startBackup } = useLocalSearchParams();
 
   const { showModal, showFormModal, hideModal, setLoading } = useModal();
@@ -158,7 +158,7 @@ export default function HomeScreen() {
   const handleDidBackup = async (input1: string, input2?: string) => {
     setPwdForEncryption(input2!);
     setLoading(true);
-    const encryptedPortableDid = await encryptData(portableDid!, input2!, t);
+    const encryptedPortableDid = await encryptData(portableDid!, input2!);
     const verificationCode = generateRandomCode();
 
     if (!encryptedPortableDid) {
@@ -186,8 +186,6 @@ export default function HomeScreen() {
             duration: Toast.durations.LONG,
             position: Toast.positions.BOTTOM,
           });
-          setLoading(false);
-          hideModal();
           console.log(verificationCode);
           setVerificationCode(verificationCode);
         },
@@ -318,6 +316,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (verificationCode && !backupCompleted) {
+      setLoading(false);
       showFormModal(
         t('Backup code'),
         'Enter the code you have just received by email.',

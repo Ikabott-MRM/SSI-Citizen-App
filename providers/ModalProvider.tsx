@@ -60,28 +60,7 @@ interface ModalContextType extends ModalState {
   cancelCallbackRef: MutableRefObject<(() => void | Promise<void>) | null>;
 }
 
-const ModalContext = createContext<ModalContextType>({
-  modalVisible: false,
-  loading: false,
-  modalMessage: '',
-  formModalVisible: false,
-  modalTitle: '',
-  confirmButtonText: '',
-  cancelButtonText: '',
-  inputTitle1Text: '',
-  inputTitle2Text: '',
-  errorMsgInput1: '',
-  errorMsgInput2: '',
-  validateInput1: () => true,
-  validateInput2: () => true,
-  showModal: () => {},
-  showFormModal: () => {},
-  hideModal: () => {},
-  setLoading: () => {},
-  callbackRef: useRef(null),
-  formCallbackRef: useRef(null),
-  cancelCallbackRef: useRef(null),
-});
+const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 interface ModalProviderProps {
   children: ReactNode;
@@ -233,5 +212,8 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
 
 export const useModal = () => {
   const context = useContext(ModalContext);
+  if (!context) {
+    throw new Error("useModal must be used within a ModalProvider");
+  }
   return context;
 };

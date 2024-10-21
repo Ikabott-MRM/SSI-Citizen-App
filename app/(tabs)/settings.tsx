@@ -12,9 +12,9 @@ import { version } from '../../package.json';
 
 export default function Settings() {
   const { i18n, t } = useTranslation();
+  const { isBackupDeclined, didUri } = useDid();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
-  const { isBackupDeclined, didUri } = useDid();
   const router = useRouter();
 
   const handleSelectLanguage = async (lng: Language) => {
