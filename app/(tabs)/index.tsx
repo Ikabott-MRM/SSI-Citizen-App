@@ -34,6 +34,7 @@ import { useLocalSearchParams } from 'expo-router';
 
 import { Accordion } from '@/components/Accordion';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMailMutation } from '@/hooks/mutations/useMailMutation';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -50,13 +51,14 @@ export default function HomeScreen() {
   } = useDid();
   const { startBackup } = useLocalSearchParams();
 
-  const { showModal, showFormModal, hideModal } = useModal();
+  const { showModal, showFormModal, hideModal, setLoading } = useModal();
   const { createDid, isPending } = useDidMutation();
   const [backupCompleted, setBackupCompleted] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [vCodeAttempts, setVCodeAttempts] = useState(0);
+  const { sendMail } = useMailMutation();
 
   const styles = stylesFnc({
     container: {
@@ -154,17 +156,62 @@ export default function HomeScreen() {
   };
 
   const handleDidBackup = async (input1: string, input2?: string) => {
-    console.log('Email:', input1);
-    console.log('Password:', input2);
-
     setPwdForEncryption(input2!);
+    setLoading(true);
     const encryptedPortableDid = await encryptData(portableDid!, input2!, t);
     const verificationCode = generateRandomCode();
-    //TODO aca se integraria con el endpoint del mail
-    //a la vuelta del endpoint se setea el codgo para compararlo
-    hideModal();
-    console.log(verificationCode);
-    setVerificationCode(verificationCode);
+
+    if (!encryptedPortableDid) {
+      Toast.show('Encryption failed. Please try again.', {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+      return;
+    }
+
+    const backUpEmailInfo = {
+      to: input1,
+      jsonContent: {
+        salt: encryptedPortableDid?.salt!,
+        iv: encryptedPortableDid?.iv!,
+        encryptedData: encryptedPortableDid?.encryptedData!,
+      },
+      verificationCode,
+    };
+    sendMail(
+      { backUpEmailInfo },
+      {
+        onSuccess: () => {
+          Toast.show(t('Back up mail successfully sent. Check your inbox'), {
+            duration: Toast.durations.LONG,
+            position: Toast.positions.BOTTOM,
+          });
+          setLoading(false);
+          hideModal();
+          console.log(verificationCode);
+          setVerificationCode(verificationCode);
+        },
+        onError: (error: string | Error) => {
+          Alert.alert(
+            'Error sending back up mail',
+            'An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.',
+            [
+              {
+                text: 'Ok',
+              },
+            ],
+            { cancelable: false },
+          );
+          setLoading(false);
+          if (typeof error === 'string') {
+            Toast.show(error, {
+              duration: Toast.durations.LONG,
+              position: Toast.positions.BOTTOM,
+            });
+          }
+        },
+      },
+    );
   };
 
   const showInvalidCodeAlert = () => {

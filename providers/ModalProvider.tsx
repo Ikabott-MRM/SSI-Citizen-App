@@ -9,6 +9,7 @@ import React, {
 
 interface ModalState {
   modalVisible: boolean;
+  loading: boolean;
   modalMessage: string;
   formModalVisible: boolean;
   modalTitle: string;
@@ -51,7 +52,7 @@ interface ModalContextType extends ModalState {
     inputTitle2Text?: string,
   ) => void;
   hideModal: () => void;
-  // setCallback: (callback: () => void) => void;
+  setLoading: (value: boolean) => void;
   callbackRef: MutableRefObject<(() => void | Promise<void>) | null>;
   formCallbackRef: MutableRefObject<
     ((input1: string, input2?: string) => Promise<void>) | null
@@ -61,6 +62,7 @@ interface ModalContextType extends ModalState {
 
 const ModalContext = createContext<ModalContextType>({
   modalVisible: false,
+  loading: false,
   modalMessage: '',
   formModalVisible: false,
   modalTitle: '',
@@ -75,7 +77,7 @@ const ModalContext = createContext<ModalContextType>({
   showModal: () => {},
   showFormModal: () => {},
   hideModal: () => {},
-  // setCallback: () => {},
+  setLoading: () => {},
   callbackRef: useRef(null),
   formCallbackRef: useRef(null),
   cancelCallbackRef: useRef(null),
@@ -88,6 +90,7 @@ interface ModalProviderProps {
 export const ModalProvider = ({ children }: ModalProviderProps) => {
   const initialState: ModalState = {
     modalVisible: false,
+    loading: false,
     modalMessage: '',
     formModalVisible: false,
     modalTitle: '',
@@ -121,6 +124,14 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
       inputTitle2Text: '',
       errorMsgInput1: '',
       errorMsgInput2: '',
+      loading: false,
+    }));
+  };
+
+  const setLoading = (value: boolean) => {
+    setModalState(prevState => ({
+      ...prevState,
+      loading: value,
     }));
   };
 
@@ -201,9 +212,6 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
       formModalVisible: false,
     }));
   };
-  // const setCallback = (callback: () => void | Promise<void>) => {
-  //   callbackRef.current = callback;
-  // };
 
   return (
     <ModalContext.Provider
@@ -212,7 +220,7 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
         showModal,
         showFormModal,
         hideModal,
-        // setCallback,
+        setLoading,
         callbackRef,
         formCallbackRef,
         cancelCallbackRef,

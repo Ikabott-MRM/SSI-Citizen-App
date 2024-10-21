@@ -41,8 +41,12 @@ export default function Settings() {
           ]}
         />
         {didUri && isBackupDeclined && (
-        <View style={styles.backupContainer}>
-            <Text style={styles.label}>{t('Your DID is not backed up. Ensure its security by creating a backup now.')}</Text>
+          <View style={styles.backupContainer}>
+            <Text style={styles.label}>
+              {t(
+                'Your DID is not backed up. Ensure its security by creating a backup now.',
+              )}
+            </Text>
             <Button
               labelStyle={styles.buttonLabel}
               style={styles.buttonDelete}
@@ -51,7 +55,7 @@ export default function Settings() {
             >
               {t('Backup your DID.')}
             </Button>
-        </View>
+          </View>
         )}
       </ScrollView>
       <View style={styles.aboutContainer}>
@@ -64,7 +68,7 @@ export default function Settings() {
 }
 
 const stylesFnc = (colors: {
-  background: { primary: string, secondary: string };
+  background: { primary: string; secondary: string };
   typography: { secondary: string };
 }) =>
   StyleSheet.create({
@@ -99,7 +103,7 @@ const stylesFnc = (colors: {
       backgroundColor: colors.background.secondary,
     },
     aboutContainer: {
-      justifyContent: 'flex-end', 
+      justifyContent: 'flex-end',
       alignItems: 'center',
       backgroundColor: colors.background.secondary,
       padding: 10,
