@@ -186,8 +186,6 @@ export default function HomeScreen() {
             duration: Toast.durations.LONG,
             position: Toast.positions.BOTTOM,
           });
-          setLoading(false);
-          hideModal();
           console.log(verificationCode);
           setVerificationCode(verificationCode);
         },
@@ -318,6 +316,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (verificationCode && !backupCompleted) {
+      setLoading(false);
       showFormModal(
         t('Backup code'),
         'Enter the code you have just received by email.',
@@ -333,13 +332,13 @@ export default function HomeScreen() {
         '',
       );
     }
-  }, [verificationCode,backupCompleted]);
+  }, [verificationCode]);
 
   useEffect(() => {
     if (portableDid && !verificationCode && !isBackupDeclined) {
       promptDidBackup();
     }
-  }, [portableDid, verificationCode, isBackupDeclined]);
+  }, [portableDid]);
 
   const copyToClipboard = async () => {
     if (!didUri) return;
