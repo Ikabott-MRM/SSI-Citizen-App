@@ -35,6 +35,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Accordion } from '@/components/Accordion';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMailMutation } from '@/hooks/mutations/useMailMutation';
+// import * as DocumentPicker from 'expo-document-picker';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ export default function HomeScreen() {
     portableDid,
     isBackupDeclined,
     setIsBackupDeclined,
-    setPwdForEncryption,
+    // setPwdForEncryption,
     pwdForEncryption,
   } = useDid();
   const theme = useTheme<CustomTheme>();
@@ -59,6 +60,7 @@ export default function HomeScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [vCodeAttempts, setVCodeAttempts] = useState(0);
   const { sendMail } = useMailMutation();
+  // const [selectedDocument, setSelectedDocument] = useState<DocumentPicker.DocumentPickerAsset[]>([]);        
 
   const styles = stylesFnc({
     container: {
@@ -77,6 +79,23 @@ export default function HomeScreen() {
       color: theme.customColors.typography.secondary,
     },
   });
+
+  // const pickDocument = async () => {
+  //   try {
+  //     const result = await DocumentPicker.getDocumentAsync({
+  //       type:'application/json'
+  //     });
+  //     if (!result.canceled) {
+  //       const successResult = result as DocumentPicker.DocumentPickerSuccessResult;
+  //       setSelectedDocument(successResult.assets);
+  //     } else {
+  //       Toast.show("Document selection cancelled.");
+  //     }
+  //   } catch (error) {
+  //     Toast.show("Error picking documents.");
+  //     console.error("Error picking documents:", error);
+  //   }
+  // };  
 
   const setBackupStatusAsync = async (completed: string) => {
     try {
@@ -115,7 +134,7 @@ export default function HomeScreen() {
     setDidUri('');
     setIsBackupDeclined(false);
     setPortableDid('');
-    setPwdForEncryption('');
+    // setPwdForEncryption('');
     setVerificationCode('');
     handleBackupStatusUpdate(false);
     hideModal();
@@ -132,6 +151,13 @@ export default function HomeScreen() {
   };
 
   const handleRetrieveDid = async () => {
+    //TODO primero comparo la password ingresada
+    //no tiene sentido comparar la password pq si se corre en otro cel no habria una o si instalo
+    //yo en el cel de mi hna no me dejaria recuperar por error de password pq estaria guardada la de ella
+
+    //Tengo que mostrar un modal con un field para form y tambien un boton para password y que al confirmar
+    //se triggeree el decrypt y con el decrypt el setear el portableDid y didUri 
+    //ver de donde agarro el did uri
     showModal('Recuperar DID', 'Recuperar DID', 'Ok', undefined, () => {
       console.log('Modal closed. Just for testing the retrieve modal button.');
     });
@@ -156,7 +182,7 @@ export default function HomeScreen() {
   };
 
   const handleDidBackup = async (input1: string, input2?: string) => {
-    setPwdForEncryption(input2!);
+    // setPwdForEncryption(input2!);
     setLoading(true);
     const encryptedPortableDid = await encryptData(portableDid!, input2!);
     const verificationCode = generateRandomCode();
@@ -223,7 +249,7 @@ export default function HomeScreen() {
             hideModal();
             setVCodeAttempts(0);
             setVerificationCode('');
-            setPwdForEncryption('');
+            // setPwdForEncryption('');
           },
         },
       ],
@@ -256,7 +282,7 @@ export default function HomeScreen() {
             setIsBackupDeclined(true);
             setVCodeAttempts(0);
             setVerificationCode('');
-            setPwdForEncryption('');
+            // setPwdForEncryption('');
             hideModal();
           },
         },
