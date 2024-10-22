@@ -46,15 +46,14 @@ export default function HomeScreen() {
     portableDid,
     isBackupDeclined,
     setIsBackupDeclined,
-    // setPwdForEncryption,
-    pwdForEncryption,
+    isBackupCompleted,
+    setBackupCompleted,
   } = useDid();
   const theme = useTheme<CustomTheme>();
   const { startBackup } = useLocalSearchParams();
 
   const { showModal, showFormModal, hideModal, setLoading } = useModal();
   const { createDid, isPending } = useDidMutation();
-  const [backupCompleted, setBackupCompleted] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -97,46 +96,14 @@ export default function HomeScreen() {
   //   }
   // };  
 
-  const setBackupStatusAsync = async (completed: string) => {
-    try {
-      await AsyncStorage.setItem('backupStatus', completed);
-    } catch (error) {
-      console.error('Error saving backup status:', error);
-      setSnackbarMessage('Error saving backup status');
-      setSnackbarVisible(true);
-    }
-  };
-
-  const getBackupStatus = async () => {
-    try {
-      const backupStatus = await AsyncStorage.getItem('backupStatus');
-      return backupStatus || '';
-    } catch (error) {
-      console.error('Error retrieving backup status:', error);
-      setSnackbarMessage('Error retrieving backup status');
-      setSnackbarVisible(true);
-      return '';
-    }
-  };
-
-  const handleBackupStatusUpdate = async (completed: boolean) => {
-    if (completed) {
-      await setBackupStatusAsync('completed');
-    } else {
-      await setBackupStatusAsync('');
-    }
-    setBackupCompleted(completed);
-  };
-
   const deleteDid = async () => {
     await deleteCredentials();
     await deleteDatabase();
     setDidUri('');
     setIsBackupDeclined(false);
     setPortableDid('');
-    // setPwdForEncryption('');
     setVerificationCode('');
-    handleBackupStatusUpdate(false);
+    setBackupCompleted('');
     hideModal();
   };
 
@@ -182,7 +149,6 @@ export default function HomeScreen() {
   };
 
   const handleDidBackup = async (input1: string, input2?: string) => {
-    // setPwdForEncryption(input2!);
     setLoading(true);
     const encryptedPortableDid = await encryptData(portableDid!, input2!);
     const verificationCode = generateRandomCode();
@@ -249,7 +215,6 @@ export default function HomeScreen() {
             hideModal();
             setVCodeAttempts(0);
             setVerificationCode('');
-            // setPwdForEncryption('');
           },
         },
       ],
@@ -262,7 +227,7 @@ export default function HomeScreen() {
     if (validCode) {
       setSnackbarMessage('Your DID has been successfully backed up');
       setSnackbarVisible(true);
-      handleBackupStatusUpdate(true);
+      setBackupCompleted('completed');
       hideModal();
     } else {
       setSnackbarMessage('Incorrect code, please try again');
@@ -282,7 +247,6 @@ export default function HomeScreen() {
             setIsBackupDeclined(true);
             setVCodeAttempts(0);
             setVerificationCode('');
-            // setPwdForEncryption('');
             hideModal();
           },
         },
@@ -326,22 +290,13 @@ export default function HomeScreen() {
   }, [startBackup]);
 
   useEffect(() => {
-    const fetchBackupStatus = async () => {
-      const backupCompleted = await getBackupStatus();
-      if (backupCompleted) setBackupCompleted(true);
-    };
-
-    fetchBackupStatus();
-  }, []);
-
-  useEffect(() => {
     if (vCodeAttempts >= 3) {
       showInvalidCodeAlert();
     }
   }, [vCodeAttempts]);
 
   useEffect(() => {
-    if (verificationCode && !backupCompleted) {
+    if (verificationCode && !isBackupCompleted) {
       setLoading(false);
       showFormModal(
         t('Backup code'),
@@ -425,7 +380,7 @@ export default function HomeScreen() {
           </Button>
         </>
       )}
-      {!isPending && didUri && isBackupDeclined && (
+      {!isPending && didUri && isBackupDeclined && !isBackupCompleted && (
         <>
           <Button
             labelStyle={styles.buttonLabel}
