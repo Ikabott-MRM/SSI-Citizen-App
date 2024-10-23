@@ -382,7 +382,12 @@ export default function HomeScreen() {
   }, [verificationCode]);
 
   useEffect(() => {
-    if (portableDid && !verificationCode && !isBackupDeclined && !isBackupCompleted) {
+    if (
+      portableDid &&
+      !verificationCode &&
+      !isBackupDeclined &&
+      !isBackupCompleted
+    ) {
       promptDidBackup();
     }
   }, [portableDid]);
