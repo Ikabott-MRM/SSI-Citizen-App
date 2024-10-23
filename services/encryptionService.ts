@@ -13,10 +13,7 @@ const deriveKeyGivenPasswordAndSalt = (password: string, salt: Buffer) => {
 };
 
 //encrypt data using AES-256-CBC
-export const encryptData = async (
-  data: string,
-  password: string,
-) => {
+export const encryptData = async (data: string, password: string) => {
   try {
     const salt = generateSalt();
     const encryptionKey = deriveKeyGivenPasswordAndSalt(password, salt);
@@ -56,7 +53,6 @@ export const decryptData = async (
     const iv = Buffer.from(fileContent.iv, 'hex');
 
     const encryptionKey = deriveKeyGivenPasswordAndSalt(password, salt);
-
     const decipher = crypto.createDecipheriv('aes-256-cbc', encryptionKey, iv);
 
     let decrypted = decipher.update(

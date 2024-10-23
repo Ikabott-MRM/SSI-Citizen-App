@@ -23,9 +23,10 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
-import { encryptData } from '@/services/encryptionService';
+import { decryptData, encryptData } from '@/services/encryptionService';
 import {
   generateRandomCode,
+  isDecryptionSuccessful,
   validateEmail,
   validateFiveDigitCode,
   validatePwd,
@@ -33,8 +34,9 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 
 import { Accordion } from '@/components/Accordion';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMailMutation } from '@/hooks/mutations/useMailMutation';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -45,20 +47,21 @@ export default function HomeScreen() {
     portableDid,
     isBackupDeclined,
     setIsBackupDeclined,
-    setPwdForEncryption,
-    pwdForEncryption,
+    isBackupCompleted,
+    setBackupCompleted,
   } = useDid();
   const theme = useTheme<CustomTheme>();
   const { startBackup } = useLocalSearchParams();
 
   const { showModal, showFormModal, hideModal, setLoading } = useModal();
   const { createDid, isPending } = useDidMutation();
-  const [backupCompleted, setBackupCompleted] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [vCodeAttempts, setVCodeAttempts] = useState(0);
   const { sendMail } = useMailMutation();
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentPicker.DocumentPickerAsset>();
 
   const styles = stylesFnc({
     container: {
@@ -78,35 +81,28 @@ export default function HomeScreen() {
     },
   });
 
-  const setBackupStatusAsync = async (completed: string) => {
+  const pickDocument = async () => {
     try {
-      await AsyncStorage.setItem('backupStatus', completed);
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+      });
+      if (!result.canceled) {
+        const successResult =
+          result as DocumentPicker.DocumentPickerSuccessResult;
+        setSelectedDocument(successResult.assets[0]);
+      } else {
+        Toast.show(t('Document selection cancelled.'), {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
+      }
     } catch (error) {
-      console.error('Error saving backup status:', error);
-      setSnackbarMessage('Error saving backup status');
-      setSnackbarVisible(true);
+      Toast.show(t('Error picking document.'), {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+      console.error('Error picking document:', error);
     }
-  };
-
-  const getBackupStatus = async () => {
-    try {
-      const backupStatus = await AsyncStorage.getItem('backupStatus');
-      return backupStatus || '';
-    } catch (error) {
-      console.error('Error retrieving backup status:', error);
-      setSnackbarMessage('Error retrieving backup status');
-      setSnackbarVisible(true);
-      return '';
-    }
-  };
-
-  const handleBackupStatusUpdate = async (completed: boolean) => {
-    if (completed) {
-      await setBackupStatusAsync('completed');
-    } else {
-      await setBackupStatusAsync('');
-    }
-    setBackupCompleted(completed);
   };
 
   const deleteDid = async () => {
@@ -115,9 +111,8 @@ export default function HomeScreen() {
     setDidUri('');
     setIsBackupDeclined(false);
     setPortableDid('');
-    setPwdForEncryption('');
     setVerificationCode('');
-    handleBackupStatusUpdate(false);
+    setBackupCompleted('');
     hideModal();
   };
 
@@ -131,10 +126,44 @@ export default function HomeScreen() {
     );
   };
 
-  const handleRetrieveDid = async () => {
-    showModal('Recuperar DID', 'Recuperar DID', 'Ok', undefined, () => {
-      console.log('Modal closed. Just for testing the retrieve modal button.');
-    });
+  const handleRetrieveDid = async (_input1: string, input2?: string) => {
+    try {
+      setLoading(true);
+      const fileAsString = await FileSystem.readAsStringAsync(
+        selectedDocument?.uri!,
+      );
+      const fileAsJson = JSON.parse(fileAsString);
+      const decryptedData = await decryptData(fileAsJson, input2!);
+      if (!decryptedData) throw new Error('Error decrypting file.');
+      const validDecryption = isDecryptionSuccessful(decryptedData);
+
+      if (validDecryption) {
+        setPortableDid(decryptedData!);
+        const portableDidAsJson = JSON.parse(decryptedData);
+        setDidUri(portableDidAsJson.uri);
+        Toast.show(t('Your DID has been successfully retrieved.'), {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
+        setBackupCompleted('completed');
+        setLoading(false);
+        hideModal();
+      } else {
+        Toast.show(t('Error decrypting document. Please try again'), {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      Toast.show(t('Error reading document.'), {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+      console.error('Error reading document:', error);
+      setLoading(false);
+      hideModal();
+    }
   };
 
   const handleCreateDid = async () => {
@@ -156,13 +185,12 @@ export default function HomeScreen() {
   };
 
   const handleDidBackup = async (input1: string, input2?: string) => {
-    setPwdForEncryption(input2!);
     setLoading(true);
     const encryptedPortableDid = await encryptData(portableDid!, input2!);
     const verificationCode = generateRandomCode();
 
     if (!encryptedPortableDid) {
-      Toast.show('Encryption failed. Please try again.', {
+      Toast.show(t('Encryption failed. Please try again.'), {
         duration: Toast.durations.LONG,
         position: Toast.positions.BOTTOM,
       });
@@ -186,13 +214,14 @@ export default function HomeScreen() {
             duration: Toast.durations.LONG,
             position: Toast.positions.BOTTOM,
           });
-          console.log(verificationCode);
           setVerificationCode(verificationCode);
         },
         onError: (error: string | Error) => {
           Alert.alert(
-            'Error sending back up mail',
-            'An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.',
+            t('Error sending back up mail'),
+            t(
+              'An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.',
+            ),
             [
               {
                 text: 'Ok',
@@ -214,16 +243,17 @@ export default function HomeScreen() {
 
   const showInvalidCodeAlert = () => {
     Alert.alert(
-      'Invalid verification code',
-      'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+      t('Invalid verification code'),
+      t(
+        'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+      ),
       [
         {
-          text: 'Understood',
+          text: t('Understood'),
           onPress: () => {
             hideModal();
             setVCodeAttempts(0);
             setVerificationCode('');
-            setPwdForEncryption('');
           },
         },
       ],
@@ -234,12 +264,12 @@ export default function HomeScreen() {
   const verifyCode = async (input1: string) => {
     const validCode = input1 === verificationCode;
     if (validCode) {
-      setSnackbarMessage('Your DID has been successfully backed up');
+      setSnackbarMessage(t('Your DID has been successfully backed up'));
       setSnackbarVisible(true);
-      handleBackupStatusUpdate(true);
+      setBackupCompleted('completed');
       hideModal();
     } else {
-      setSnackbarMessage('Incorrect code, please try again');
+      setSnackbarMessage(t('Incorrect code, please try again'));
       setSnackbarVisible(true);
       setVCodeAttempts(prevAttempts => prevAttempts + 1);
     }
@@ -247,16 +277,17 @@ export default function HomeScreen() {
 
   const declineDidBackup = (): void => {
     Alert.alert(
-      'Your DID won’t be backed up.',
-      'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
+      t('Your DID won’t be backed up.'),
+      t(
+        'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
+      ),
       [
         {
-          text: 'Understood',
+          text: t('Understood'),
           onPress: () => {
             setIsBackupDeclined(true);
             setVCodeAttempts(0);
             setVerificationCode('');
-            setPwdForEncryption('');
             hideModal();
           },
         },
@@ -265,6 +296,24 @@ export default function HomeScreen() {
     );
   };
 
+  const cancelRetrieval = (): void => {
+    Alert.alert(
+      t('Your DID won’t be retrieved.'),
+      t(
+        'By pressing `Understood` you are choosing to finish the DID retrieval process. You will remain without DID until you restart the process or create a new one.',
+      ),
+      [
+        {
+          text: t('Understood'),
+          onPress: () => {
+            setSelectedDocument(undefined);
+            hideModal();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
   const promptDidBackup = () => {
     showModal(
       t('Do you want to backup your DID?'),
@@ -300,13 +349,25 @@ export default function HomeScreen() {
   }, [startBackup]);
 
   useEffect(() => {
-    const fetchBackupStatus = async () => {
-      const backupCompleted = await getBackupStatus();
-      if (backupCompleted) setBackupCompleted(true);
-    };
-
-    fetchBackupStatus();
-  }, []);
+    if (selectedDocument) {
+      showFormModal(
+        t('Password for decryption'),
+        t(
+          'Please enter the password you used when you choose to backu up your DID.',
+        ),
+        t('Confirm'),
+        t('Cancel'),
+        handleRetrieveDid,
+        () => true,
+        validatePwd,
+        cancelRetrieval,
+        undefined,
+        t('Invalid password'),
+        undefined,
+        t('Password'),
+      );
+    }
+  }, [selectedDocument]);
 
   useEffect(() => {
     if (vCodeAttempts >= 3) {
@@ -315,27 +376,32 @@ export default function HomeScreen() {
   }, [vCodeAttempts]);
 
   useEffect(() => {
-    if (verificationCode && !backupCompleted) {
+    if (verificationCode && !isBackupCompleted) {
       setLoading(false);
       showFormModal(
         t('Backup code'),
-        'Enter the code you have just received by email.',
+        t('Enter the code you have just received by email.'),
         t('Verify'),
         t('Cancel'),
         verifyCode,
         validateFiveDigitCode,
         () => true,
         declineDidBackup,
-        'The code must be five digits.',
+        t('The code must be five digits.'),
         undefined,
-        'Code',
+        t('Code'),
         '',
       );
     }
   }, [verificationCode]);
 
   useEffect(() => {
-    if (portableDid && !verificationCode && !isBackupDeclined) {
+    if (
+      portableDid &&
+      !verificationCode &&
+      !isBackupDeclined &&
+      !isBackupCompleted
+    ) {
       promptDidBackup();
     }
   }, [portableDid]);
@@ -381,7 +447,7 @@ export default function HomeScreen() {
             labelStyle={styles.buttonLabel}
             style={styles.button}
             mode="contained"
-            onPress={handleRetrieveDid}
+            onPress={pickDocument}
           >
             {t('Have a DID? Retrieve it.')}
           </Button>
@@ -399,7 +465,7 @@ export default function HomeScreen() {
           </Button>
         </>
       )}
-      {!isPending && didUri && isBackupDeclined && (
+      {!isPending && didUri && isBackupDeclined && !isBackupCompleted && (
         <>
           <Button
             labelStyle={styles.buttonLabel}

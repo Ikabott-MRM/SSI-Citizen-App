@@ -7,11 +7,11 @@ type DidContextType = {
   didUri: string | null;
   portableDid: string | null;
   isBackupDeclined: boolean;
-  pwdForEncryption: string | null;
+  isBackupCompleted: string | null;
   setDidUri: (value: string) => void;
   setPortableDid: (value: string) => void;
   setIsBackupDeclined: (value: boolean) => void;
-  setPwdForEncryption: (value: string) => void;
+  setBackupCompleted: (value: string) => void;
 };
 
 const DidContext = createContext<DidContextType | undefined>(undefined);
@@ -28,9 +28,9 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   const [portableDid, setPortableDidState] = useState<string | null>(null);
   const [didUri, setDidUriState] = useState<string | null>(null);
   const [isBackupDeclined, setIsBackupDeclinedState] = useState<boolean>(false);
-  const [pwdForEncryption, setPwdForEncryptionState] = useState<string | null>(
-    null,
-  );
+  const [isBackupCompleted, setIsBackupCompletedState] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const loadDidData = async () => {
@@ -102,16 +102,14 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const setPwdForEncryption = async (value: string) => {
+  const setBackupCompleted = async (value: string) => {
     try {
       if (value) {
-        await Keychain.setGenericPassword('user-pwd', value, {
-          service: 'pwd',
-        });
-        setPwdForEncryptionState(value);
+        await AsyncStorage.setItem('backup-completed', 'completed');
+        setIsBackupCompletedState(value);
       } else {
-        await Keychain.resetGenericPassword({ service: 'pwd' });
-        setPwdForEncryptionState(null);
+        await AsyncStorage.removeItem('backup-completed');
+        setIsBackupCompletedState(null);
       }
     } catch (error) {
       console.error('Error saving user password to Keychain', error);
@@ -127,8 +125,8 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
         setPortableDid,
         isBackupDeclined,
         setIsBackupDeclined,
-        pwdForEncryption,
-        setPwdForEncryption,
+        isBackupCompleted,
+        setBackupCompleted,
       }}
     >
       {children}
