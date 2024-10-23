@@ -91,10 +91,16 @@ export default function HomeScreen() {
           result as DocumentPicker.DocumentPickerSuccessResult;
         setSelectedDocument(successResult.assets[0]);
       } else {
-        Toast.show('Document selection cancelled.');
+        Toast.show(t('Document selection cancelled.'), {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
       }
     } catch (error) {
-      Toast.show('Error picking document.');
+      Toast.show(t('Error picking document.'), {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
       console.error('Error picking document:', error);
     }
   };
@@ -135,7 +141,7 @@ export default function HomeScreen() {
         setPortableDid(decryptedData!);
         const portableDidAsJson = JSON.parse(decryptedData);
         setDidUri(portableDidAsJson.uri);
-        Toast.show('Your DID has been successfully retrieved.', {
+        Toast.show(t('Your DID has been successfully retrieved.'), {
           duration: Toast.durations.LONG,
           position: Toast.positions.BOTTOM,
         });
@@ -143,14 +149,14 @@ export default function HomeScreen() {
         setLoading(false);
         hideModal();
       } else {
-        Toast.show('Error decrypting document. Please try again', {
+        Toast.show(t('Error decrypting document. Please try again'), {
           duration: Toast.durations.LONG,
           position: Toast.positions.BOTTOM,
         });
         setLoading(false);
       }
     } catch (error) {
-      Toast.show('Error reading document.', {
+      Toast.show(t('Error reading document.'), {
         duration: Toast.durations.LONG,
         position: Toast.positions.BOTTOM,
       });
@@ -184,7 +190,7 @@ export default function HomeScreen() {
     const verificationCode = generateRandomCode();
 
     if (!encryptedPortableDid) {
-      Toast.show('Encryption failed. Please try again.', {
+      Toast.show(t('Encryption failed. Please try again.'), {
         duration: Toast.durations.LONG,
         position: Toast.positions.BOTTOM,
       });
@@ -212,8 +218,10 @@ export default function HomeScreen() {
         },
         onError: (error: string | Error) => {
           Alert.alert(
-            'Error sending back up mail',
-            'An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.',
+            t('Error sending back up mail'),
+            t(
+              'An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.',
+            ),
             [
               {
                 text: 'Ok',
@@ -235,11 +243,13 @@ export default function HomeScreen() {
 
   const showInvalidCodeAlert = () => {
     Alert.alert(
-      'Invalid verification code',
-      'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+      t('Invalid verification code'),
+      t(
+        'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+      ),
       [
         {
-          text: 'Understood',
+          text: t('Understood'),
           onPress: () => {
             hideModal();
             setVCodeAttempts(0);
@@ -254,12 +264,12 @@ export default function HomeScreen() {
   const verifyCode = async (input1: string) => {
     const validCode = input1 === verificationCode;
     if (validCode) {
-      setSnackbarMessage('Your DID has been successfully backed up');
+      setSnackbarMessage(t('Your DID has been successfully backed up'));
       setSnackbarVisible(true);
       setBackupCompleted('completed');
       hideModal();
     } else {
-      setSnackbarMessage('Incorrect code, please try again');
+      setSnackbarMessage(t('Incorrect code, please try again'));
       setSnackbarVisible(true);
       setVCodeAttempts(prevAttempts => prevAttempts + 1);
     }
@@ -267,11 +277,13 @@ export default function HomeScreen() {
 
   const declineDidBackup = (): void => {
     Alert.alert(
-      'Your DID won’t be backed up.',
-      'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
+      t('Your DID won’t be backed up.'),
+      t(
+        'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
+      ),
       [
         {
-          text: 'Understood',
+          text: t('Understood'),
           onPress: () => {
             setIsBackupDeclined(true);
             setVCodeAttempts(0);
@@ -286,11 +298,13 @@ export default function HomeScreen() {
 
   const cancelRetrieval = (): void => {
     Alert.alert(
-      'Your DID won’t be retrieved.',
-      'By pressing `Understood` you are choosing to finish the DID retrieval process. You will remain without DID until you restart the process or create a new one.',
+      t('Your DID won’t be retrieved.'),
+      t(
+        'By pressing `Understood` you are choosing to finish the DID retrieval process. You will remain without DID until you restart the process or create a new one.',
+      ),
       [
         {
-          text: 'Understood',
+          text: t('Understood'),
           onPress: () => {
             setSelectedDocument(undefined);
             hideModal();
@@ -366,16 +380,16 @@ export default function HomeScreen() {
       setLoading(false);
       showFormModal(
         t('Backup code'),
-        'Enter the code you have just received by email.',
+        t('Enter the code you have just received by email.'),
         t('Verify'),
         t('Cancel'),
         verifyCode,
         validateFiveDigitCode,
         () => true,
         declineDidBackup,
-        'The code must be five digits.',
+        t('The code must be five digits.'),
         undefined,
-        'Code',
+        t('Code'),
         '',
       );
     }
