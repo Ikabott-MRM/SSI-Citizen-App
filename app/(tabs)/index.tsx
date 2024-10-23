@@ -23,9 +23,10 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
-import { encryptData } from '@/services/encryptionService';
+import { decryptData, encryptData } from '@/services/encryptionService';
 import {
   generateRandomCode,
+  isDecryptionSuccessful,
   validateEmail,
   validateFiveDigitCode,
   validatePwd,
@@ -33,9 +34,9 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 
 import { Accordion } from '@/components/Accordion';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMailMutation } from '@/hooks/mutations/useMailMutation';
-// import * as DocumentPicker from 'expo-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -59,7 +60,8 @@ export default function HomeScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [vCodeAttempts, setVCodeAttempts] = useState(0);
   const { sendMail } = useMailMutation();
-  // const [selectedDocument, setSelectedDocument] = useState<DocumentPicker.DocumentPickerAsset[]>([]);        
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentPicker.DocumentPickerAsset>();
 
   const styles = stylesFnc({
     container: {
@@ -79,22 +81,23 @@ export default function HomeScreen() {
     },
   });
 
-  // const pickDocument = async () => {
-  //   try {
-  //     const result = await DocumentPicker.getDocumentAsync({
-  //       type:'application/json'
-  //     });
-  //     if (!result.canceled) {
-  //       const successResult = result as DocumentPicker.DocumentPickerSuccessResult;
-  //       setSelectedDocument(successResult.assets);
-  //     } else {
-  //       Toast.show("Document selection cancelled.");
-  //     }
-  //   } catch (error) {
-  //     Toast.show("Error picking documents.");
-  //     console.error("Error picking documents:", error);
-  //   }
-  // };  
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+      });
+      if (!result.canceled) {
+        const successResult =
+          result as DocumentPicker.DocumentPickerSuccessResult;
+        setSelectedDocument(successResult.assets[0]);
+      } else {
+        Toast.show('Document selection cancelled.');
+      }
+    } catch (error) {
+      Toast.show('Error picking document.');
+      console.error('Error picking document:', error);
+    }
+  };
 
   const deleteDid = async () => {
     await deleteCredentials();
@@ -117,17 +120,44 @@ export default function HomeScreen() {
     );
   };
 
-  const handleRetrieveDid = async () => {
-    //TODO primero comparo la password ingresada
-    //no tiene sentido comparar la password pq si se corre en otro cel no habria una o si instalo
-    //yo en el cel de mi hna no me dejaria recuperar por error de password pq estaria guardada la de ella
+  const handleRetrieveDid = async (_input1: string, input2?: string) => {
+    try {
+      setLoading(true);
+      const fileAsString = await FileSystem.readAsStringAsync(
+        selectedDocument?.uri!,
+      );
+      const fileAsJson = JSON.parse(fileAsString);
+      const decryptedData = await decryptData(fileAsJson, input2!);
+      if (!decryptedData) throw new Error('Error decrypting file.');
+      const validDecryption = isDecryptionSuccessful(decryptedData);
 
-    //Tengo que mostrar un modal con un field para form y tambien un boton para password y que al confirmar
-    //se triggeree el decrypt y con el decrypt el setear el portableDid y didUri 
-    //ver de donde agarro el did uri
-    showModal('Recuperar DID', 'Recuperar DID', 'Ok', undefined, () => {
-      console.log('Modal closed. Just for testing the retrieve modal button.');
-    });
+      if (validDecryption) {
+        setPortableDid(decryptedData!);
+        const portableDidAsJson = JSON.parse(decryptedData);
+        setDidUri(portableDidAsJson.uri);
+        Toast.show('Your DID has been successfully retrieved.', {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
+        setBackupCompleted('completed');
+        setLoading(false);
+        hideModal();
+      } else {
+        Toast.show('Error decrypting document. Please try again', {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      Toast.show('Error reading document.', {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+      console.error('Error reading document:', error);
+      setLoading(false);
+      hideModal();
+    }
   };
 
   const handleCreateDid = async () => {
@@ -178,7 +208,6 @@ export default function HomeScreen() {
             duration: Toast.durations.LONG,
             position: Toast.positions.BOTTOM,
           });
-          console.log(verificationCode);
           setVerificationCode(verificationCode);
         },
         onError: (error: string | Error) => {
@@ -255,6 +284,22 @@ export default function HomeScreen() {
     );
   };
 
+  const cancelRetrieval = (): void => {
+    Alert.alert(
+      'Your DID won’t be retrieved.',
+      'By pressing `Understood` you are choosing to finish the DID retrieval process. You will remain without DID until you restart the process or create a new one.',
+      [
+        {
+          text: 'Understood',
+          onPress: () => {
+            setSelectedDocument(undefined);
+            hideModal();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
   const promptDidBackup = () => {
     showModal(
       t('Do you want to backup your DID?'),
@@ -290,6 +335,27 @@ export default function HomeScreen() {
   }, [startBackup]);
 
   useEffect(() => {
+    if (selectedDocument) {
+      showFormModal(
+        t('Password for decryption'),
+        t(
+          'Please enter the password you used when you choose to backu up your DID.',
+        ),
+        t('Confirm'),
+        t('Cancel'),
+        handleRetrieveDid,
+        () => true,
+        validatePwd,
+        cancelRetrieval,
+        undefined,
+        t('Invalid password'),
+        undefined,
+        t('Password'),
+      );
+    }
+  }, [selectedDocument]);
+
+  useEffect(() => {
     if (vCodeAttempts >= 3) {
       showInvalidCodeAlert();
     }
@@ -316,7 +382,7 @@ export default function HomeScreen() {
   }, [verificationCode]);
 
   useEffect(() => {
-    if (portableDid && !verificationCode && !isBackupDeclined) {
+    if (portableDid && !verificationCode && !isBackupDeclined && !isBackupCompleted) {
       promptDidBackup();
     }
   }, [portableDid]);
@@ -362,7 +428,7 @@ export default function HomeScreen() {
             labelStyle={styles.buttonLabel}
             style={styles.button}
             mode="contained"
-            onPress={handleRetrieveDid}
+            onPress={pickDocument}
           >
             {t('Have a DID? Retrieve it.')}
           </Button>

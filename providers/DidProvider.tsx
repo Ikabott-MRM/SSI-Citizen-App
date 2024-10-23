@@ -28,9 +28,9 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   const [portableDid, setPortableDidState] = useState<string | null>(null);
   const [didUri, setDidUriState] = useState<string | null>(null);
   const [isBackupDeclined, setIsBackupDeclinedState] = useState<boolean>(false);
-  const [isBackupCompleted, setIsBackupCompletedState] = useState<string | null>(
-    null,
-  );
+  const [isBackupCompleted, setIsBackupCompletedState] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const loadDidData = async () => {

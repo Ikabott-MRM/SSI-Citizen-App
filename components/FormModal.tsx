@@ -81,7 +81,7 @@ const FormModal = () => {
           <ActivityIndicator size="large" style={{ marginBottom: 20 }} />
         ) : (
           <>
-        <Dialog.Title>{modalTitle}</Dialog.Title>
+            <Dialog.Title>{modalTitle}</Dialog.Title>
             <Dialog.Content>
               <Text
                 style={{

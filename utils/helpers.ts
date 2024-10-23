@@ -14,7 +14,19 @@ export const validateFiveDigitCode = (input: string): boolean => {
   };
 
   export const validatePwd = (input: string): boolean => {
-    const passwordRegex = /^(?!\s*$).+/
+    const passwordRegex = /^(?=.*\d)[A-Za-z\d]{8}$/
     return passwordRegex.test(input);
   };
 
+export const isDecryptionSuccessful = (decryptedData: string): boolean => {
+  try {
+    const json = JSON.parse(decryptedData);
+    
+    if (json.uri && json.document && json.privateKeys) {
+      return true;
+    }
+    return false; 
+  } catch (error) {
+    return false;
+  }
+}

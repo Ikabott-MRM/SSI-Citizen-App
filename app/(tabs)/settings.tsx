@@ -12,7 +12,7 @@ import { version } from '../../package.json';
 
 export default function Settings() {
   const { i18n, t } = useTranslation();
-  const { isBackupDeclined, didUri,isBackupCompleted } = useDid();
+  const { isBackupDeclined, didUri, isBackupCompleted } = useDid();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function Settings() {
             { label: 'Español', value: 'es' },
           ]}
         />
-        {didUri && isBackupDeclined && !isBackupCompleted &&(
+        {didUri && isBackupDeclined && !isBackupCompleted && (
           <View style={styles.backupContainer}>
             <Text style={styles.label}>
               {t(
