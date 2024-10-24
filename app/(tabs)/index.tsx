@@ -245,7 +245,7 @@ export default function HomeScreen() {
     Alert.alert(
       t('Invalid verification code'),
       t(
-        'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.',
+        'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want to mark it as completed.',
       ),
       [
         {
