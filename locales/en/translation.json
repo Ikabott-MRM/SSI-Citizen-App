@@ -53,7 +53,7 @@
   "Error sending back up mail":"Error sending back up mail",
   "An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.":"An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.",
   "Invalid verification code":"Invalid verification code",
-  "You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.":"You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want the backup. The email that has been sent to you on the first attempt of backup will no longer be valid.",
+  "You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want to mark it as completed.":"You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want to mark it as completed.",
   "Understood":"Understood",
   "Your DID has been successfully backed up":"Your DID has been successfully backed up",
   "Incorrect code, please try again":"Incorrect code, please try again",
@@ -76,7 +76,4 @@
   "Enter the code you have just received by email.":"Enter the code you have just received by email.",
   "The code must be five digits.":"The code must be five digits.",
   "Code":"Code"
-
-
-
 }
