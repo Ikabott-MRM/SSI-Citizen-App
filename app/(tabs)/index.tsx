@@ -509,7 +509,7 @@ const stylesFnc = (css: {
       width: 'auto',
       alignSelf: 'center',
       marginTop: 20,
-      height: 'auto',
+      height: 50,
       justifyContent: 'center',
       borderRadius: 25,
       color: '#444',
