@@ -1,3 +1,4 @@
+import './i18n';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { useEffect } from 'react';
@@ -17,7 +18,6 @@ import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
 import { DidProvider } from '@/providers/DidProvider';
-import './i18n';
 import { FormModal } from '@/components/FormModal';
 
 export {
