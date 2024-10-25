@@ -14,25 +14,41 @@ const resources = {
   },
 };
 
-const initI18n = async () => {
-  let savedLanguage = await AsyncStorage.getItem(StorageKey.language);
+enum LangCode {
+  en = 'en',
+  es = 'es',
+}
 
-  if (!savedLanguage) {
-    savedLanguage = Language.en;
-  }
+// const initI18n = async () => {
+//   let savedLanguage = await AsyncStorage.getItem(StorageKey.language);
 
-  i18n.use(initReactI18next).init({
-    compatibilityJSON: 'v3',
-    resources,
-    lng: savedLanguage,
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
-    },
-  });
-};
+//   if (!savedLanguage) {
+//     savedLanguage = Language.en;
+//   }
 
-export default (async () => {
-  await initI18n();
-  return i18n;
-})();
+//   i18n.use(initReactI18next).init({
+//     compatibilityJSON: 'v3',
+//     resources,
+//     lng: savedLanguage,
+//     fallbackLng: 'en',
+//     interpolation: {
+//       escapeValue: false,
+//     },
+//   });
+// };
+
+i18n.use(initReactI18next).init({
+  debug: false,
+  resources,
+  lng: LangCode.es,
+  fallbackLng: LangCode.es,
+  compatibilityJSON: 'v3',
+  interpolation: {
+    escapeValue: false,
+  },
+});
+
+// export default (async () => {
+//   await initI18n();
+//   return i18n;
+// })();
