@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native-paper';
 import { useModal } from '@/providers/ModalProvider';
-import { ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 
 const FormModal = () => {
   const {
@@ -33,7 +33,6 @@ const FormModal = () => {
   const [error1, setError1] = useState('');
   const [error2, setError2] = useState('');
 
-
   const handleFormSubmit = () => {
     if (formCallbackRef.current) {
       formCallbackRef.current(input1, input2);
@@ -50,7 +49,8 @@ const FormModal = () => {
       setInput1('');
       setInput2('');
       setError1('');
-      setError2('');    }
+      setError2('');
+    }
   };
 
   const handleInput1Change = (text: string) => {
@@ -85,7 +85,11 @@ const FormModal = () => {
           <ActivityIndicator size="large" style={{ marginBottom: 20 }} />
         ) : (
           <>
-            <ScrollView contentContainerStyle={{ padding: 20 }}>
+              <ScrollView>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding':'height'}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+            >
                 <Dialog.Title>{modalTitle}</Dialog.Title>
                 <Dialog.Content>
                   <Text
@@ -101,13 +105,15 @@ const FormModal = () => {
 
                   {inputTitle1Text && (
                     <>
-                      <Text style={{ marginBottom: 10 }}>{inputTitle1Text}</Text>
+                      <Text style={{ marginBottom: 10 }}>
+                        {inputTitle1Text}
+                      </Text>
                       <TextInput
                         mode="outlined"
                         value={input1}
                         onChangeText={handleInput1Change}
                         placeholder={inputTitle1Text}
-                        style={{ marginBottom: 20, backgroundColor:'white' }}
+                        style={{ marginBottom: 20, backgroundColor: 'white' }}
                       />
                       {error1 ? (
                         <Text style={{ color: 'red', marginBottom: 10 }}>
@@ -119,14 +125,16 @@ const FormModal = () => {
 
                   {inputTitle2Text && (
                     <>
-                      <Text style={{ marginBottom: 10 }}>{inputTitle2Text}</Text>
+                      <Text style={{ marginBottom: 10 }}>
+                        {inputTitle2Text}
+                      </Text>
                       <TextInput
                         mode="outlined"
                         value={input2}
                         onChangeText={handleInput2Change}
                         placeholder={inputTitle2Text}
                         secureTextEntry
-                        style={{ marginBottom: 20, backgroundColor:'white' }}
+                        style={{ marginBottom: 20, backgroundColor: 'white' }}
                       />
                       {error2 ? (
                         <Text style={{ color: 'red', marginBottom: 10 }}>
@@ -147,7 +155,9 @@ const FormModal = () => {
                       borderRadius: 25,
                       backgroundColor: '#CCC',
                     }}
-                    disabled={error1 || error2 || !input1 || !input2 ? true : false}
+                    disabled={
+                      error1 || error2 || !input1 || !input2 ? true : false
+                    }
                     onPress={handleFormSubmit}
                     mode="contained-tonal"
                   >
@@ -170,7 +180,8 @@ const FormModal = () => {
                     {cancelButtonText}
                   </Button>
                 </Dialog.Actions>
-              </ScrollView>
+            </KeyboardAvoidingView>
+            </ScrollView>
           </>
         )}
       </Dialog>

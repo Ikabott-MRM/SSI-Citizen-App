@@ -122,7 +122,7 @@ export default function HomeScreen() {
       undefined,
       undefined,
       undefined,
-      deleteDid
+      deleteDid,
     );
   };
 
@@ -333,7 +333,9 @@ export default function HomeScreen() {
           validatePwd,
           declineDidBackup,
           t('Invalid email'),
-          t('Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.'),
+          t(
+            'Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.',
+          ),
           t('Email'),
           t('Password'),
         );
@@ -362,7 +364,9 @@ export default function HomeScreen() {
         validatePwd,
         cancelRetrieval,
         undefined,
-        t('Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.'),
+        t(
+          'Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.',
+        ),
         undefined,
         t('Password'),
       );
