@@ -49,7 +49,7 @@ const Modal = () => {
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button
+        <Button
             style={{
               margin: 10,
               paddingVertical: 5,
@@ -59,10 +59,11 @@ const Modal = () => {
               borderRadius: 25,
               backgroundColor: '#CCC',
             }}
-            onPress={confirmAction}
-            mode="contained-tonal"
+            labelStyle={{ color: '#444' }}
+            onPress={cancelAction}
+            mode="contained"
           >
-            {confirmButtonText}
+            {cancelButtonText}
           </Button>
           <Button
             style={{
@@ -75,10 +76,10 @@ const Modal = () => {
               backgroundColor: '#00ff85',
             }}
             labelStyle={{ color: '#444' }}
-            onPress={cancelAction}
-            mode="contained"
+            onPress={confirmAction}
+            mode="contained-tonal"
           >
-            {cancelButtonText}
+            {confirmButtonText}
           </Button>
         </Dialog.Actions>
       </Dialog>

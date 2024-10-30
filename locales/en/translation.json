@@ -71,9 +71,10 @@
   "Password":"Password",
   "Password for decryption":"Password for decryption",
   "Please enter the password you used when you choose to backu up your DID.":"Please enter the password you used when you choose to backu up your DID.",
-  "Invalid password":"Invalid password",
+  "Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.":"Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.",
   "Backup code":"Backup code",
   "Enter the code you have just received by email.":"Enter the code you have just received by email.",
   "The code must be five digits.":"The code must be five digits.",
-  "Code":"Code"
+  "Code":"Code",
+  "Your DID is not backed up. Ensure its security by creating a backup now.":"Your DID is not backed up. Ensure its security by creating a backup now."
 }

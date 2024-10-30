@@ -71,9 +71,11 @@
   "Password":"Contraseña",
   "Password for decryption":"Contraseña para desencriptar",
   "Please enter the password you used when you choose to backu up your DID.":"Por favor, introduce la contraseña que usaste cuando decidiste respaldar tu DID.",
-  "Invalid password":"Contraseña inválida",
+  "Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.":"Contraseña inválida.\nLa contraseña debe tener 8 caracteres alfanuméricos y contener al menos un número.",
   "Backup code":"Código de respaldo",
   "Enter the code you have just received by email.":"Introduce el código que acabas de recibir por correo electrónico.",
   "The code must be five digits.":"El código debe tener cinco dígitos.",
-  "Code":"Código"
+  "Code":"Código",
+  "Backup your DID":"Respalda tu DID",
+  "Your DID is not backed up. Ensure its security by creating a backup now.":"Su DID no ha sido respaldado. Para garantizar su seguridad, cree un respaldo ahora."
 }
