@@ -57,8 +57,9 @@ const Modal = () => {
               justifyContent: 'center',
               alignSelf: 'center',
               borderRadius: 25,
-              backgroundColor: '#CCC',
+              backgroundColor: '#00ff85',
             }}
+            labelStyle={{ color: '#444' }}
             onPress={confirmAction}
             mode="contained-tonal"
           >
@@ -72,7 +73,7 @@ const Modal = () => {
               justifyContent: 'center',
               alignSelf: 'center',
               borderRadius: 25,
-              backgroundColor: '#00ff85',
+              backgroundColor: '#CCC',
             }}
             labelStyle={{ color: '#444' }}
             onPress={cancelAction}
