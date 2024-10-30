@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native-paper';
 import { useModal } from '@/providers/ModalProvider';
+import { ScrollView } from 'react-native';
 
 const FormModal = () => {
   const {
@@ -22,20 +23,24 @@ const FormModal = () => {
     validateInput1,
     validateInput2,
     errorMsgInput1,
+    errorMsgInput2,
     cancelCallbackRef,
     loading,
   } = useModal();
 
   const [input1, setInput1] = useState('');
   const [input2, setInput2] = useState('');
-  const [error, setError] = useState('');
+  const [error1, setError1] = useState('');
+  const [error2, setError2] = useState('');
+
 
   const handleFormSubmit = () => {
     if (formCallbackRef.current) {
       formCallbackRef.current(input1, input2);
       setInput1('');
       setInput2('');
-      setError('');
+      setError1('');
+      setError2('');
     }
   };
 
@@ -44,8 +49,8 @@ const FormModal = () => {
       cancelCallbackRef.current();
       setInput1('');
       setInput2('');
-      setError('');
-    }
+      setError1('');
+      setError2('');    }
   };
 
   const handleInput1Change = (text: string) => {
@@ -54,9 +59,9 @@ const FormModal = () => {
     if (validateInput1) {
       // If validation function is passed, use it
       if (!validateInput1(text)) {
-        setError(errorMsgInput1);
+        setError1(errorMsgInput1);
       } else {
-        setError('');
+        setError1('');
       }
     }
   };
@@ -66,9 +71,9 @@ const FormModal = () => {
     if (validateInput2) {
       // If validation function is passed, use it
       if (!validateInput2(text)) {
-        setError(errorMsgInput1);
+        setError2(errorMsgInput2);
       } else {
-        setError('');
+        setError2('');
       }
     }
   };
@@ -80,85 +85,92 @@ const FormModal = () => {
           <ActivityIndicator size="large" style={{ marginBottom: 20 }} />
         ) : (
           <>
-            <Dialog.Title>{modalTitle}</Dialog.Title>
-            <Dialog.Content>
-              <Text
-                style={{
-                  fontSize: 16,
-                  lineHeight: 24,
-                  textAlign: 'center',
-                  marginBottom: 20,
-                }}
-              >
-                {modalMessage}
-              </Text>
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
+                <Dialog.Title>{modalTitle}</Dialog.Title>
+                <Dialog.Content>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      lineHeight: 24,
+                      textAlign: 'center',
+                      marginBottom: 20,
+                    }}
+                  >
+                    {modalMessage}
+                  </Text>
 
-              {inputTitle1Text && (
-                <>
-                  <Text style={{ marginBottom: 10 }}>{inputTitle1Text}</Text>
-                  <TextInput
-                    mode="outlined"
-                    value={input1}
-                    onChangeText={handleInput1Change}
-                    placeholder={inputTitle1Text}
-                    style={{ marginBottom: 20 }}
-                  />
-                  {error ? (
-                    <Text style={{ color: 'red', marginBottom: 10 }}>
-                      {error}
-                    </Text>
-                  ) : null}
-                </>
-              )}
+                  {inputTitle1Text && (
+                    <>
+                      <Text style={{ marginBottom: 10 }}>{inputTitle1Text}</Text>
+                      <TextInput
+                        mode="outlined"
+                        value={input1}
+                        onChangeText={handleInput1Change}
+                        placeholder={inputTitle1Text}
+                        style={{ marginBottom: 20, backgroundColor:'white' }}
+                      />
+                      {error1 ? (
+                        <Text style={{ color: 'red', marginBottom: 10 }}>
+                          {error1}
+                        </Text>
+                      ) : null}
+                    </>
+                  )}
 
-              {inputTitle2Text && (
-                <>
-                  <Text style={{ marginBottom: 10 }}>{inputTitle2Text}</Text>
-                  <TextInput
-                    mode="outlined"
-                    value={input2}
-                    onChangeText={handleInput2Change}
-                    placeholder={inputTitle2Text}
-                    secureTextEntry
-                    style={{ marginBottom: 20 }}
-                  />
-                </>
-              )}
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                style={{
-                  margin: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                  borderRadius: 25,
-                  backgroundColor: '#CCC',
-                }}
-                disabled={error ? true : false}
-                onPress={handleFormSubmit}
-                mode="contained-tonal"
-              >
-                {confirmButtonText}
-              </Button>
-              <Button
-                style={{
-                  margin: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                  borderRadius: 25,
-                  backgroundColor: '#00ff85',
-                }}
-                labelStyle={{ color: '#444' }}
-                onPress={handleFormCancel}
-                mode="contained"
-              >
-                {cancelButtonText}
-              </Button>
-            </Dialog.Actions>
+                  {inputTitle2Text && (
+                    <>
+                      <Text style={{ marginBottom: 10 }}>{inputTitle2Text}</Text>
+                      <TextInput
+                        mode="outlined"
+                        value={input2}
+                        onChangeText={handleInput2Change}
+                        placeholder={inputTitle2Text}
+                        secureTextEntry
+                        style={{ marginBottom: 20, backgroundColor:'white' }}
+                      />
+                      {error2 ? (
+                        <Text style={{ color: 'red', marginBottom: 10 }}>
+                          {error2}
+                        </Text>
+                      ) : null}
+                    </>
+                  )}
+                </Dialog.Content>
+                <Dialog.Actions>
+                  <Button
+                    style={{
+                      margin: 10,
+                      paddingVertical: 5,
+                      paddingHorizontal: 10,
+                      justifyContent: 'center',
+                      alignSelf: 'center',
+                      borderRadius: 25,
+                      backgroundColor: '#CCC',
+                    }}
+                    disabled={error1 || error2 || !input1 || !input2 ? true : false}
+                    onPress={handleFormSubmit}
+                    mode="contained-tonal"
+                  >
+                    {confirmButtonText}
+                  </Button>
+                  <Button
+                    style={{
+                      margin: 10,
+                      paddingVertical: 5,
+                      paddingHorizontal: 10,
+                      justifyContent: 'center',
+                      alignSelf: 'center',
+                      borderRadius: 25,
+                      backgroundColor: '#00ff85',
+                    }}
+                    labelStyle={{ color: '#444' }}
+                    onPress={handleFormCancel}
+                    mode="contained"
+                  >
+                    {cancelButtonText}
+                  </Button>
+                </Dialog.Actions>
+              </ScrollView>
           </>
         )}
       </Dialog>
