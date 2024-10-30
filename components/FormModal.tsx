@@ -145,7 +145,7 @@ const FormModal = () => {
                   )}
                 </Dialog.Content>
                 <Dialog.Actions>
-                  <Button
+                <Button
                     style={{
                       margin: 10,
                       paddingVertical: 5,
@@ -155,13 +155,11 @@ const FormModal = () => {
                       borderRadius: 25,
                       backgroundColor: '#CCC',
                     }}
-                    disabled={
-                      error1 || error2 || !input1 || !input2 ? true : false
-                    }
-                    onPress={handleFormSubmit}
-                    mode="contained-tonal"
+                    labelStyle={{ color: '#444' }}
+                    onPress={handleFormCancel}
+                    mode="contained"
                   >
-                    {confirmButtonText}
+                    {cancelButtonText}
                   </Button>
                   <Button
                     style={{
@@ -171,14 +169,16 @@ const FormModal = () => {
                       justifyContent: 'center',
                       alignSelf: 'center',
                       borderRadius: 25,
-                      backgroundColor: '#00ff85',
+                     
+                      backgroundColor:  (error1 || error2 || !input1 || !input2) ? '#e5ffeb' : '#00ff85',
                     }}
                     labelStyle={{ color: '#444' }}
-                    onPress={handleFormCancel}
-                    mode="contained"
+                    disabled={Boolean(error1 || error2 || !input1 || !input2)}
+                    onPress={handleFormSubmit}
+                    mode="contained-tonal"
                   >
-                    {cancelButtonText}
-                  </Button>
+                    {confirmButtonText}
+                  </Button>         
                 </Dialog.Actions>
             </KeyboardAvoidingView>
             </ScrollView>

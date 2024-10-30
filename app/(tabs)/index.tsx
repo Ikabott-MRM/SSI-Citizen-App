@@ -477,7 +477,7 @@ export default function HomeScreen() {
             mode="contained"
             onPress={promptDidBackup}
           >
-            {t('Backup your DID.')}
+            {t('Backup your DID')}
           </Button>
         </>
       )}

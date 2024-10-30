@@ -76,5 +76,6 @@
   "Enter the code you have just received by email.":"Introduce el código que acabas de recibir por correo electrónico.",
   "The code must be five digits.":"El código debe tener cinco dígitos.",
   "Code":"Código",
+  "Backup your DID":"Respalda tu DID",
   "Your DID is not backed up. Ensure its security by creating a backup now.":"Su DID no ha sido respaldado. Para garantizar su seguridad, cree un respaldo ahora."
 }

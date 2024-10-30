@@ -53,7 +53,7 @@ export default function Settings() {
               mode="contained"
               onPress={goToBackup}
             >
-              {t('Backup your DID.')}
+              {t('Backup your DID')}
             </Button>
           </View>
         )}
