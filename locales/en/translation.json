@@ -76,5 +76,9 @@
   "Enter the code you have just received by email.":"Enter the code you have just received by email.",
   "The code must be five digits.":"The code must be five digits.",
   "Code":"Code",
+  "Backup your DID":"Backup your DID",
+  "DID has been backed up":"DID has been backed up",
+  "The DID has not been backed up.":  "The DID has not been backed up.",
+  "Click here to back it up now":"Click here to back it up now.",
   "Your DID is not backed up. Ensure its security by creating a backup now.":"Your DID is not backed up. Ensure its security by creating a backup now."
 }

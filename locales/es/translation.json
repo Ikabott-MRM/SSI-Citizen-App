@@ -77,5 +77,9 @@
   "The code must be five digits.":"El código debe tener cinco dígitos.",
   "Code":"Código",
   "Backup your DID":"Respalda tu DID",
+  "DID has been backed up":"DID respaldado",
+  "Verify":"Verificar",
+  "The DID has not been backed up.":"El DID no ha sido respaldado.",
+  "Click here to back it up now.":"Haz clic aquí para realizar un respaldo ahora.",
   "Your DID is not backed up. Ensure its security by creating a backup now.":"Su DID no ha sido respaldado. Para garantizar su seguridad, cree un respaldo ahora."
 }
