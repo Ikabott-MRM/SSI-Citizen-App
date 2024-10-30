@@ -85,11 +85,11 @@ const FormModal = () => {
           <ActivityIndicator size="large" style={{ marginBottom: 20 }} />
         ) : (
           <>
-              <ScrollView>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding':'height'}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-            >
+            <ScrollView>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+              >
                 <Dialog.Title>{modalTitle}</Dialog.Title>
                 <Dialog.Content>
                   <Text
@@ -145,7 +145,7 @@ const FormModal = () => {
                   )}
                 </Dialog.Content>
                 <Dialog.Actions>
-                <Button
+                  <Button
                     style={{
                       margin: 10,
                       paddingVertical: 5,
@@ -169,18 +169,29 @@ const FormModal = () => {
                       justifyContent: 'center',
                       alignSelf: 'center',
                       borderRadius: 25,
-                     
-                      backgroundColor:  (error1 || error2 || !input1 || !input2) ? '#e5ffeb' : '#00ff85',
+
+                      backgroundColor:
+                        error1 ||
+                        error2 ||
+                        (!input1 && inputTitle1Text) ||
+                        (!input2 && inputTitle2Text)
+                          ? '#e5ffeb'
+                          : '#00ff85',
                     }}
                     labelStyle={{ color: '#444' }}
-                    disabled={Boolean(error1 || error2 || !input1 || !input2)}
+                    disabled={Boolean(
+                      error1 ||
+                        error2 ||
+                        (!input1 && inputTitle1Text) ||
+                        (!input2 && inputTitle2Text),
+                    )}
                     onPress={handleFormSubmit}
                     mode="contained-tonal"
                   >
                     {confirmButtonText}
-                  </Button>         
+                  </Button>
                 </Dialog.Actions>
-            </KeyboardAvoidingView>
+              </KeyboardAvoidingView>
             </ScrollView>
           </>
         )}

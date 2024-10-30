@@ -49,7 +49,7 @@ const Modal = () => {
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
-        <Button
+          <Button
             style={{
               margin: 10,
               paddingVertical: 5,

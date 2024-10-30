@@ -420,21 +420,35 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Text style={styles.h1}>{t('Welcome to IDA DEMO')}</Text>
       {didUri && (
-        <Accordion
-          title={t('Decentralized identifier (DID)')}
-          styles={styles}
-          isOpen={true}
-        >
-          <View style={styles.didContainer}>
-            <Text style={styles.didTextInput}>{didUri}</Text>
-            <TouchableOpacity
-              onPress={copyToClipboard}
-              style={styles.iconContainer}
-            >
-              <Ionicons name="copy-outline" size={20} color="#CCC" />
+        <>
+          <Accordion
+            title={t('Decentralized identifier (DID)')}
+            styles={styles}
+            isOpen={true}
+          >
+            <View style={styles.didContainer}>
+              <Text style={styles.didTextInput}>{didUri}</Text>
+              <TouchableOpacity
+                onPress={copyToClipboard}
+                style={styles.iconContainer}
+              >
+                <Ionicons name="copy-outline" size={20} color="#CCC" />
+              </TouchableOpacity>
+            </View>
+          </Accordion>
+          {isBackupCompleted ? (
+            <Text style={styles.info}>{t('DID has been backed up')}</Text>
+          ) : (
+            <TouchableOpacity onPress={promptDidBackup}>
+              <Text style={styles.info}>
+                {t('The DID has not been backed up.')}
+              </Text>
+              <Text style={styles.infoPressable}>
+                {t('Click here to back it up now.')}
+              </Text>
             </TouchableOpacity>
-          </View>
-        </Accordion>
+          )}
+        </>
       )}
       {!isPending && !didUri && (
         <>
@@ -466,18 +480,6 @@ export default function HomeScreen() {
             onPress={handleDeleteDid}
           >
             Borrar tu DID {'\n'}(Solo para Test)
-          </Button>
-        </>
-      )}
-      {!isPending && didUri && isBackupDeclined && !isBackupCompleted && (
-        <>
-          <Button
-            labelStyle={styles.buttonLabel}
-            style={styles.buttonDelete}
-            mode="contained"
-            onPress={promptDidBackup}
-          >
-            {t('Backup your DID')}
           </Button>
         </>
       )}
@@ -540,6 +542,21 @@ const stylesFnc = (css: {
       textAlign: 'center',
       marginBottom: 20,
     },
+    info: {
+      fontSize: 16,
+      fontWeight: 'light',
+      color: css.didTextInput.color,
+      textAlign: 'center',
+      marginBottom: 7,
+    },
+    infoPressable: {
+      fontSize: 16,
+      fontWeight: 'light',
+      textDecorationLine: 'underline',
+      color: css.didTextInput.color,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
     text: {
       fontSize: 16,
       lineHeight: 24,
@@ -548,10 +565,10 @@ const stylesFnc = (css: {
       color: css.text.color,
     },
     accordionContainer: {
-      marginBottom: 20,
+      marginBottom: 10,
       backgroundColor: '#f9f9f9',
       borderRadius: 5,
-      marginTop: 50,
+      marginTop: 30,
     },
     accordionTitle: {
       fontSize: 18,
