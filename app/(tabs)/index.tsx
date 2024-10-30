@@ -122,7 +122,7 @@ export default function HomeScreen() {
       undefined,
       undefined,
       undefined,
-      deleteDid,
+      deleteDid
     );
   };
 

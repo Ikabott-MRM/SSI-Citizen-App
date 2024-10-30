@@ -9,7 +9,6 @@ const Modal = () => {
     modalTitle,
     confirmButtonText,
     cancelButtonText,
-    hideModal,
     callbackRef,
     cancelCallbackRef,
   } = useModal();
@@ -28,7 +27,7 @@ const Modal = () => {
 
   return (
     <Portal>
-      <Dialog visible={modalVisible} onDismiss={hideModal}>
+      <Dialog visible={modalVisible} dismissable={false}>
         <Dialog.Title
           style={{
             textAlign: 'center',

@@ -16,7 +16,6 @@ const FormModal = () => {
     modalTitle,
     confirmButtonText,
     cancelButtonText,
-    hideModal,
     formCallbackRef,
     inputTitle1Text,
     inputTitle2Text,
@@ -76,7 +75,7 @@ const FormModal = () => {
 
   return (
     <Portal>
-      <Dialog visible={formModalVisible} onDismiss={hideModal}>
+      <Dialog visible={formModalVisible} dismissable={false}>
         {loading ? (
           <ActivityIndicator size="large" style={{ marginBottom: 20 }} />
         ) : (
