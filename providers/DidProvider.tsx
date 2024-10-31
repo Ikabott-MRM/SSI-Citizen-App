@@ -8,6 +8,11 @@ type DidContextType = {
   portableDid: string | null;
   isBackupDeclined: boolean;
   isBackupCompleted: string | null;
+  vCodeAttempts: number;
+  verificationCode: string;
+  setVerificationCode: (value: string) => void;
+  incrementVCodeAttempts: () => void;
+  resetVCodeAttempts: () => void;
   setDidUri: (value: string) => void;
   setPortableDid: (value: string) => void;
   setIsBackupDeclined: (value: boolean) => void;
@@ -27,10 +32,15 @@ export const useDid = () => {
 export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   const [portableDid, setPortableDidState] = useState<string | null>(null);
   const [didUri, setDidUriState] = useState<string | null>(null);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [vCodeAttempts, setVCodeAttempts] = useState(0);
   const [isBackupDeclined, setIsBackupDeclinedState] = useState<boolean>(false);
   const [isBackupCompleted, setIsBackupCompletedState] = useState<
     string | null
   >(null);
+
+  const incrementVCodeAttempts = () => setVCodeAttempts(prev => prev + 1);
+  const resetVCodeAttempts = () => setVCodeAttempts(0);
 
   useEffect(() => {
     const loadDidData = async () => {
@@ -121,6 +131,11 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         portableDid,
         didUri,
+        vCodeAttempts,
+        verificationCode,
+        incrementVCodeAttempts,
+        resetVCodeAttempts,
+        setVerificationCode,
         setDidUri,
         setPortableDid,
         isBackupDeclined,

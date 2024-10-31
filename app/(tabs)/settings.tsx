@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, Text } from 'react-native';
-import { Button, useTheme } from 'react-native-paper';
+import { Button, Snackbar, useTheme } from 'react-native-paper';
 import { CustomTheme } from '@/@types/theme';
 import Dropdown from '@/components/Dropdown';
 import { Language, StorageKey } from '@/@types/language';
@@ -9,14 +9,44 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDid } from '@/providers/DidProvider';
 import { useRouter } from 'expo-router';
 import { version } from '../../package.json';
+import { promptDidBackup, useVCodeAttempts, useVerificationCode } from '@/utils/didBackupHelpers';
+import { useModal } from '@/providers/ModalProvider';
+import { validateFiveDigitCode } from '@/utils/helpers';
+import { useMailMutation } from '@/hooks/mutations/useMailMutation';
 
 export default function Settings() {
   const { i18n, t } = useTranslation();
-  const { isBackupDeclined, didUri, isBackupCompleted } = useDid();
+  const { sendMail } = useMailMutation();
+
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const { isBackupDeclined, didUri, isBackupCompleted,setVerificationCode,resetVCodeAttempts,portableDid,setIsBackupDeclined,verificationCode,setBackupCompleted,incrementVCodeAttempts } = useDid();
+  const {hideModal,setLoading,showFormModal,showModal} = useModal();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
   const router = useRouter();
 
+  //TODO esto es lo que repite codigo nomas
+  //TODO probar todo el flujo desde ambas pantallas para confirmar que quedo ok
+  const verifyCode = async (input1: string) => {
+    const validCode = input1 === verificationCode;
+    if (validCode) {
+      setSnackbarMessage(t('Your DID has been successfully backed up'));
+      setSnackbarVisible(true);
+      setBackupCompleted('completed');
+      hideModal();
+    } else {
+      setSnackbarMessage(t('Incorrect code, please try again'));
+      setSnackbarVisible(true);
+      incrementVCodeAttempts();
+      // setVCodeAttempts(prevAttempts => prevAttempts + 1);
+    }
+  };
+
+
+  useVCodeAttempts(t, hideModal);
+  useVerificationCode({ verifyCode, validateFiveDigitCode, t });
+  
   const handleSelectLanguage = async (lng: Language) => {
     await i18n.changeLanguage(lng);
     await AsyncStorage.setItem(StorageKey.language, lng);
@@ -51,7 +81,21 @@ export default function Settings() {
               labelStyle={styles.buttonLabel}
               style={styles.buttonDelete}
               mode="contained"
-              onPress={goToBackup}
+              // onPress={goToBackup}
+              onPress={() =>
+                promptDidBackup(
+                  t,
+                  sendMail,
+                  setVerificationCode,
+                  resetVCodeAttempts,
+                  hideModal,
+                  setIsBackupDeclined,
+                  setLoading,
+                  portableDid!,
+                  showModal,
+                  showFormModal,
+                )
+              }
             >
               {t('Backup your DID')}
             </Button>
@@ -63,6 +107,13 @@ export default function Settings() {
           {t('App Version')}: {version}
         </Text>
       </View>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }
