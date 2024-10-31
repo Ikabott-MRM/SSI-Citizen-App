@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, Text } from 'react-native';
-import { Button, useTheme } from 'react-native-paper';
+import { Button, Snackbar, useTheme } from 'react-native-paper';
 import { CustomTheme } from '@/@types/theme';
 import Dropdown from '@/components/Dropdown';
 import { Language, StorageKey } from '@/@types/language';
@@ -9,24 +9,46 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDid } from '@/providers/DidProvider';
 import { useRouter } from 'expo-router';
 import { version } from '../../package.json';
+import {
+  promptDidBackup,
+  useVCodeAttempts,
+  useVerificationCode,
+} from '@/utils/didBackupHelpers';
+import { useModal } from '@/providers/ModalProvider';
+import { validateFiveDigitCode } from '@/utils/helpers';
+import { useMailMutation } from '@/hooks/mutations/useMailMutation';
 
 export default function Settings() {
   const { i18n, t } = useTranslation();
-  const { isBackupDeclined, didUri, isBackupCompleted } = useDid();
+  const { sendMail } = useMailMutation();
+
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const {
+    isBackupDeclined,
+    didUri,
+    isBackupCompleted,
+    setVerificationCode,
+    resetVCodeAttempts,
+    portableDid,
+    setIsBackupDeclined,
+  } = useDid();
+  const { hideModal, setLoading, showFormModal, showModal } = useModal();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
   const router = useRouter();
 
+  useVCodeAttempts(t, hideModal);
+  useVerificationCode({
+    validateFiveDigitCode,
+    t,
+    setSnackbarMessage,
+    setSnackbarVisible,
+  });
+
   const handleSelectLanguage = async (lng: Language) => {
     await i18n.changeLanguage(lng);
     await AsyncStorage.setItem(StorageKey.language, lng);
-  };
-
-  const goToBackup = () => {
-    router.push({
-      pathname: '/',
-      params: { startBackup: 1 },
-    });
   };
 
   return (
@@ -51,7 +73,20 @@ export default function Settings() {
               labelStyle={styles.buttonLabel}
               style={styles.buttonDelete}
               mode="contained"
-              onPress={goToBackup}
+              onPress={() =>
+                promptDidBackup(
+                  t,
+                  sendMail,
+                  setVerificationCode,
+                  resetVCodeAttempts,
+                  hideModal,
+                  setIsBackupDeclined,
+                  setLoading,
+                  portableDid!,
+                  showModal,
+                  showFormModal,
+                )
+              }
             >
               {t('Backup your DID')}
             </Button>
@@ -63,6 +98,13 @@ export default function Settings() {
           {t('App Version')}: {version}
         </Text>
       </View>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }

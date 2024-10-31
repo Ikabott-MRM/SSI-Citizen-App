@@ -1,6 +1,6 @@
 import axios from './axios';
 
-interface BackUpEmailInfo {
+export interface BackUpEmailInfo {
   to: string;
   jsonContent: {
     salt: string;
