@@ -16,7 +16,6 @@ type HandleDidBackupParams = {
         encryptedData: string;
         salt: string;
     } | undefined>
-    // generateRandomCode: () => string;
     sendMail: UseMutateFunction<any, Error, {
         backUpEmailInfo: BackUpEmailInfo;
     }, unknown>
@@ -34,6 +33,48 @@ type HandleDidBackupParams = {
     hideModal:()=>void;
   };
   
+  type UseVerificationCodeHookParams = {
+    validateFiveDigitCode: (input: string) => boolean;
+    t: (key: string) => string;
+    setSnackbarMessage: (message: string) => void;
+  setSnackbarVisible: (visible: boolean) => void;
+  };
+
+  type VerifyCodeDependencies = {
+    verificationCode: string;
+    setSnackbarMessage: (message: string) => void;
+    setSnackbarVisible: (visible: boolean) => void;
+    setBackupCompleted: (status: string) => void;
+    hideModal: () => void;
+    incrementVCodeAttempts: () => void;
+    t: (key: string) => string;
+  };
+  
+  const verifyCodeHelper = async (
+    input1: string,
+    {
+      verificationCode,
+      setSnackbarMessage,
+      setSnackbarVisible,
+      setBackupCompleted,
+      hideModal,
+      incrementVCodeAttempts,
+      t
+    }: VerifyCodeDependencies
+  ) => {
+    const validCode = input1 === verificationCode;
+    if (validCode) {
+      setSnackbarMessage(t('Your DID has been successfully backed up'));
+      setSnackbarVisible(true);
+      setBackupCompleted('completed');
+      hideModal();
+    } else {
+      setSnackbarMessage(t('Incorrect code, please try again'));
+      setSnackbarVisible(true);
+      incrementVCodeAttempts();
+    }
+  };
+
   export const declineDidBackup = ({t,setIsBackupDeclined,resetVCodeAttempts,setVerificationCode,hideModal}:HandleDeclineDidBackupParams): void => {
     Alert.alert(
       t('Your DID won’t be backed up.'),
@@ -46,7 +87,6 @@ type HandleDidBackupParams = {
           onPress: () => {
             setIsBackupDeclined(true);
             resetVCodeAttempts();
-            // setVCodeAttempts(0);
             setVerificationCode('');
             hideModal();
           },
@@ -62,51 +102,30 @@ type HandleDidBackupParams = {
       if (vCodeAttempts >= 3) {
         showInvalidCodeAlert({ t, hideModal, resetVCodeAttempts, setVerificationCode });
       }
-    }, [vCodeAttempts, t, hideModal, resetVCodeAttempts, setVerificationCode]);
-  };
-
-  type UseVerificationCodeHookParams = {
-    // verificationCode: string;
-    // isBackupCompleted: boolean;
-    // hideModal: () => void;
-    // setLoading: (loading: boolean) => void;
-    // showFormModal: (
-    //   title: string,
-    //   message: string,
-    //   confirmText: string,
-    //   cancelText: string,
-    //   onConfirm: () => Promise<void>,
-    //   validateInput: (input: string) => boolean,
-    //   onInputValidationSuccess: () => boolean,
-    //   onCancel: () => void,
-    //   invalidMessage: string,
-    //   placeholder?: string,
-    //   additionalText?: string
-    // ) => void;
-    verifyCode:(input1: string) => Promise<void>;
-    validateFiveDigitCode: (input: string) => boolean;
-    // declineDidBackup: (params: {
-    //   t: (key: string) => string;
-    //   setIsBackupDeclined: (declined: boolean) => void;
-    //   resetVCodeAttempts: () => void;
-    //   setVerificationCode: (code: string) => void;
-    //   hideModal: () => void;
-    // }) => void;
-    t: (key: string) => string;
+    }, [vCodeAttempts]);
   };
   
   export const useVerificationCode = ({
-    // verificationCode,
-    // isBackupCompleted,
-    // setLoading,
-    // showFormModal,
-    verifyCode,
     validateFiveDigitCode,
-    // declineDidBackup,
     t,
+    setSnackbarMessage,
+    setSnackbarVisible
   }: UseVerificationCodeHookParams) => {
-    const { setIsBackupDeclined, verificationCode,isBackupCompleted, resetVCodeAttempts, setVerificationCode } = useDid();
+    const { setIsBackupDeclined, incrementVCodeAttempts, setBackupCompleted, verificationCode,isBackupCompleted, resetVCodeAttempts, setVerificationCode } = useDid();
     const {hideModal,showFormModal, setLoading} = useModal();
+
+  const verifyCode = async (input1: string) => {
+    await verifyCodeHelper(input1, {
+      verificationCode,
+      setSnackbarMessage,
+      setSnackbarVisible,
+      setBackupCompleted,
+      hideModal,
+      incrementVCodeAttempts,
+      t,
+    });
+  };
+
     useEffect(() => {
       if (verificationCode && !isBackupCompleted) {
         setLoading(false);
@@ -129,11 +148,10 @@ type HandleDidBackupParams = {
           t('The code must be five digits.'),
           undefined,
           t('Code'),
-          ''
+          undefined
         );
       }
-      //TODO revisar si preciso todas esas dependencias en estos custom Hooks
-    }, [verificationCode, isBackupCompleted, setLoading, showFormModal, verifyCode, validateFiveDigitCode, declineDidBackup, t]);
+    }, [verificationCode]);
   };
 
   export const showInvalidCodeAlert = ({t,hideModal,resetVCodeAttempts,setVerificationCode}:{
@@ -153,7 +171,6 @@ type HandleDidBackupParams = {
           onPress: () => {
             hideModal();
             resetVCodeAttempts();
-            // setVCodeAttempts(0);
             setVerificationCode('');
           },
         },
@@ -166,7 +183,6 @@ type HandleDidBackupParams = {
     input1,
     input2,
     encryptData,
-    // generateRandomCode,
     sendMail,
     setVerificationCode,
     setLoading,
@@ -227,68 +243,8 @@ type HandleDidBackupParams = {
     );
   };
 
-export const promptDidBackup1 =  (
-    t: (key: string) => string,
-    handleDidBackup: (input1: string, input2?: string) => Promise<void>,
-    // validateEmail: (input: string) => boolean,
-    // validatePwd: (input: string) => boolean,
-    declineDidBackup: () => void,
-    showModal: (
-      title: string,
-      message: string,
-      confirmText: string,
-      cancelText: string,
-      onConfirm: () => void,
-      onCancel?: () => void,
-    ) => void,
-    showFormModal: (
-      title: string,
-      message: string,
-      confirmText: string,
-      cancelText: string,
-      onConfirm: (input1: string, input2?: string | undefined) => Promise<void>,
-      validateInput1: (input: string) => boolean,
-      validateInput2: (input: string) => boolean,
-      onCancel: () => void,
-      invalidMessage1?: string,
-      invalidMessage2?: string,
-      placeholder1?: string,
-      placeholder2?: string,
-    ) => void
-  ) => {
-    showModal(
-      t('Do you want to backup your DID?'),
-      t(''),
-      t('Yes'),
-      t('No'),
-      () => {
-        showFormModal(
-          t('DID Backup'),
-          t(
-            "Please enter the email address where you'd like to receive your backup, along with a password for encryption.",
-          ),
-          t('Backup'),
-          t('Cancel'),
-          handleDidBackup,
-          validateEmail,
-          validatePwd,
-          declineDidBackup,
-          t('Invalid email'),
-          t(
-            'Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.',
-          ),
-          t('Email'),
-          t('Password'),
-        );
-      },
-      declineDidBackup,
-    );
-  };
-
-
   export const promptDidBackup = (
     t: (key: string) => string,
-    // encryptData: (data: string, password: string) => Promise<{ iv: string; encryptedData: string; salt: string } | undefined>,
     sendMail: UseMutateFunction<any, Error, { backUpEmailInfo: BackUpEmailInfo }, unknown>,
     setVerificationCode: (code: string) => void,
     resetVCodeAttempts: () => void,
@@ -296,7 +252,6 @@ export const promptDidBackup1 =  (
     setIsBackupDeclined:(value:boolean)=>void,
     setLoading: (loading: boolean) => void,
     portableDid: string,
-    // declineDidBackup: () => void,
     showModal: (
         title: string,
         message: string,

@@ -9,7 +9,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDid } from '@/providers/DidProvider';
 import { useRouter } from 'expo-router';
 import { version } from '../../package.json';
-import { promptDidBackup, useVCodeAttempts, useVerificationCode } from '@/utils/didBackupHelpers';
+import {
+  promptDidBackup,
+  useVCodeAttempts,
+  useVerificationCode,
+} from '@/utils/didBackupHelpers';
 import { useModal } from '@/providers/ModalProvider';
 import { validateFiveDigitCode } from '@/utils/helpers';
 import { useMailMutation } from '@/hooks/mutations/useMailMutation';
@@ -20,43 +24,31 @@ export default function Settings() {
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const { isBackupDeclined, didUri, isBackupCompleted,setVerificationCode,resetVCodeAttempts,portableDid,setIsBackupDeclined,verificationCode,setBackupCompleted,incrementVCodeAttempts } = useDid();
-  const {hideModal,setLoading,showFormModal,showModal} = useModal();
+  const {
+    isBackupDeclined,
+    didUri,
+    isBackupCompleted,
+    setVerificationCode,
+    resetVCodeAttempts,
+    portableDid,
+    setIsBackupDeclined,
+  } = useDid();
+  const { hideModal, setLoading, showFormModal, showModal } = useModal();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
   const router = useRouter();
 
-  //TODO esto es lo que repite codigo nomas
-  //TODO probar todo el flujo desde ambas pantallas para confirmar que quedo ok
-  const verifyCode = async (input1: string) => {
-    const validCode = input1 === verificationCode;
-    if (validCode) {
-      setSnackbarMessage(t('Your DID has been successfully backed up'));
-      setSnackbarVisible(true);
-      setBackupCompleted('completed');
-      hideModal();
-    } else {
-      setSnackbarMessage(t('Incorrect code, please try again'));
-      setSnackbarVisible(true);
-      incrementVCodeAttempts();
-      // setVCodeAttempts(prevAttempts => prevAttempts + 1);
-    }
-  };
-
-
   useVCodeAttempts(t, hideModal);
-  useVerificationCode({ verifyCode, validateFiveDigitCode, t });
-  
+  useVerificationCode({
+    validateFiveDigitCode,
+    t,
+    setSnackbarMessage,
+    setSnackbarVisible,
+  });
+
   const handleSelectLanguage = async (lng: Language) => {
     await i18n.changeLanguage(lng);
     await AsyncStorage.setItem(StorageKey.language, lng);
-  };
-
-  const goToBackup = () => {
-    router.push({
-      pathname: '/',
-      params: { startBackup: 1 },
-    });
   };
 
   return (
@@ -81,7 +73,6 @@ export default function Settings() {
               labelStyle={styles.buttonLabel}
               style={styles.buttonDelete}
               mode="contained"
-              // onPress={goToBackup}
               onPress={() =>
                 promptDidBackup(
                   t,

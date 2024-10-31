@@ -23,11 +23,9 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
-import { decryptData, encryptData } from '@/services/encryptionService';
+import { decryptData } from '@/services/encryptionService';
 import {
-  generateRandomCode,
   isDecryptionSuccessful,
-  validateEmail,
   validateFiveDigitCode,
   validatePwd,
 } from '@/utils/helpers';
@@ -38,9 +36,7 @@ import { useMailMutation } from '@/hooks/mutations/useMailMutation';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import {
-  declineDidBackup,
   promptDidBackup,
-  showInvalidCodeAlert,
   useVCodeAttempts,
   useVerificationCode,
 } from '@/utils/didBackupHelpers';
@@ -67,35 +63,19 @@ export default function HomeScreen() {
 
   const { showModal, showFormModal, hideModal, setLoading } = useModal();
   const { createDid, isPending } = useDidMutation();
-  // const [verificationCode, setVerificationCode] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  // const [vCodeAttempts, setVCodeAttempts] = useState(0);
   const { sendMail } = useMailMutation();
   const [selectedDocument, setSelectedDocument] =
     useState<DocumentPicker.DocumentPickerAsset>();
 
-  //TODO ver si puedo mover esto a helpers
-  const verifyCode = async (input1: string) => {
-    const validCode = input1 === verificationCode;
-    if (validCode) {
-      setSnackbarMessage(t('Your DID has been successfully backed up'));
-      setSnackbarVisible(true);
-      setBackupCompleted('completed');
-      hideModal();
-    } else {
-      setSnackbarMessage(t('Incorrect code, please try again'));
-      setSnackbarVisible(true);
-      incrementVCodeAttempts();
-      // setVCodeAttempts(prevAttempts => prevAttempts + 1);
-    }
-  };
-
-  //TODO meto el show alert en un hook
-  //TODO tengo que agregar al useDid vCodeAttempts, verificationCode
-  //TODO REVISAR ACA COMO ES LO DE ATTEMPTS
   useVCodeAttempts(t, hideModal);
-  useVerificationCode({ verifyCode, validateFiveDigitCode, t });
+  useVerificationCode({
+    validateFiveDigitCode,
+    t,
+    setSnackbarMessage,
+    setSnackbarVisible,
+  });
   const styles = stylesFnc({
     container: {
       backgroundColor: theme.customColors.background.primary,
@@ -217,104 +197,6 @@ export default function HomeScreen() {
     });
   };
 
-  // const handleDidBackup = async (input1: string, input2?: string) => {
-  //   setLoading(true);
-  //   const encryptedPortableDid = await encryptData(portableDid!, input2!);
-  //   const verificationCode = generateRandomCode();
-
-  //   if (!encryptedPortableDid) {
-  //     Toast.show(t('Encryption failed. Please try again.'), {
-  //       duration: Toast.durations.LONG,
-  //       position: Toast.positions.BOTTOM,
-  //     });
-  //     return;
-  //   }
-
-  //   const backUpEmailInfo = {
-  //     to: input1,
-  //     jsonContent: {
-  //       salt: encryptedPortableDid?.salt!,
-  //       iv: encryptedPortableDid?.iv!,
-  //       encryptedData: encryptedPortableDid?.encryptedData!,
-  //     },
-  //     verificationCode,
-  //   };
-  //   sendMail(
-  //     { backUpEmailInfo },
-  //     {
-  //       onSuccess: () => {
-  //         Toast.show(t('Back up mail successfully sent. Check your inbox'), {
-  //           duration: Toast.durations.LONG,
-  //           position: Toast.positions.BOTTOM,
-  //         });
-  //         setVerificationCode(verificationCode);
-  //       },
-  //       onError: (error: string | Error) => {
-  //         Alert.alert(
-  //           t('Error sending back up mail'),
-  //           t(
-  //             'An error occurred while trying to send the mail for DID back up. Please review the email address you have entered and try again.',
-  //           ),
-  //           [
-  //             {
-  //               text: 'Ok',
-  //             },
-  //           ],
-  //           { cancelable: false },
-  //         );
-  //         setLoading(false);
-  //         if (typeof error === 'string') {
-  //           Toast.show(error, {
-  //             duration: Toast.durations.LONG,
-  //             position: Toast.positions.BOTTOM,
-  //           });
-  //         }
-  //       },
-  //     },
-  //   );
-  // };
-
-  // const showInvalidCodeAlert = () => {
-  //   Alert.alert(
-  //     t('Invalid verification code'),
-  //     t(
-  //       'You have reached the maximum attempts for entering an invalid code. Please restart the backup process if you want to mark it as completed.',
-  //     ),
-  //     [
-  //       {
-  //         text: t('Understood'),
-  //         onPress: () => {
-  //           hideModal();
-  //           setVCodeAttempts(0);
-  //           setVerificationCode('');
-  //         },
-  //       },
-  //     ],
-  //     { cancelable: false },
-  //   );
-  // };
-
-  // const declineDidBackup = (): void => {
-  //   Alert.alert(
-  //     t('Your DID won’t be backed up.'),
-  //     t(
-  //       'By pressing `Understood` and leaving this step incomplete, you are choosing not to back up your DID. Your DID will remain unbacked up until you restart the backup process.',
-  //     ),
-  //     [
-  //       {
-  //         text: t('Understood'),
-  //         onPress: () => {
-  //           setIsBackupDeclined(true);
-  //           setVCodeAttempts(0);
-  //           setVerificationCode('');
-  //           hideModal();
-  //         },
-  //       },
-  //     ],
-  //     { cancelable: true },
-  //   );
-  // };
-
   const cancelRetrieval = (): void => {
     Alert.alert(
       t('Your DID won’t be retrieved.'),
@@ -333,35 +215,6 @@ export default function HomeScreen() {
       { cancelable: true },
     );
   };
-  // const promptDidBackup = () => {
-  //   showModal(
-  //     t('Do you want to backup your DID?'),
-  //     t(''),
-  //     t('Yes'),
-  //     t('No'),
-  //     () => {
-  //       showFormModal(
-  //         t('DID Backup'),
-  //         t(
-  //           "Please enter the email address where you'd like to receive your backup, along with a password for encryption.",
-  //         ),
-  //         t('Backup'),
-  //         t('Cancel'),
-  //         handleDidBackup,
-  //         validateEmail,
-  //         validatePwd,
-  //         declineDidBackup,
-  //         t('Invalid email'),
-  //         t(
-  //           'Invalid password.\nPassword must be 8 alphanumeric characters and contain at least one number.',
-  //         ),
-  //         t('Email'),
-  //         t('Password'),
-  //       );
-  //     },
-  //     declineDidBackup,
-  //   );
-  // };
 
   useEffect(() => {
     if (startBackup) {
@@ -402,33 +255,6 @@ export default function HomeScreen() {
       );
     }
   }, [selectedDocument]);
-
-  // useEffect(() => {
-  //   if (vCodeAttempts >= 3) {
-  //     showInvalidCodeAlert({t,hideModal,setVCodeAttempts,setVerificationCode});
-  //   }
-  // }, [vCodeAttempts]);
-
-  //TODO mover la logica de este useEffect para afuera tambien
-  // useEffect(() => {
-  //   if (verificationCode && !isBackupCompleted) {
-  //     setLoading(false);
-  //     showFormModal(
-  //       t('Backup code'),
-  //       t('Enter the code you have just received by email.'),
-  //       t('Verify'),
-  //       t('Cancel'),
-  //       verifyCode,
-  //       validateFiveDigitCode,
-  //       () => true,
-  //       ()=>declineDidBackup({t,setIsBackupDeclined,resetVCodeAttempts,setVerificationCode,hideModal}),
-  //       t('The code must be five digits.'),
-  //       undefined,
-  //       t('Code'),
-  //       '',
-  //     );
-  //   }
-  // }, [verificationCode]);
 
   useEffect(() => {
     if (
