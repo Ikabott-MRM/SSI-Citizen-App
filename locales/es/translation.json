@@ -6,7 +6,7 @@
   "Credentials": "Credenciales",
   "Requests": "Solicitudes",
   "No DID description": "Para solicitar una nueva credencial, primero necesitas crear un Identificador Digital Descentralizado (DID) en la sección 'Identidad'.",
-  "Go to identity": "Ir a Identindad",
+  "Go to Identity": "Ir a Identidad",
   "Decentralized identifier (DID)": "Identificador Descentralizado (DID)",
   "Your credentials": "Tus Credenciales",
   "You currently do not have any credentials": "Actualmente no tienes ninguna credencial",

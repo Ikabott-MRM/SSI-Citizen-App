@@ -27,7 +27,7 @@ const NoDID = () => {
           style={styles.button}
           mode="contained"
         >
-          {t('Go to identity')}
+          {t('Go to Identity')}
         </Button>
       </Link>
     </View>

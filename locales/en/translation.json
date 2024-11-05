@@ -6,7 +6,7 @@
   "Credentials": "Credentials",
   "Requests": "Requests",
   "No DID description": "To request a new credential, you first need to create a Decentralized Identifier (DID) in the 'Identity' section.",
-  "Go to identity": "Go to identity",
+  "Go to Identity": "Go to Identity",
   "Decentralized identifier (DID)": "Decentralized identifier (DID)",
   "Your credentials": "Your credentials",
   "You currently do not have any credentials": "You currently do not have any credentials",
