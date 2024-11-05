@@ -90,7 +90,7 @@ const FormModal = () => {
           <ActivityIndicator size="large" style={{ marginBottom: 20 }} />
         ) : (
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'position' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
           >
             <Dialog.Title>{modalTitle}</Dialog.Title>
