@@ -1,6 +1,7 @@
+import './i18n';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { RootSiblingParent } from 'react-native-root-siblings';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
@@ -16,8 +17,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { CustomTheme } from '@/@types/theme';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
-import { SecureStoreProvider } from '@/providers/SecureStoreProvider';
-import './i18n';
+import { DidProvider } from '@/providers/DidProvider';
+import { FormModal } from '@/components/FormModal';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -76,52 +77,53 @@ export default function RootLayout() {
   }
 
   return (
-    <SecureStoreProvider>
-    <QueryClientProvider client={queryClient}>
-      <PaperProvider theme={theme}>
-        <ModalProvider>
-          <RootSiblingParent>
-            <Stack
-              screenOptions={{
-                headerStyle: {
-                  backgroundColor: '#343434',
-                },
-                headerTintColor: '#4c4c4c',
-                headerTitleStyle: {
-                  fontWeight: 'bold',
-                },
-                headerTitleAlign: 'center',
-                headerTitle: () => (
-                  <Image
-                    source={require('../assets/images/logo-iovf.png')}
-                    style={{ width: 80, height: 30 }}
-                  />
-                ),
-                headerLeft: () =>
-                  segments.length > 0 &&
-                  segments[0] === 'identitySubmission' && (
-                    <IconButton
-                      icon={() => (
-                        <Ionicons
-                          name="home-outline"
-                          size={24}
-                          color={theme.customColors.typography.secondary}
-                          style={{ marginBottom: 10 }}
-                        />
-                      )}
-                      onPress={() => router.back()}
+    <DidProvider>
+      <QueryClientProvider client={queryClient}>
+        <PaperProvider theme={theme}>
+          <ModalProvider>
+            <RootSiblingParent>
+              <Stack
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: '#343434',
+                  },
+                  headerTintColor: '#4c4c4c',
+                  headerTitleStyle: {
+                    fontWeight: 'bold',
+                  },
+                  headerTitleAlign: 'center',
+                  headerTitle: () => (
+                    <Image
+                      source={require('../assets/images/logo-iovf.png')}
+                      style={{ width: 80, height: 30 }}
                     />
                   ),
-              }}
-            >
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </RootSiblingParent>
-          <Modal />
-        </ModalProvider>
-      </PaperProvider>
-    </QueryClientProvider>
-    </SecureStoreProvider>
+                  headerLeft: () =>
+                    segments.length > 0 &&
+                    segments[0] === 'identitySubmission' && (
+                      <IconButton
+                        icon={() => (
+                          <Ionicons
+                            name="home-outline"
+                            size={24}
+                            color={theme.customColors.typography.secondary}
+                            style={{ marginBottom: 10 }}
+                          />
+                        )}
+                        onPress={() => router.back()}
+                      />
+                    ),
+                }}
+              >
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </RootSiblingParent>
+            <FormModal />
+            <Modal />
+          </ModalProvider>
+        </PaperProvider>
+      </QueryClientProvider>
+    </DidProvider>
   );
 }

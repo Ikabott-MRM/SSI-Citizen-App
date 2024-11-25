@@ -1,0 +1,32 @@
+export const generateRandomCode = (): string => {
+    const randomCode = Math.floor(10000 + Math.random() * 90000);
+    return randomCode.toString();
+  };
+
+export const validateEmail = (input: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(input);
+  };
+
+export const validateFiveDigitCode = (input: string): boolean => {
+    const fiveDigitCodeRegex = /^\d{5}$/;
+    return fiveDigitCodeRegex.test(input);
+  };
+
+  export const validatePwd = (input: string): boolean => {
+    const passwordRegex = /^(?=.*\d)[A-Za-z\d]{8}$/
+    return passwordRegex.test(input);
+  };
+
+export const isDecryptionSuccessful = (decryptedData: string): boolean => {
+  try {
+    const json = JSON.parse(decryptedData);
+    
+    if (json.uri && json.document && json.privateKeys) {
+      return true;
+    }
+    return false; 
+  } catch (error) {
+    return false;
+  }
+}

@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { Link } from 'expo-router';
 import { CustomTheme } from '@/@types/theme';
@@ -27,7 +27,7 @@ const NoDID = () => {
           style={styles.button}
           mode="contained"
         >
-          {t('Go to identity')}
+          {t('Go to Identity')}
         </Button>
       </Link>
     </View>

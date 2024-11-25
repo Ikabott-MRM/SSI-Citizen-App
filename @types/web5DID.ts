@@ -12,16 +12,11 @@ interface Metadata {
   versionId: string;
 }
 
-interface KeyManager {
-  _algorithmInstances: unknown;
-  _keyStore: {
-    store: unknown;
-  };
-}
+
 
 export interface Web5DID {
   document: Document;
-  keyManager: KeyManager;
+  privateKeys: object[];
   metadata: Metadata;
   uri: string;
 }

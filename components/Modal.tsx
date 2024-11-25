@@ -3,18 +3,38 @@ import { Portal, Dialog, Text, Button } from 'react-native-paper';
 import { useModal } from '@/providers/ModalProvider';
 
 const Modal = () => {
-  const { modalVisible, modalMessage, hideModal, cancelModal } = useModal();
+  const {
+    modalVisible,
+    modalMessage,
+    modalTitle,
+    confirmButtonText,
+    cancelButtonText,
+    callbackRef,
+    cancelCallbackRef,
+  } = useModal();
+
+  const confirmAction = () => {
+    if (callbackRef.current) {
+      callbackRef.current();
+    }
+  };
+
+  const cancelAction = () => {
+    if (cancelCallbackRef.current) {
+      cancelCallbackRef.current();
+    }
+  };
 
   return (
     <Portal>
-      <Dialog visible={modalVisible} onDismiss={cancelModal}>
+      <Dialog visible={modalVisible} dismissable={false}>
         <Dialog.Title
           style={{
             textAlign: 'center',
             fontWeight: 'bold',
           }}
         >
-          Atención
+          {modalTitle}
         </Dialog.Title>
         <Dialog.Content>
           <Text
@@ -39,10 +59,11 @@ const Modal = () => {
               borderRadius: 25,
               backgroundColor: '#CCC',
             }}
-            onPress={hideModal}
-            mode="contained-tonal"
+            labelStyle={{ color: '#444' }}
+            onPress={cancelAction}
+            mode="contained"
           >
-            Sí, eliminar todo
+            {cancelButtonText}
           </Button>
           <Button
             style={{
@@ -55,10 +76,10 @@ const Modal = () => {
               backgroundColor: '#00ff85',
             }}
             labelStyle={{ color: '#444' }}
-            onPress={cancelModal}
-            mode="contained"
+            onPress={confirmAction}
+            mode="contained-tonal"
           >
-            Cancelar
+            {confirmButtonText}
           </Button>
         </Dialog.Actions>
       </Dialog>

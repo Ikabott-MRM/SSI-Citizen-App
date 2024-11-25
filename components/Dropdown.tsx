@@ -6,7 +6,6 @@ import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Language } from '@/@types/language';
-import { version } from '../package.json';
 
 type Option = {
   label: string;
@@ -27,7 +26,7 @@ const Dropdown = ({ items, onValueChange, value }: DropdownProps) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView>
         <Text style={styles.label}>{t('Select a language')}:</Text>
         <RNPickerSelect
           value={value}
@@ -41,11 +40,6 @@ const Dropdown = ({ items, onValueChange, value }: DropdownProps) => {
           style={dropStyles}
         />
       </ScrollView>
-      <View style={styles.aboutContainer}>
-        <Text style={styles.aboutText}>
-          {t('App Version')}: {version}
-        </Text>
-      </View>
     </SafeAreaView>
   );
 };
@@ -61,8 +55,7 @@ const stylesFnc = (colors: {
       flex: 1,
     },
     content: {
-      flex: 1,
-      padding: 16,
+      marginBottom: 40,
     },
     label: {
       color: colors.typography.secondary,
@@ -98,7 +91,7 @@ const dropdownStylesFnc = (colors: {
       paddingHorizontal: 10,
       color: colors.typography.secondary,
       backgroundColor: colors.background.secondary,
-      paddingRight: 30, // to ensure the text is never behind the icon
+      paddingRight: 30,
     },
     inputAndroid: {
       fontSize: 16,
@@ -106,7 +99,7 @@ const dropdownStylesFnc = (colors: {
       paddingVertical: 8,
       color: colors.typography.secondary,
       backgroundColor: colors.background.secondary,
-      paddingRight: 30, // to ensure the text is never behind the icon
+      paddingRight: 30,
     },
     iconContainer: {
       top: 15,
