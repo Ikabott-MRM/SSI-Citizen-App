@@ -4,7 +4,7 @@ import { Credential } from '@/@types/credential';
 export default {
   getCredentials: async (did: string): Promise<Credential[]> => {
     const response = await axios.get<{ data: Credential[] }>(
-      '/dwn/credentials',
+      '/issuerAgent/credentials',
       {
         params: {
           holderDid: did,
