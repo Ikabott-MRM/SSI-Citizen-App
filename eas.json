@@ -8,7 +8,7 @@
       "developmentClient": true,
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/",
-        "EXPO_PUBLIC_API_KEY": "8a5e66195337b0eccdddbce894579f97"
+        "EXPO_PUBLIC_API_KEY": "00313be0db0be3044121eb4231aff0c3"
       },
       "ios": {
         "simulator": true
@@ -21,7 +21,7 @@
       },
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/",
-        "EXPO_PUBLIC_API_KEY": "8a5e66195337b0eccdddbce894579f97"
+        "EXPO_PUBLIC_API_KEY": "00313be0db0be3044121eb4231aff0c3"
       },
       "ios": {
         "simulator": true
@@ -30,7 +30,7 @@
     "production": {
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/",
-        "EXPO_PUBLIC_API_KEY": "8a5e66195337b0eccdddbce894579f97"
+        "EXPO_PUBLIC_API_KEY": "00313be0db0be3044121eb4231aff0c3"
       }
     }
   },
