@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "IDA Ciudadano",
-    "slug": "driver-license-mobile",
+    "slug": "ssi-web3",
     "version": "1.6.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -29,6 +29,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "usesCleartextTraffic": true,
       "package": "com.iovf.driverlicensemobile"
     },
     "plugins": [
@@ -37,10 +38,10 @@
         "expo-build-properties",
         {
           "ios": {
-            "newArchEnabled": true
+            "newArchEnabled": false
           },
           "android": {
-            "newArchEnabled": true
+            "newArchEnabled": false
           }
         }
       ]
@@ -50,10 +51,10 @@
         "origin": false
       },
       "eas": {
-        "projectId": "67564153-fced-432c-b065-bc90c9cdd821"
+        "projectId": "0982af0f-0162-4ce7-8e12-e8f76b6dab90"
       }
     },
-    "owner": "iovf",
+    "owner": "ikabotts-organization",
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/67564153-fced-432c-b065-bc90c9cdd821"
