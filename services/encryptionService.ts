@@ -1,6 +1,7 @@
 import crypto from 'react-native-quick-crypto';
 import { Buffer } from '@craftzdog/react-native-buffer';
 import Toast from 'react-native-root-toast';
+import i18n from '@/app/i18n';
 
 const generateSalt = () => {
   return crypto.randomBytes(16);
@@ -36,7 +37,7 @@ export const encryptData = async (data: string, password: string) => {
 
     return fileContent;
   } catch (error) {
-    Toast.show('Encryption failed. Please try again.', {
+    Toast.show(i18n.t('Encryption failed. Please try again.'), {
       duration: Toast.durations.LONG,
       position: Toast.positions.BOTTOM,
     });
@@ -64,7 +65,7 @@ export const decryptData = async (
 
     return decrypted;
   } catch (error) {
-    Toast.show('Decryption failed. Please try again.', {
+    Toast.show(i18n.t('Decryption failed. Please try again.'), {
       duration: Toast.durations.LONG,
       position: Toast.positions.BOTTOM,
     });

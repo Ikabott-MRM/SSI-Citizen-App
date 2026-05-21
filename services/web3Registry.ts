@@ -12,6 +12,14 @@ const CHAIN_ID = parseInt(
 const RPC_URL = process.env.EXPO_PUBLIC_WEB3_RPC_URL || '';
 const CONTRACT_ADDRESS = process.env.EXPO_PUBLIC_WEB3_CONTRACT_ADDRESS || '';
 
+function rootstockNetworkName(chainId: number): string {
+  if (process.env.EXPO_PUBLIC_WEB3_NETWORK_NAME) {
+    return process.env.EXPO_PUBLIC_WEB3_NETWORK_NAME;
+  }
+  if (chainId === 30) return 'rootstock';
+  return 'rootstock-testnet';
+}
+
 // Minimal ABI for reading manifest CID
 const CONTRACT_ABI = [
   'function getManifestCid(bytes32 didKey) external view returns (string memory)',
@@ -29,7 +37,7 @@ function getProvider(): JsonRpcProvider {
     }
     provider = new JsonRpcProvider(RPC_URL, {
       chainId: CHAIN_ID,
-      name: 'rootstock-testnet',
+      name: rootstockNetworkName(CHAIN_ID),
     });
   }
   return provider;

@@ -6,6 +6,7 @@ import React, {
   useRef,
   MutableRefObject,
 } from 'react';
+import i18n from '@/app/i18n';
 
 interface ModalState {
   modalVisible: boolean;
@@ -116,9 +117,9 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
 
   const showModal = (
     message: string,
-    title = 'Atención',
-    confirmButton = 'Sí, eliminar todo',
-    cancelButton = 'Cancelar',
+    title = i18n.t('Modal attention title'),
+    confirmButton = i18n.t('Modal confirm delete all'),
+    cancelButton = i18n.t('Cancel'),
     onConfirm?: () => void | Promise<void>,
     onCancel?: () => void | Promise<void>,
   ) => {

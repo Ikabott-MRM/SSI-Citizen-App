@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
+import i18n from '@/app/i18n';
 
 type DidContextType = {
   didUri: string | null;
@@ -59,7 +60,10 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error('Failed to load initial did data.:', error);
-        Alert.alert('Error', 'An unexpected error occurred.');
+        Alert.alert(
+          i18n.t('Error'),
+          i18n.t('An unexpected error occurred.'),
+        );
       }
     };
     loadDidData();

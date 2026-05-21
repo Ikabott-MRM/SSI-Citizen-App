@@ -6,43 +6,25 @@
     "development": {
       "distribution": "internal",
       "developmentClient": true,
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://100.27.228.0:3000/",
-        "EXPO_PUBLIC_API_KEY": "tHeSecreastPasswrdEv4159",
-        "EXPO_PUBLIC_WEB3_CHAIN_ID": "31",
-        "EXPO_PUBLIC_WEB3_RPC_URL": "https://public-node.testnet.rsk.co",
-        "EXPO_PUBLIC_WEB3_CONTRACT_ADDRESS": "0x657b5B93e07Add7B0dA58043B68f5Ddc57af467F",
-        "EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL": "https://gateway.pinata.cloud"
-      },
+      "environment": "development",
       "ios": {
         "simulator": true
       }
     },
     "preview": {
       "distribution": "internal",
+      "environment": "preview",
       "android": {
-        "buildType": "apk"        
-      },
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://100.27.228.0:3000/",
-        "EXPO_PUBLIC_API_KEY": "tHeSecreastPasswrdEv4159",
-        "EXPO_PUBLIC_WEB3_CHAIN_ID": "31",
-        "EXPO_PUBLIC_WEB3_RPC_URL": "https://public-node.testnet.rsk.co",
-        "EXPO_PUBLIC_WEB3_CONTRACT_ADDRESS": "0x657b5B93e07Add7B0dA58043B68f5Ddc57af467F",
-        "EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL": "https://gateway.pinata.cloud"
+        "buildType": "apk"
       },
       "ios": {
         "simulator": true
       }
     },
     "production": {
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://100.27.228.0:3000/",
-        "EXPO_PUBLIC_API_KEY": "tHeSecreastPasswrdEv4159",
-        "EXPO_PUBLIC_WEB3_CHAIN_ID": "31",
-        "EXPO_PUBLIC_WEB3_RPC_URL": "https://public-node.testnet.rsk.co",
-        "EXPO_PUBLIC_WEB3_CONTRACT_ADDRESS": "0x657b5B93e07Add7B0dA58043B68f5Ddc57af467F",
-        "EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL": "https://gateway.pinata.cloud"
+      "environment": "production",
+      "android": {
+        "buildType": "apk"
       }
     }
   },

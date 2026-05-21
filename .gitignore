@@ -10,8 +10,12 @@ npm-debug.*
 *.orig.*
 web-build/
 .env
+.env.*
+!.env.example
 .idea
+google-services.json
 
+debugApp/
 ios/*
 android/*
 # macOS

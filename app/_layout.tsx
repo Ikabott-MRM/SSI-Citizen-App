@@ -1,4 +1,7 @@
 import './i18n';
+import i18n from './i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageKey } from '@/@types/language';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { useEffect } from 'react';
@@ -63,6 +66,19 @@ export default function RootLayout() {
   useEffect(() => {
     (async function initializeApp() {
       await initDatabase();
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async function restoreLanguage() {
+      try {
+        const saved = await AsyncStorage.getItem(StorageKey.language);
+        if (saved === 'en' || saved === 'es') {
+          await i18n.changeLanguage(saved);
+        }
+      } catch {
+        // ignore
+      }
     })();
   }, []);
 

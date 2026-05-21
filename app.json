@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "IDA Ciudadano",
-    "slug": "ssi-web3",
-    "version": "1.6.8",
+    "slug": "ssi-citizen-app",
+    "version": "1.7.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -24,13 +24,14 @@
       "jsEngine": "hermes"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "usesCleartextTraffic": true,
-      "package": "com.iovf.driverlicensemobile"
+      "googleServicesFile": "./google-services.json",
+      "package": "com.ssi.driverlicensemobile"
     },
     "plugins": [
       "expo-router",
@@ -51,13 +52,11 @@
         "origin": false
       },
       "eas": {
-        "projectId": "0982af0f-0162-4ce7-8e12-e8f76b6dab90"
+        "projectId": "1d7f1dc8-8209-4e6e-8ead-e56b7eb2bb5b"
       }
     },
-    "owner": "ikabotts-organization",
+    "owner": "ikabott",
     "runtimeVersion": "1.0.0",
-    "updates": {
-      "url": "https://u.expo.dev/67564153-fced-432c-b065-bc90c9cdd821"
-    }
+    "updates": {}
   }
 }

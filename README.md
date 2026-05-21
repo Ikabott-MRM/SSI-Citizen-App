@@ -18,6 +18,22 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
     npx expo start
    ```
 
+3. Configure local environment variables
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Update `.env` with the API key and endpoints for your target environment.
+
+4. Add Firebase Android config
+
+   This repo ignores `google-services.json` on purpose. Download your own
+   `google-services.json` from Firebase Console and place it at the project
+   root:
+
+   - `./google-services.json`
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
@@ -26,6 +42,30 @@ In the output, you'll find options to open the app in a
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## EAS environments
+
+This app is configured to read all `EXPO_PUBLIC_*` values from EAS environment
+variables (not from committed secrets in `eas.json`).
+
+- `development`: local/team testing (Rootstock testnet)
+- `preview`: internal APK builds (Rootstock testnet)
+- `production`: release builds (Rootstock mainnet + `https://api-ssi.iovf.org`)
+
+Create or update values:
+
+```bash
+eas env:create --environment production --name EXPO_PUBLIC_API_KEY --value "<your-key>" --visibility sensitive
+eas env:list --environment production
+```
+
+Build examples:
+
+```bash
+eas build --profile preview --platform android
+eas build --profile production --platform android
+eas build --profile production --platform ios
+```
 
 ## Contributing
 

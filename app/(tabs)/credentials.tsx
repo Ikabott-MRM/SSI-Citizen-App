@@ -13,6 +13,9 @@ import FabWithMenu from '@/components/FabWithMenu';
 import { Stack } from 'expo-router';
 import { Credential } from '@/@types/credential';
 import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale/en-US';
+import { es as esLocale } from 'date-fns/locale/es';
+import type { Locale } from 'date-fns';
 import { useNetInfo } from '@/hooks/useNetInfo';
 import { useEffect, useState } from 'react';
 import {
@@ -43,6 +46,7 @@ const mapCredentials = (
   credentials: Credential[],
   styles: Styles,
   t: TFunction<'translation', undefined>,
+  dateLocale: Locale,
 ) => {
   return credentials.map(credential => ({
     id: credential.verifiableCredential.vcDataModel.id,
@@ -102,7 +106,8 @@ const mapCredentials = (
               new Date(
                 credential.verifiableCredential.vcDataModel.issuanceDate,
               ),
-              'dd/MM/yyyy',
+              'P',
+              { locale: dateLocale },
             )}
           </Text>
         )}
@@ -113,7 +118,8 @@ const mapCredentials = (
               new Date(
                 credential.verifiableCredential.vcDataModel.expirationDate,
               ),
-              'dd/MM/yyyy',
+              'P',
+              { locale: dateLocale },
             )}
           </Text>
         )}
@@ -141,14 +147,14 @@ const insertCredentials = async (credentials: Credential[]) => {
       } = cred.verifiableCredential.vcDataModel;
 
       if (
-        (cred.vcJwt,
-        id,
-        issuer,
-        issuanceDate,
-        expirationDate,
-        firstname,
-        lastname,
-        licenseCategory)
+        cred.vcJwt &&
+        id &&
+        issuer &&
+        issuanceDate &&
+        expirationDate &&
+        firstname &&
+        lastname &&
+        licenseCategory
       ) {
         await insertCredential(
           cred.vcJwt,
@@ -187,7 +193,8 @@ const mapDatabaseCredentials = (
 };
 
 export default function Credentials() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'es' ? esLocale : enUS;
   const theme = useTheme<CustomTheme>();
   const { didUri } = useDid();
 
@@ -214,22 +221,26 @@ export default function Credentials() {
 
       if (data) {
         // @ts-expect-error
-        const mappedData = mapCredentials(data, styles, t);
+        const mappedData = mapCredentials(data, styles, t, dateLocale);
         setCredentials(mappedData);
       }
     } catch (error) {
-      if (error && typeof error === 'string') {
-        Toast.show(error as string, {
-          duration: Toast.durations.LONG,
-          position: Toast.positions.BOTTOM,
-        });
-      }
+      const message =
+        typeof error === 'string'
+          ? error
+          : error instanceof Error
+            ? error.message
+            : t('An error occurred loading credentials');
+      Toast.show(message, {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, [isConnected]);
+  }, [isConnected, i18n.language]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -239,7 +250,7 @@ export default function Credentials() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerTitle: 'Credentials' }} />
+      <Stack.Screen options={{ headerTitle: t('Credentials') }} />
       <ScrollView
         style={styles.scrollView}
         refreshControl={

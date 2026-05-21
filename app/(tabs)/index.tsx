@@ -30,6 +30,7 @@ import {
   validatePwd,
 } from '@/utils/helpers';
 import { useLocalSearchParams } from 'expo-router';
+import { getPublicEnv } from '@/utils/publicEnv';
 
 import { Accordion } from '@/components/Accordion';
 import { useMailMutation } from '@/hooks/mutations/useMailMutation';
@@ -65,9 +66,18 @@ export default function HomeScreen() {
   const { createDid, isPending } = useDidMutation();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [debugLog, setDebugLog] = useState<string[]>([]);
   const { sendMail } = useMailMutation();
   const [selectedDocument, setSelectedDocument] =
     useState<DocumentPicker.DocumentPickerAsset>();
+
+  const pushDebugLog = (message: string) => {
+    const line = `[${new Date().toISOString()}] ${message}`;
+    // Also try to emit to logcat (ReactNativeJS) when available.
+    // eslint-disable-next-line no-console
+    console.log(line);
+    setDebugLog(prev => [line, ...prev].slice(0, 30));
+  };
 
   useVCodeAttempts(t, hideModal);
   useVerificationCode({
@@ -130,13 +140,7 @@ export default function HomeScreen() {
   };
 
   const handleDeleteDid = async () => {
-    showModal(
-      'Al borrar el DID se eliminarán todas las credenciales y solicitudes de la aplicación. ¿Está seguro de que desea eliminar todo y empezar de nuevo?',
-      undefined,
-      undefined,
-      undefined,
-      deleteDid,
-    );
+    showModal(t('Delete DID confirmation message'), undefined, undefined, undefined, deleteDid);
   };
 
   const handleRetrieveDid = async (_input1: string, input2?: string) => {
@@ -180,21 +184,60 @@ export default function HomeScreen() {
   };
 
   const handleCreateDid = async () => {
-    await createDid(undefined, {
-      onSuccess: async data => {
-        setDidUri(data.uri);
-        setPortableDid(JSON.stringify(data));
-        await initDatabase();
-      },
-      onError: error => {
-        if (typeof error === 'string') {
-          Toast.show(error, {
-            duration: Toast.durations.LONG,
-            position: Toast.positions.BOTTOM,
-          });
-        }
-      },
-    });
+    try {
+      pushDebugLog('Create DID button pressed');
+      const resolvedBaseUrl =
+        getPublicEnv('EXPO_PUBLIC_API_BASE_URL') ??
+        'https://pxsmhnkq4i.execute-api.us-east-1.amazonaws.com/';
+      const resolvedHasApiKey = Boolean(getPublicEnv('EXPO_PUBLIC_API_KEY'));
+      pushDebugLog(
+        `EXPO_PUBLIC_API_BASE_URL=${resolvedBaseUrl} (env=${String(
+          getPublicEnv('EXPO_PUBLIC_API_BASE_URL'),
+        )})`,
+      );
+      pushDebugLog(
+        `EXPO_PUBLIC_API_KEY set=${resolvedHasApiKey} (env=${String(
+          Boolean(getPublicEnv('EXPO_PUBLIC_API_KEY')),
+        )})`,
+      );
+
+      Toast.show(t('Creating DID…'), {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+      });
+
+      await createDid(undefined, {
+        onSuccess: async data => {
+          pushDebugLog(`Create DID success. uri=${data?.uri ?? '(missing)'}`);
+          setDidUri(data.uri);
+          setPortableDid(JSON.stringify(data));
+          await initDatabase();
+        },
+        onError: error => {
+          // This callback runs, but we also catch below for additional details.
+          const msg =
+            typeof error === 'string'
+              ? error
+              : error && typeof error === 'object' && 'message' in error
+                ? String((error as { message?: unknown }).message)
+                : String(error);
+          pushDebugLog(`Create DID onError: ${msg}`);
+        },
+      });
+    } catch (error) {
+      const msg =
+        typeof error === 'string'
+          ? error
+          : error && typeof error === 'object' && 'message' in error
+            ? String((error as { message?: unknown }).message)
+            : String(error);
+
+      pushDebugLog(`Create DID threw: ${msg}`);
+      Toast.show(t('Create DID failed', { message: msg }), {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+      });
+    }
   };
 
   const cancelRetrieval = (): void => {
@@ -352,6 +395,31 @@ export default function HomeScreen() {
           >
             {t('Have a DID? Retrieve it.')}
           </Button>
+          {!!debugLog.length && (
+            <View style={{ marginTop: 16, paddingHorizontal: 6 }}>
+              <Text
+                style={{
+                  color: theme.customColors.typography.secondary,
+                  fontSize: 12,
+                  marginBottom: 6,
+                }}
+              >
+                {t('Debug log (latest first)')}
+              </Text>
+              {debugLog.slice(0, 6).map(line => (
+                <Text
+                  key={line}
+                  style={{
+                    color: theme.customColors.typography.secondary,
+                    fontSize: 10,
+                    marginBottom: 2,
+                  }}
+                >
+                  {line}
+                </Text>
+              ))}
+            </View>
+          )}
         </>
       )}
       {!isPending && didUri && (
@@ -362,7 +430,7 @@ export default function HomeScreen() {
             mode="contained"
             onPress={handleDeleteDid}
           >
-            Borrar tu DID {'\n'}(Solo para Test)
+            {t('Delete DID test button')}
           </Button>
         </>
       )}

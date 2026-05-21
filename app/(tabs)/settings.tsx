@@ -58,8 +58,8 @@ export default function Settings() {
           value={i18n.language}
           onValueChange={handleSelectLanguage}
           items={[
-            { label: 'English', value: 'en' },
-            { label: 'Español', value: 'es' },
+            { label: t('languageEnglish'), value: 'en' },
+            { label: t('languageSpanish'), value: 'es' },
           ]}
         />
         {didUri && isBackupDeclined && !isBackupCompleted && (

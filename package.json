@@ -1,7 +1,7 @@
 {
   "name": "driver-license-mobile",
   "main": "expo-router/entry",
-  "version": "1.6.8",
+  "version": "1.7.0",
   "scripts": {
     "start": "expo start",
     "format": "prettier --write \"app/**/*.ts\" \"app/**/*.tsx\" \"components/**/*.tsx\" \"constants/**/*.ts\" \"hooks/**/*.ts\" \"services/**/*.ts\" \"providers/**/*.tsx\" ",

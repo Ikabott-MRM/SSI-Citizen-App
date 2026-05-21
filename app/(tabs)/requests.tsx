@@ -19,6 +19,7 @@ import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { useDid } from '@/providers/DidProvider';
+import { getPublicEnv } from '@/utils/publicEnv';
 
 const getCredentialTypes = (
   t: (key: string) => string,
@@ -46,6 +47,22 @@ interface Request {
   status: string;
   schema_id: string;
   document_url: string;
+}
+
+const DEFAULT_API_BASE_URL = 'https://api-ssi.iovf.org';
+
+function normalizeBaseUrl(url: string | undefined): string {
+  if (!url) return DEFAULT_API_BASE_URL;
+  return url.replace(/\/+$/, '');
+}
+
+function resolveDocumentUrl(documentUrl: string): string {
+  // If backend already returns absolute URL, use it as-is.
+  if (/^https?:\/\//i.test(documentUrl)) return documentUrl;
+
+  const baseUrl = normalizeBaseUrl(getPublicEnv('EXPO_PUBLIC_API_BASE_URL'));
+  const path = documentUrl.startsWith('/') ? documentUrl : `/${documentUrl}`;
+  return `${baseUrl}${path}`;
 }
 
 interface Styles {
@@ -107,7 +124,7 @@ const mapRequests = (
         </View>
         <View style={styles.documentImageContainer}>
           <Image
-            source={`https://identity-api.mangofield-2f4eea69.brazilsouth.azurecontainerapps.io/${request.document_url}`}
+            source={resolveDocumentUrl(request.document_url)}
             style={[styles.documentImage, { height: imageHeight }]}
             transition={300}
           />
