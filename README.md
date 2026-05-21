@@ -34,6 +34,13 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
    - `./google-services.json`
 
+   For EAS cloud builds, upload it as a file environment variable (already
+   configured for this project if you have access):
+
+   ```bash
+   eas env:create --environment production --name GOOGLE_SERVICES_JSON --type file --value ./google-services.json --visibility secret
+   ```
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
