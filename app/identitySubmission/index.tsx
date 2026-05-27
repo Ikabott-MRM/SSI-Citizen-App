@@ -25,6 +25,9 @@ import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
 import { useDid } from '@/providers/DidProvider';
 
+const DRIVER_LICENSE_SCHEMA_ID = 'drivers_license';
+const PRODUCTION_REGISTRY_SCHEMA_ID = 'production_registry';
+
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round((dimensions.width * 9) / 16);
 const imageWidth = dimensions.width - 30;
@@ -41,6 +44,9 @@ export default function Identity() {
   const router = useRouter();
   const theme = useTheme<CustomTheme>();
   const [image, setImage] = useState<string | null>(null);
+  const [selectedSchema, setSelectedSchema] = useState<string>(
+    DRIVER_LICENSE_SCHEMA_ID,
+  );
   const { didUri } = useDid();
   const { uploadDocumentFile, isPending } = useIdentityMutation();
   const styles = styleFnc({
@@ -87,6 +93,7 @@ export default function Identity() {
       type: 'image/jpeg',
       name: 'document-image',
     });
+    formData.append('schema_id', selectedSchema);
 
     uploadDocumentFile(
       {
@@ -134,18 +141,52 @@ export default function Identity() {
         }}
       />
       {!image && didUri && (
-        <TouchableOpacity onPress={pickImage}>
-          <View style={styles.containerUpload}>
-            <Ionicons
-              name="cloud-upload"
-              size={240}
-              color={theme.colors.primary}
-            />
-            <Button style={styles.button} mode="contained" textColor="#444">
-              {t('Upload image')}
-            </Button>
+        <View style={styles.containerUpload}>
+          <View style={styles.schemaPicker}>
+            <Text style={styles.schemaTitle}>{t('Credential type')}</Text>
+            <View style={styles.schemaButtons}>
+              <Button
+                mode={
+                  selectedSchema === DRIVER_LICENSE_SCHEMA_ID
+                    ? 'contained'
+                    : 'outlined'
+                }
+                onPress={() => setSelectedSchema(DRIVER_LICENSE_SCHEMA_ID)}
+              >
+                {t('Driver license')}
+              </Button>
+              <Button
+                mode={
+                  selectedSchema === PRODUCTION_REGISTRY_SCHEMA_ID
+                    ? 'contained'
+                    : 'outlined'
+                }
+                onPress={() => setSelectedSchema(PRODUCTION_REGISTRY_SCHEMA_ID)}
+              >
+                {t('Production registry')}
+              </Button>
+            </View>
           </View>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={pickImage}>
+            <View style={styles.containerUpload}>
+              <Ionicons
+                name="cloud-upload"
+                size={240}
+                color={theme.colors.primary}
+              />
+              <Button style={styles.button} mode="contained" textColor="#444">
+                {t('Upload image')}
+              </Button>
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.schemaSelected}>
+            {t('Selected credential type')}: {t(
+              selectedSchema === DRIVER_LICENSE_SCHEMA_ID
+                ? 'Driver license'
+                : 'Production registry',
+            )}
+          </Text>
+        </View>
       )}
       {image && !isPending && didUri && (
         <View style={styles.imageContainer}>
@@ -203,6 +244,22 @@ const styleFnc = (css: { container: { backgroundColor: string } }) =>
       flexDirection: 'column',
       alignItems: 'center',
       cursor: 'pointer',
+    },
+    schemaPicker: {
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+    schemaButtons: {
+      flexDirection: 'row',
+      width: 320,
+      justifyContent: 'space-between',
+    },
+    schemaTitle: {
+      color: '#CCC',
+    },
+    schemaSelected: {
+      marginTop: 10,
+      color: '#CCC',
     },
     imageContainer: {
       marginHorizontal: 15,

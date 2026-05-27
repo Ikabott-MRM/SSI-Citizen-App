@@ -26,6 +26,7 @@ const getCredentialTypes = (
 ): { [key in Request['schema_id']]: string } => {
   return {
     drivers_license: t('Driver license'),
+    production_registry: t('Production registry'),
   };
 };
 
@@ -202,7 +203,7 @@ const stylesFnc = (colors: {
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#00ff85',
+      color: '#C5A028',
       textAlign: 'center',
       marginBottom: 20,
     },

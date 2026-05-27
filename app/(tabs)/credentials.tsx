@@ -41,6 +41,17 @@ interface Styles {
   labelText: TextStyle;
 }
 
+const isProductionRegistryCredential = (type: string[] = []) =>
+  type.some(t => t.includes('productionRegistry'));
+
+const getCredentialTitle = (
+  type: string[] = [],
+  t: TFunction<'translation', undefined>,
+) =>
+  isProductionRegistryCredential(type)
+    ? t('Production registry')
+    : t('Driver license');
+
 // Function to map credentials to the required format
 const mapCredentials = (
   credentials: Credential[],
@@ -60,7 +71,10 @@ const mapCredentials = (
             textTransform: 'uppercase',
           }}
         >
-          {t('Driver license')}
+          {getCredentialTitle(
+            credential.verifiableCredential.vcDataModel.type,
+            t,
+          )}
         </Text>
       </View>
     ),
@@ -97,6 +111,42 @@ const mapCredentials = (
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .licenseCategory
             }
+          </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject.tipo && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>{t('Type')}: </Text>
+            {credential.verifiableCredential.vcDataModel.credentialSubject.tipo}
+          </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject
+          .cantidad && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>{t('Quantity')}: </Text>
+            {
+              credential.verifiableCredential.vcDataModel.credentialSubject
+                .cantidad
+            }
+          </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject.precio && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>{t('Price')}: </Text>
+            {credential.verifiableCredential.vcDataModel.credentialSubject.precio}
+          </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject
+          .fechaEntrega && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>{t('Delivery date')}: </Text>
+            {format(
+              new Date(
+                credential.verifiableCredential.vcDataModel.credentialSubject
+                  .fechaEntrega,
+              ),
+              'P',
+              { locale: dateLocale },
+            )}
           </Text>
         )}
         {credential.verifiableCredential.vcDataModel.issuanceDate && (
@@ -143,8 +193,13 @@ const insertCredentials = async (credentials: Credential[]) => {
         issuer,
         expirationDate,
         issuanceDate,
+        type,
         credentialSubject: { firstname, lastname, licenseCategory },
       } = cred.verifiableCredential.vcDataModel;
+
+      if (isProductionRegistryCredential(type)) {
+        continue;
+      }
 
       if (
         cred.vcJwt &&
@@ -178,6 +233,7 @@ const mapDatabaseCredentials = (
     verifiableCredential: {
       vcDataModel: {
         id: dbCredential.dataModelId,
+        type: ['https://identity-iovf.xyz/schemas/driversLicense'],
         issuanceDate: dbCredential.issuanceDate,
         expirationDate: dbCredential.expirationDate,
         issuer: dbCredential.issuer,
@@ -349,7 +405,7 @@ const stylesFnc = (css: { container: { backgroundColor: string } }) =>
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#00ff85',
+      color: '#C5A028',
       textAlign: 'center',
       marginBottom: 20,
       fontFamily: 'Roboto',

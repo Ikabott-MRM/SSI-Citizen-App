@@ -1,8 +1,12 @@
 interface CredentialSubject {
   id: string;
-  firstname: string;
-  lastname: string;
-  licenseCategory: string;
+  firstname?: string;
+  lastname?: string;
+  licenseCategory?: string;
+  tipo?: string;
+  cantidad?: string;
+  precio?: string;
+  fechaEntrega?: string;
 }
 
 interface VcDataModel {
@@ -12,7 +16,7 @@ interface VcDataModel {
   issuer: string;
   issuanceDate: string;
   credentialSubject: CredentialSubject;
-  expirationDate: string;
+  expirationDate?: string;
 }
 
 interface VerifiableCredential {
