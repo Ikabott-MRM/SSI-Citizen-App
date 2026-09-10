@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
+import { tenantBrand } from '@/constants/brand';
 
 export default function TabLayout() {
   const { t } = useTranslation();
@@ -11,8 +12,8 @@ export default function TabLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#343434',
-          borderColor: '#343434',
+          backgroundColor: tenantBrand.headerBackground,
+          borderColor: tenantBrand.headerBackground,
         },
         tabBarLabel: ({ focused }) => {
           let label;

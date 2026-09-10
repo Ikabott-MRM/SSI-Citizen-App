@@ -4,6 +4,7 @@ import { FAB, useTheme, Portal, Modal, Text, Button } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { CustomTheme } from '@/@types/theme';
 import { useTranslation } from 'react-i18next';
+import { tenantBrand } from '@/constants/brand';
 
 const FabWithMenu = () => {
   const { t } = useTranslation();
@@ -14,9 +15,12 @@ const FabWithMenu = () => {
     setVisible(!visible);
   };
 
-  const handleNewCredential = () => {
+  const handleNewCredential = (schemaId: string) => {
     setVisible(false);
-    router.push('/identitySubmission');
+    router.push({
+      pathname: '/identitySubmission',
+      params: { schemaId },
+    });
   };
 
   return (
@@ -26,7 +30,7 @@ const FabWithMenu = () => {
           ...styles.fab,
           backgroundColor: theme.colors.primary,
         }}
-        color="#444"
+        color={theme.colors.onPrimary}
         mode="flat"
         icon="plus"
         onPress={toggleModal}
@@ -52,39 +56,20 @@ const FabWithMenu = () => {
           >
             {t('Request new credential')}
           </Text>
-          <Button
-            labelStyle={{
-              fontSize: 18,
-            }}
-            style={styles.button}
-            mode="contained"
-            onPress={() => handleNewCredential()}
-            textColor={theme.customColors.typography.color3}
-          >
-            {t('Driver license')}
-          </Button>
-          <Button
-            labelStyle={{
-              fontSize: 18,
-            }}
-            style={styles.buttonDisabled}
-            mode="contained"
-            textColor={theme.customColors.typography.color3}
-            disabled={true}
-          >
-            {t('Passport')}
-          </Button>
-          <Button
-            labelStyle={{
-              fontSize: 18,
-            }}
-            style={styles.buttonDisabled}
-            mode="contained"
-            textColor={theme.customColors.typography.color3}
-            disabled={true}
-          >
-            {t('Identification document')}
-          </Button>
+          {tenantBrand.credentials.map(cred => (
+            <Button
+              key={cred.id}
+              labelStyle={{
+                fontSize: 18,
+              }}
+              style={styles.button}
+              mode="contained"
+              onPress={() => handleNewCredential(cred.id)}
+              textColor={theme.colors.onPrimary}
+            >
+              {t(cred.labelKey)}
+            </Button>
+          ))}
         </Modal>
       </Portal>
     </View>
@@ -100,28 +85,6 @@ const styles = StyleSheet.create({
   fab: {
     borderRadius: 50,
   },
-  menu: {
-    backgroundColor: '#f2f2f2',
-    position: 'absolute',
-    top: -50,
-    minWidth: 120,
-    right: 0,
-    color: '#333',
-    fontWeight: 600,
-    borderWidth: 1,
-    borderColor: '#F9f9f9',
-    zIndex: 999,
-    fontSize: 16,
-    lineHeight: 24,
-    borderRadius: 5,
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
-  },
-  option: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
-  },
   button: {
     marginTop: 20,
     width: 300,
@@ -130,16 +93,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 25,
     fontFamily: 'Roboto',
-  },
-  buttonDisabled: {
-    marginTop: 20,
-    width: 300,
-    height: 50,
-    justifyContent: 'center',
-    alignSelf: 'center',
-    borderRadius: 25,
-    fontFamily: 'Roboto',
-    backgroundColor: '#464646',
   },
 });
 

@@ -38,14 +38,16 @@ const theme = {
   colors: {
     ...DefaultTheme.colors,
     primary: tenantBrand.primary,
+    onPrimary: tenantBrand.onPrimary,
     secondary: tenantBrand.accent,
+    onSecondary: tenantBrand.onPrimary,
     background: '#444',
   },
   customColors: {
     typography: {
       primary: '#FFF',
       secondary: '#CCC',
-      color3: '#333',
+      color3: tenantBrand.onPrimary,
     },
     background: {
       primary: '#3a3a3a',
@@ -106,7 +108,7 @@ export default function RootLayout() {
                   headerStyle: {
                     backgroundColor: tenantBrand.headerBackground,
                   },
-                  headerTintColor: '#4c4c4c',
+                  headerTintColor: tenantBrand.slug === 'geyser' ? '#E8E8E8' : '#4c4c4c',
                   headerTitleStyle: {
                     fontWeight: 'bold',
                   },
