@@ -2,26 +2,31 @@ const appJson = require('./app.json');
 
 /**
  * Bake into expo.extra so release APKs can read them via getPublicEnv.
- * Prefer EAS/profile env when it already points at the new API; otherwise force cutover values
- * (EAS "production" historically still had legacy iovf / old API keys).
+ * Public env comes only from process.env (EAS Environment / local .env).
+ * Never hardcode API keys here.
  */
-const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL || '';
-const envKey = process.env.EXPO_PUBLIC_API_KEY || '';
-const useEnvUrl =
-  envUrl.includes('api.ssi-api.xyz') || envUrl.includes('32.193.115.213');
-const useEnvKey =
-  Boolean(envKey) &&
-  envKey !== 'e8be2a7d799ac712e250317b1edf276c' &&
-  !envKey.includes('api-key-for-interacting');
+const apiBaseUrl =
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.ssi-api.xyz';
+const apiKey = process.env.EXPO_PUBLIC_API_KEY || '';
+const ipfsGateway =
+  process.env.EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL ||
+  'https://gateway.pinata.cloud';
+
+const isReleaseLike =
+  Boolean(process.env.EAS_BUILD) ||
+  Boolean(process.env.CI) ||
+  process.env.NODE_ENV === 'production';
+
+if (!apiKey && isReleaseLike) {
+  throw new Error(
+    'EXPO_PUBLIC_API_KEY is missing. Set it in Expo EAS Environment variables (production / per-tenant) or in a local .env — never commit keys. See EAS_ENV_SETUP.md.'
+  );
+}
 
 const publicEnv = {
-  EXPO_PUBLIC_API_BASE_URL: useEnvUrl ? envUrl : 'https://api.ssi-api.xyz',
-  EXPO_PUBLIC_API_KEY: useEnvKey
-    ? envKey
-    : 'fb9e01c186166997e295226f7f3c9871',
-  EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL:
-    process.env.EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL ||
-    'https://gateway.pinata.cloud',
+  EXPO_PUBLIC_API_BASE_URL: apiBaseUrl,
+  EXPO_PUBLIC_API_KEY: apiKey,
+  EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL: ipfsGateway,
 };
 
 /** @type {import('expo/config').ExpoConfig} */
