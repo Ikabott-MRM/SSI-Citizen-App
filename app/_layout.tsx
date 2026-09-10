@@ -18,9 +18,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initDatabase } from '@/database/db';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { CustomTheme } from '@/@types/theme';
+import { tenantBrand } from '@/constants/brand';
 import { ModalProvider } from '@/providers/ModalProvider';
 import { Modal } from '@/components/Modal';
 import { DidProvider } from '@/providers/DidProvider';
+import { DidSessionProvider } from '@/providers/DidSessionProvider';
 import { FormModal } from '@/components/FormModal';
 
 export {
@@ -35,8 +37,8 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#00ff85',
-    secondary: '#535353',
+    primary: tenantBrand.primary,
+    secondary: tenantBrand.accent,
     background: '#444',
   },
   customColors: {
@@ -94,6 +96,7 @@ export default function RootLayout() {
 
   return (
     <DidProvider>
+      <DidSessionProvider>
       <QueryClientProvider client={queryClient}>
         <PaperProvider theme={theme}>
           <ModalProvider>
@@ -101,7 +104,7 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{
                   headerStyle: {
-                    backgroundColor: '#343434',
+                    backgroundColor: tenantBrand.headerBackground,
                   },
                   headerTintColor: '#4c4c4c',
                   headerTitleStyle: {
@@ -110,7 +113,7 @@ export default function RootLayout() {
                   headerTitleAlign: 'center',
                   headerTitle: () => (
                     <Image
-                      source={require('../assets/images/logo-iovf.png')}
+                      source={tenantBrand.logo}
                       style={{ width: 80, height: 30 }}
                     />
                   ),
@@ -140,6 +143,7 @@ export default function RootLayout() {
           </ModalProvider>
         </PaperProvider>
       </QueryClientProvider>
+      </DidSessionProvider>
     </DidProvider>
   );
 }
