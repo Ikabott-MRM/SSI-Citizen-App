@@ -41,16 +41,20 @@ interface Styles {
   labelText: TextStyle;
 }
 
-const isProductionRegistryCredential = (type: string[] = []) =>
-  type.some(t => t.includes('productionRegistry'));
-
 const getCredentialTitle = (
   type: string[] = [],
   t: TFunction<'translation', undefined>,
-) =>
-  isProductionRegistryCredential(type)
-    ? t('Production registry')
-    : t('Driver license');
+) => {
+  const joined = type.join(' ').toLowerCase();
+  if (joined.includes('donor')) return t('Donor');
+  if (joined.includes('fundraiser')) return t('Fundraiser');
+  if (joined.includes('associate')) return t('Associate');
+  if (joined.includes('productionregistry') || joined.includes('production_registry'))
+    return t('Production registry');
+  if (joined.includes('driverslicense') || joined.includes('drivers_license'))
+    return t('Driver license');
+  return t('Credential');
+};
 
 // Function to map credentials to the required format
 const mapCredentials = (
@@ -101,6 +105,22 @@ const mapCredentials = (
               credential.verifiableCredential.vcDataModel.credentialSubject
                 .lastname
             }
+          </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject
+          .projectName && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>{t('Project name')}: </Text>
+            {
+              credential.verifiableCredential.vcDataModel.credentialSubject
+                .projectName
+            }
+          </Text>
+        )}
+        {credential.verifiableCredential.vcDataModel.credentialSubject.role && (
+          <Text style={styles.credentialText}>
+            <Text style={styles.labelText}>{t('Role')}: </Text>
+            {credential.verifiableCredential.vcDataModel.credentialSubject.role}
           </Text>
         )}
         {credential.verifiableCredential.vcDataModel.credentialSubject

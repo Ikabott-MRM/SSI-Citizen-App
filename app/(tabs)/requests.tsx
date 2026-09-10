@@ -23,10 +23,13 @@ import { getPublicEnv } from '@/utils/publicEnv';
 
 const getCredentialTypes = (
   t: (key: string) => string,
-): { [key in Request['schema_id']]: string } => {
+): Record<string, string> => {
   return {
     drivers_license: t('Driver license'),
     production_registry: t('Production registry'),
+    donor: t('Donor'),
+    fundraiser: t('Fundraiser'),
+    associate: t('Associate'),
   };
 };
 
@@ -110,7 +113,7 @@ const mapRequests = (
           {t('Type of credential requested')}
         </Text>
         <Text style={styles.credentialType}>
-          {getCredentialTypes(t)[request.schema_id]}
+          {getCredentialTypes(t)[request.schema_id] || request.schema_id}
         </Text>
         <Text style={styles.statusLabel}>{t('Status')}</Text>
         <View

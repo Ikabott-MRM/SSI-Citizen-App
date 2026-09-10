@@ -21,6 +21,7 @@ import { useModal } from '@/providers/ModalProvider';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
+import { tenantBrand } from '@/constants/brand';
 import Toast from 'react-native-root-toast';
 import { useDid } from '@/providers/DidProvider';
 import { decryptData } from '@/services/encryptionService';
@@ -328,7 +329,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.h1}>{t('Welcome to IDA DEMO')}</Text>
+      <Text style={styles.h1}>{t('Welcome to tenant', { name: tenantBrand.displayName })}</Text>
       {didUri && (
         <>
           <Accordion
