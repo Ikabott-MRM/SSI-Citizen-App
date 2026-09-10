@@ -50,7 +50,7 @@ interface Request {
   document_url: string;
 }
 
-const DEFAULT_API_BASE_URL = 'https://api-ssi.iovf.org';
+const DEFAULT_API_BASE_URL = 'https://api.ssi-api.xyz';
 
 function normalizeBaseUrl(url: string | undefined): string {
   if (!url) return DEFAULT_API_BASE_URL;

@@ -187,8 +187,7 @@ export default function HomeScreen() {
     try {
       pushDebugLog('Create DID button pressed');
       const resolvedBaseUrl =
-        getPublicEnv('EXPO_PUBLIC_API_BASE_URL') ??
-        'https://pxsmhnkq4i.execute-api.us-east-1.amazonaws.com/';
+        getPublicEnv('EXPO_PUBLIC_API_BASE_URL') ?? 'https://api.ssi-api.xyz';
       const resolvedHasApiKey = Boolean(getPublicEnv('EXPO_PUBLIC_API_KEY'));
       pushDebugLog(
         `EXPO_PUBLIC_API_BASE_URL=${resolvedBaseUrl} (env=${String(

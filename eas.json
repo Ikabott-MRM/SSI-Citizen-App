@@ -26,6 +26,28 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "production-ip": {
+      "environment": "production",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "http://32.193.115.213",
+        "EXPO_PUBLIC_API_KEY": "fb9e01c186166997e295226f7f3c9871",
+        "EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL": "https://gateway.pinata.cloud"
+      }
+    },
+    "production-ssi-api": {
+      "environment": "production",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.ssi-api.xyz",
+        "EXPO_PUBLIC_API_KEY": "fb9e01c186166997e295226f7f3c9871",
+        "EXPO_PUBLIC_IPFS_GATEWAY_BASE_URL": "https://gateway.pinata.cloud"
+      }
     }
   },
   "submit": {

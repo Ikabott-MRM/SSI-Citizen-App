@@ -7,8 +7,7 @@ import i18n from '@/app/i18n';
 
 // Default API endpoint (HTTPS) for all builds.
 // Keep env override available for local dev / staging switches.
-const DEFAULT_PUBLIC_API_BASE_URL =
-  'https://pxsmhnkq4i.execute-api.us-east-1.amazonaws.com';
+const DEFAULT_PUBLIC_API_BASE_URL = 'https://api.ssi-api.xyz';
 
 function normalizeBaseUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
