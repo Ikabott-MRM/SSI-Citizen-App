@@ -35,7 +35,7 @@ const Dropdown = ({ items, onValueChange, value }: DropdownProps) => {
           items={items}
           useNativeAndroidPickerStyle={false}
           Icon={() => {
-            return <Ionicons name="caret-down" size={16} color="#CCC" />;
+            return <Ionicons name="caret-down" size={16} color="#4A4A4A" />;
           }}
           style={dropStyles}
         />

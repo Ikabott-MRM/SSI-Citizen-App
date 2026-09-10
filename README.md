@@ -89,3 +89,7 @@ Read our [contributing guide](./CONTRIBUTING.md) to learn about our development 
 ### License
 
 React is [Apache 2.0](./LICENSE).
+
+## EAS / tenant API keys
+
+See [EAS_ENV_SETUP.md](./EAS_ENV_SETUP.md) — `production-geyser` must inject Geyser `apiKeyMobile` (not the legacy `api.ssi-api.xyz` key).

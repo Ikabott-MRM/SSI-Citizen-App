@@ -43,7 +43,7 @@ const List = ({ data }: { data: IList[] }) => {
               key={item.id}
               style={[
                 styles.accordionContainer,
-                { backgroundColor: '#444', borderRadius: 5 },
+                { backgroundColor: '#F5F7F7', borderRadius: 5 },
                 !isOpened && styles.accordionClosed,
               ]}
             >

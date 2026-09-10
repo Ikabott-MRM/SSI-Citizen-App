@@ -73,7 +73,7 @@ const Modal = () => {
               justifyContent: 'center',
               alignSelf: 'center',
               borderRadius: 25,
-              backgroundColor: '#00ff85',
+              backgroundColor: '#00F5DC',
             }}
             labelStyle={{ color: '#444' }}
             onPress={confirmAction}

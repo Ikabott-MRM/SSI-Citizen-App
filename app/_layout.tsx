@@ -41,19 +41,22 @@ const theme = {
     onPrimary: tenantBrand.onPrimary,
     secondary: tenantBrand.accent,
     onSecondary: tenantBrand.onPrimary,
-    background: '#444',
+    background: '#FFFFFF',
+    surface: '#FFFFFF',
+    onSurface: tenantBrand.primaryDark,
+    onBackground: tenantBrand.primaryDark,
   },
   customColors: {
     typography: {
-      primary: '#FFF',
-      secondary: '#CCC',
+      primary: tenantBrand.primaryDark,
+      secondary: '#4A4A4A',
       color3: tenantBrand.onPrimary,
     },
     background: {
-      primary: '#3a3a3a',
-      secondary: '#444',
-      color3: '#555',
-      color4: '#2c2c2c',
+      primary: '#FFFFFF',
+      secondary: '#F5F7F7',
+      color3: '#EEF2F2',
+      color4: '#E4EAEA',
     },
   },
 } as CustomTheme;
@@ -108,7 +111,7 @@ export default function RootLayout() {
                   headerStyle: {
                     backgroundColor: tenantBrand.headerBackground,
                   },
-                  headerTintColor: tenantBrand.slug === 'geyser' ? '#E8E8E8' : '#4c4c4c',
+                  headerTintColor: tenantBrand.slug === 'geyser' ? tenantBrand.primaryDark : '#4c4c4c',
                   headerTitleStyle: {
                     fontWeight: 'bold',
                   },
@@ -116,7 +119,7 @@ export default function RootLayout() {
                   headerTitle: () => (
                     <Image
                       source={tenantBrand.logo}
-                      style={{ width: 80, height: 30 }}
+                      style={{ width: 120, height: 40, resizeMode: 'contain' }}
                     />
                   ),
                   headerLeft: () =>

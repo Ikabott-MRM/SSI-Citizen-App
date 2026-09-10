@@ -284,11 +284,11 @@ const styleFnc = (css: { container: { backgroundColor: string } }) =>
       justifyContent: 'center',
     },
     schemaTitle: {
-      color: '#CCC',
+      color: '#4A4A4A',
     },
     schemaSelected: {
       marginTop: 10,
-      color: '#CCC',
+      color: '#4A4A4A',
     },
     imageContainer: {
       marginHorizontal: 15,
@@ -304,7 +304,7 @@ const styleFnc = (css: { container: { backgroundColor: string } }) =>
     text: {
       textAlign: 'center',
       marginBottom: 10,
-      color: '#CCC',
+      color: '#4A4A4A',
     },
     actionsContainer: {
       marginTop: 10,

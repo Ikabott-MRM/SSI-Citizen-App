@@ -25,7 +25,7 @@ export const Accordion = ({
   };
 
   return (
-    <View style={[styles.accordionContainer, { backgroundColor: '#444' }]}>
+    <View style={[styles.accordionContainer, { backgroundColor: '#F5F7F7' }]}>
       <TouchableOpacity onPress={toggleAccordion}>
         <Text style={styles.accordionTitle}>{title}</Text>
       </TouchableOpacity>

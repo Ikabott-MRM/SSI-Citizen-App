@@ -343,7 +343,7 @@ export default function HomeScreen() {
                 onPress={copyToClipboard}
                 style={styles.iconContainer}
               >
-                <Ionicons name="copy-outline" size={20} color="#CCC" />
+                <Ionicons name="copy-outline" size={20} color={tenantBrand.primaryDark} />
               </TouchableOpacity>
             </View>
           </Accordion>
@@ -469,12 +469,12 @@ const stylesFnc = (css: {
       height: 50,
       justifyContent: 'center',
       borderRadius: 25,
-      color: '#444',
+      backgroundColor: tenantBrand.primary,
     },
     buttonLabel: {
       textAlign: 'center',
       fontSize: 18,
-      color: '#444',
+      color: tenantBrand.onPrimary,
     },
     buttonDelete: {
       marginTop: 20,
@@ -489,7 +489,7 @@ const stylesFnc = (css: {
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#00ff85',
+      color: tenantBrand.primary,
       textAlign: 'center',
       marginBottom: 20,
     },

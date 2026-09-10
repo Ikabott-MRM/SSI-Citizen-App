@@ -206,7 +206,7 @@ const stylesFnc = (colors: {
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#C5A028',
+      color: '#00F5DC',
       textAlign: 'center',
       marginBottom: 20,
     },
@@ -226,7 +226,7 @@ const stylesFnc = (colors: {
       marginRight: 5,
     },
     requestTitleText: {
-      color: '#CCC',
+      color: '#21201C',
       fontSize: 16,
       fontWeight: 'bold',
       textTransform: 'uppercase',
@@ -238,19 +238,19 @@ const stylesFnc = (colors: {
     },
     credentialTypeLabel: {
       marginBottom: 5,
-      color: '#D9D8D9',
+      color: '#4A4A4A',
       fontSize: 14,
       fontWeight: 'bold',
     },
     credentialType: {
-      color: '#fff',
+      color: '#21201C',
       fontSize: 16,
       fontWeight: 'bold',
       marginBottom: 15,
     },
     statusLabel: {
       marginBottom: 5,
-      color: '#D9D8D9',
+      color: '#4A4A4A',
       fontSize: 14,
       fontWeight: 'bold',
     },
