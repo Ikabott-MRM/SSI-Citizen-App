@@ -119,7 +119,11 @@ export default function RootLayout() {
                   headerTitle: () => (
                     <Image
                       source={tenantBrand.logo}
-                      style={{ width: 120, height: 40, resizeMode: 'contain' }}
+                      style={{
+                        width: tenantBrand.slug === 'geyser' ? 148 : 120,
+                        height: 36,
+                        resizeMode: 'contain',
+                      }}
                     />
                   ),
                   headerLeft: () =>

@@ -2,7 +2,7 @@
   "expo": {
     "name": "IDA Ciudadano",
     "slug": "ssi-citizen-app",
-    "version": "1.7.2",
+    "version": "1.7.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -24,7 +24,7 @@
       "jsEngine": "hermes"
     },
     "android": {
-      "versionCode": 14,
+      "versionCode": 15,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
