@@ -51,7 +51,8 @@ interface Request {
   code: string;
   status: string;
   schema_id: string;
-  document_url: string;
+  document_url?: string | null;
+  document_access_url?: string | null;
 }
 
 const DEFAULT_API_BASE_URL = 'https://api.ssi-api.xyz';
@@ -61,12 +62,17 @@ function normalizeBaseUrl(url: string | undefined): string {
   return url.replace(/\/+$/, '');
 }
 
-function resolveDocumentUrl(documentUrl: string): string {
+function resolveDocumentUrl(
+  documentUrl?: string | null,
+  accessUrl?: string | null,
+): string | null {
+  const raw = accessUrl || documentUrl;
+  if (!raw) return null;
   // If backend already returns absolute URL, use it as-is.
-  if (/^https?:\/\//i.test(documentUrl)) return documentUrl;
+  if (/^https?:\/\//i.test(raw)) return raw;
 
   const baseUrl = normalizeBaseUrl(getPublicEnv('EXPO_PUBLIC_API_BASE_URL'));
-  const path = documentUrl.startsWith('/') ? documentUrl : `/${documentUrl}`;
+  const path = raw.startsWith('/') ? raw : `/${raw}`;
   return `${baseUrl}${path}`;
 }
 
@@ -100,7 +106,7 @@ const mapRequests = (
         <View
           style={[
             styles.statusDot,
-            { backgroundColor: getStatusConfig(t)[request.status].color },
+            { backgroundColor: (getStatusConfig(t)[request.status] || getStatusConfig(t).pending).color },
           ]}
         />
         <Text style={styles.requestTitleText}>
@@ -120,20 +126,28 @@ const mapRequests = (
         <View
           style={[
             styles.statusBadge,
-            { backgroundColor: getStatusConfig(t)[request.status].color },
+            { backgroundColor: (getStatusConfig(t)[request.status] || getStatusConfig(t).pending).color },
           ]}
         >
           <Text style={styles.statusText}>
-            {getStatusConfig(t)[request.status].text}
+            {(getStatusConfig(t)[request.status] || getStatusConfig(t).pending).text}
           </Text>
         </View>
-        <View style={styles.documentImageContainer}>
-          <Image
-            source={resolveDocumentUrl(request.document_url)}
-            style={[styles.documentImage, { height: imageHeight }]}
-            transition={300}
-          />
-        </View>
+        {!!resolveDocumentUrl(
+          request.document_url,
+          request.document_access_url,
+        ) && (
+          <View style={styles.documentImageContainer}>
+            <Image
+              source={resolveDocumentUrl(
+                request.document_url,
+                request.document_access_url,
+              )}
+              style={[styles.documentImage, { height: imageHeight }]}
+              transition={300}
+            />
+          </View>
+        )}
       </View>
     ),
   }));
