@@ -19,6 +19,7 @@ import Toast from 'react-native-root-toast';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { useDid } from '@/providers/DidProvider';
+import { useDidSessionContext } from '@/providers/DidSessionProvider';
 import { getPublicEnv } from '@/utils/publicEnv';
 
 const getCredentialTypes = (
@@ -142,8 +143,10 @@ export default function Credentials() {
   const { t } = useTranslation();
   const theme = useTheme<CustomTheme>();
   const styles = stylesFnc(theme.customColors);
-  const { didUri } = useDid();
+  const { didUri, portableDid } = useDid();
+  const { isAuthenticated } = useDidSessionContext();
   const { requests, refetch, error } = useRequestsQuery(didUri || '', {
+    enabled: Boolean(didUri && portableDid && isAuthenticated),
     select: (data: Request[]) => mapRequests(data, styles, t),
   });
 

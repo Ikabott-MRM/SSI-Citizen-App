@@ -5,6 +5,7 @@ import Toast from 'react-native-root-toast';
 import { getPublicEnv } from '@/utils/publicEnv';
 import i18n from '@/app/i18n';
 import type { InternalAxiosRequestConfig } from 'axios';
+import { AxiosHeaders } from 'axios';
 import {
   ensureDidAccessToken,
   isDidAuthEndpoint,
@@ -62,6 +63,25 @@ if (apiKey) {
 
 type DidRetryConfig = InternalAxiosRequestConfig & { _didRetry?: boolean };
 
+function setAuthorizationHeader(
+  config: InternalAxiosRequestConfig,
+  token: string,
+): void {
+  const value = `Bearer ${token}`;
+  if (!config.headers) {
+    config.headers = new AxiosHeaders();
+  }
+  const headers = config.headers as AxiosHeaders & {
+    set?: (k: string, v: string) => void;
+    Authorization?: string;
+  };
+  if (typeof headers.set === 'function') {
+    headers.set('Authorization', value);
+  } else {
+    headers.Authorization = value;
+  }
+}
+
 instance.interceptors.request.use(async (config: DidRetryConfig) => {
   // Avoid logging secrets like api_key; log only the request target.
   const baseURL = config.baseURL ?? instance.defaults.baseURL ?? '';
@@ -72,15 +92,25 @@ instance.interceptors.request.use(async (config: DidRetryConfig) => {
   // eslint-disable-next-line no-console
   console.log(`[API] ${method} ${resolvedUrl}`);
 
-  if (!isDidAuthEndpoint(resolvedUrl) && !isDidAuthEndpoint(url)) {
+  const skipAuth = isDidAuthEndpoint(resolvedUrl) || isDidAuthEndpoint(url);
+  const subject = isDidSubjectRoute(url) || isDidSubjectRoute(resolvedUrl);
+
+  if (!skipAuth) {
     try {
       const token = await ensureDidAccessToken();
       if (token) {
-        config.headers = config.headers ?? {};
-        config.headers.Authorization = `Bearer ${token}`;
+        setAuthorizationHeader(config, token);
+      } else if (subject) {
+        // Don't hit DidJwtAuthGuard without a Bearer (Passport: "No auth token").
+        return Promise.reject(
+          new Error('DID access token unavailable. Recreate or restore your DID.'),
+        );
       }
-    } catch {
-      // Request proceeds; guarded routes will 401 and the response interceptor may retry.
+    } catch (err) {
+      if (subject) {
+        return Promise.reject(err);
+      }
+      // Non-subject routes proceed; guarded routes will 401.
     }
   }
   return config;
@@ -106,8 +136,7 @@ instance.interceptors.response.use(
         try {
           const token = await ensureDidAccessToken({ force: true });
           if (token) {
-            cfg.headers = cfg.headers ?? {};
-            cfg.headers.Authorization = `Bearer ${token}`;
+            setAuthorizationHeader(cfg, token);
             return instance.request(cfg);
           }
         } catch {

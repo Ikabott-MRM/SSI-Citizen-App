@@ -49,10 +49,41 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
         const storedDidUri = await AsyncStorage.getItem('did-uri');
         if (storedDidUri) {
           setDidUriState(storedDidUri);
-          const portableDid = await Keychain.getGenericPassword();
+          // setPortableDid writes service 'portable-did'; older builds used the
+          // default Keychain service. Try named first, then migrate default.
+          let storedPortable: string | null = null;
+          try {
+            const named = await Keychain.getGenericPassword({
+              service: 'portable-did',
+            });
+            if (named && named.password) {
+              storedPortable = named.password;
+            }
+          } catch {
+            // ignore and try default service
+          }
+          if (!storedPortable) {
+            try {
+              const fallback = await Keychain.getGenericPassword();
+              if (fallback && fallback.password) {
+                storedPortable = fallback.password;
+                try {
+                  await Keychain.setGenericPassword(
+                    'user-portable-did',
+                    fallback.password,
+                    { service: 'portable-did' },
+                  );
+                } catch {
+                  // migration is best-effort
+                }
+              }
+            } catch {
+              // ignore
+            }
+          }
           const backupDeclined = await AsyncStorage.getItem('backupDeclined');
-          if (portableDid) {
-            setPortableDidState(portableDid.password);
+          if (storedPortable) {
+            setPortableDidState(storedPortable);
           }
           if (backupDeclined) {
             setIsBackupDeclinedState(true);

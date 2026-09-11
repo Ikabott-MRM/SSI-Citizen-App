@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDid } from '@/providers/DidProvider';
 import { useRouter } from 'expo-router';
-import { version } from '../../package.json';
+import Constants from 'expo-constants';
 import {
   promptDidBackup,
   useVCodeAttempts,
@@ -95,7 +95,7 @@ export default function Settings() {
       </ScrollView>
       <View style={styles.aboutContainer}>
         <Text style={styles.aboutText}>
-          {t('App Version')}: {version}
+          {t('App Version')}: {Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? '—'}
         </Text>
       </View>
       <Snackbar
