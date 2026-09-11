@@ -112,5 +112,7 @@
   "Associate": "Socio",
   "Credential": "Credencial",
   "Project name": "Nombre del proyecto",
-  "Role": "Rol"
+  "Role": "Rol",
+  "DidKeysMissing": "No se encontraron las claves del DID en este teléfono. Recreá el DID o restaurá un backup.",
+  "DidAuthFailed": "No se pudo autenticar el DID. Probá Confirmar de nuevo, o recreá el DID."
 }

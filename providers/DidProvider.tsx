@@ -4,6 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import i18n from '@/app/i18n';
 
+const PORTABLE_DID_SERVICE = 'portable-did';
+const PORTABLE_DID_ACCOUNT = 'user-portable-did';
+
 type DidContextType = {
   didUri: string | null;
   portableDid: string | null;
@@ -30,6 +33,17 @@ export const useDid = () => {
   return context;
 };
 
+/** Reject JWTs / empty strings accidentally stored in Keychain. */
+export function isPortableDidJson(value: string | null | undefined): value is string {
+  if (!value || typeof value !== 'string') return false;
+  try {
+    const parsed = JSON.parse(value) as { privateKeys?: unknown; uri?: unknown };
+    return Array.isArray(parsed.privateKeys) && parsed.privateKeys.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   const [portableDid, setPortableDidState] = useState<string | null>(null);
   const [didUri, setDidUriState] = useState<string | null>(null);
@@ -49,42 +63,35 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
         const storedDidUri = await AsyncStorage.getItem('did-uri');
         if (storedDidUri) {
           setDidUriState(storedDidUri);
-          // setPortableDid writes service 'portable-did'; older builds used the
-          // default Keychain service. Try named first, then migrate default.
-          let storedPortable: string | null = null;
+          const candidates: string[] = [];
           try {
             const named = await Keychain.getGenericPassword({
-              service: 'portable-did',
+              service: PORTABLE_DID_SERVICE,
             });
-            if (named && named.password) {
-              storedPortable = named.password;
-            }
+            if (named?.password) candidates.push(named.password);
           } catch {
-            // ignore and try default service
+            // ignore
           }
-          if (!storedPortable) {
+          try {
+            const fallback = await Keychain.getGenericPassword();
+            if (fallback?.password) candidates.push(fallback.password);
+          } catch {
+            // ignore
+          }
+          const storedPortable = candidates.find(isPortableDidJson) ?? null;
+          if (storedPortable) {
+            setPortableDidState(storedPortable);
             try {
-              const fallback = await Keychain.getGenericPassword();
-              if (fallback && fallback.password) {
-                storedPortable = fallback.password;
-                try {
-                  await Keychain.setGenericPassword(
-                    'user-portable-did',
-                    fallback.password,
-                    { service: 'portable-did' },
-                  );
-                } catch {
-                  // migration is best-effort
-                }
-              }
+              await Keychain.setGenericPassword(
+                PORTABLE_DID_ACCOUNT,
+                storedPortable,
+                { service: PORTABLE_DID_SERVICE },
+              );
             } catch {
-              // ignore
+              // named write is best-effort
             }
           }
           const backupDeclined = await AsyncStorage.getItem('backupDeclined');
-          if (storedPortable) {
-            setPortableDidState(storedPortable);
-          }
           if (backupDeclined) {
             setIsBackupDeclinedState(true);
           }
@@ -132,18 +139,23 @@ export const DidProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const setPortableDid = async (value: string) => {
-    try {
-      if (value) {
-        await Keychain.setGenericPassword('user-portable-did', value, {
-          service: 'portable-did',
+    if (value) {
+      // Memory first so Confirm works even if Keychain write fails.
+      setPortableDidState(value);
+      try {
+        await Keychain.setGenericPassword(PORTABLE_DID_ACCOUNT, value, {
+          service: PORTABLE_DID_SERVICE,
         });
-        setPortableDidState(value);
-      } else {
-        await Keychain.resetGenericPassword({ service: 'portable-did' });
-        setPortableDidState(null);
+      } catch (error) {
+        console.error('Error saving portable did to Keychain', error);
       }
-    } catch (error) {
-      console.error('Error saving portable did to Keychain', error);
+    } else {
+      setPortableDidState(null);
+      try {
+        await Keychain.resetGenericPassword({ service: PORTABLE_DID_SERVICE });
+      } catch (error) {
+        console.error('Error clearing portable did from Keychain', error);
+      }
     }
   };
 

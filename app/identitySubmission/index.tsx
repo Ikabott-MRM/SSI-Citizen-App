@@ -48,7 +48,7 @@ export default function Identity() {
     'associate';
   const [image, setImage] = useState<string | null>(null);
   const [selectedSchema, setSelectedSchema] = useState<string>(initialSchema);
-  const { didUri } = useDid();
+  const { didUri, portableDid } = useDid();
   const { ensureSession, isAuthenticating, error: sessionError } =
     useDidSessionContext();
   const { uploadDocumentFile, isPending } = useIdentityMutation();
@@ -97,10 +97,13 @@ export default function Identity() {
 
     const token = await ensureSession();
     if (!token) {
-      Toast.show(t('An unexpected error occurred.'), {
-        duration: Toast.durations.LONG,
-        position: Toast.positions.BOTTOM,
-      });
+      Toast.show(
+        !portableDid ? t('DidKeysMissing') : t('DidAuthFailed'),
+        {
+          duration: Toast.durations.LONG,
+          position: Toast.positions.BOTTOM,
+        },
+      );
       return;
     }
 

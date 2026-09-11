@@ -209,8 +209,8 @@ export default function HomeScreen() {
       await createDid(undefined, {
         onSuccess: async data => {
           pushDebugLog(`Create DID success. uri=${data?.uri ?? '(missing)'}`);
-          setDidUri(data.uri);
-          setPortableDid(JSON.stringify(data));
+          await setPortableDid(JSON.stringify(data));
+          await setDidUri(data.uri);
           await initDatabase();
         },
         onError: error => {

@@ -112,5 +112,7 @@
   "Associate": "Associate",
   "Credential": "Credential",
   "Project name": "Project name",
-  "Role": "Role"
+  "Role": "Role",
+  "DidKeysMissing": "DID keys were not found on this phone. Recreate the DID or restore a backup.",
+  "DidAuthFailed": "Could not sign in with your DID. Try Confirm again, or recreate the DID."
 }
