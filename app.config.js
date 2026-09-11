@@ -24,7 +24,7 @@ const tenantMeta = {
     androidPackage: 'com.ikabott.ssi.citizen.geyser',
     iosBundle: 'com.ikabott.ssi.citizen.geyser',
     adaptiveBg: '#00F5DC',
-    splashBg: '#FFFFFF',
+    splashBg: '#21201C',
   },
   avaldao: {
     displayName: 'AvalDAO Ciudadano',
