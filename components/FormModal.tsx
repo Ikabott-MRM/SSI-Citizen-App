@@ -181,7 +181,7 @@ const FormModal = () => {
                       (!input1 && inputTitle1Text) ||
                       (!input2 && inputTitle2Text)
                         ? '#e5ffeb'
-                        : '#00ff85',
+                        : '#00F5DC',
                   }}
                   labelStyle={{ color: '#444' }}
                   disabled={Boolean(

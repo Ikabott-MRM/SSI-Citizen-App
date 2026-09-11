@@ -13,7 +13,8 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: tenantBrand.headerBackground,
-          borderColor: tenantBrand.headerBackground,
+          borderTopColor: '#E4EAEA',
+          borderColor: '#E4EAEA',
         },
         tabBarLabel: ({ focused }) => {
           let label;
@@ -34,7 +35,7 @@ export default function TabLayout() {
               label = '';
           }
           return (
-            <Text style={{ color: focused ? theme.colors.primary : '#e0e0e0' }}>
+            <Text style={{ color: focused ? theme.colors.primary : '#6B7280' }}>
               {label}
             </Text>
           );
@@ -47,7 +48,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'person' : 'person-outline'}
-              color={focused ? theme.colors.primary : '#e0e0e0'}
+              color={focused ? theme.colors.primary : '#6B7280'}
             />
           ),
         }}
@@ -58,7 +59,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'id-card' : 'id-card-outline'}
-              color={focused ? theme.colors.primary : '#e0e0e0'}
+              color={focused ? theme.colors.primary : '#6B7280'}
             />
           ),
         }}
@@ -69,7 +70,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'list' : 'list-outline'}
-              color={focused ? theme.colors.primary : '#e0e0e0'}
+              color={focused ? theme.colors.primary : '#6B7280'}
             />
           ),
         }}
@@ -80,7 +81,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               name={focused ? 'settings' : 'settings-outline'}
-              color={focused ? theme.colors.primary : '#e0e0e0'}
+              color={focused ? theme.colors.primary : '#6B7280'}
             />
           ),
         }}

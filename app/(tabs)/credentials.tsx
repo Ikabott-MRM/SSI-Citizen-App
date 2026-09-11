@@ -69,7 +69,7 @@ const mapCredentials = (
       <View>
         <Text
           style={{
-            color: '#CCC',
+            color: '#21201C',
             fontSize: 16,
             fontWeight: 'bold',
             textTransform: 'uppercase',
@@ -385,7 +385,7 @@ const stylesFnc = (css: { container: { backgroundColor: string } }) =>
     },
 
     credentialContainer: {
-      backgroundColor: '#444',
+      backgroundColor: '#F5F7F7',
       marginTop: 0,
       paddingBottom: 20,
     },
@@ -402,14 +402,14 @@ const stylesFnc = (css: { container: { backgroundColor: string } }) =>
       fontSize: 16,
       lineHeight: 24,
       fontFamily: Platform.OS === 'android' ? 'Roboto' : 'System',
-      color: '#fff',
+      color: '#21201C',
       textAlign: 'left',
       marginLeft: 5,
     },
 
     labelText: {
       fontWeight: 'bold',
-      color: '#CCC',
+      color: '#4A4A4A',
     },
 
     qrCodeContainer: {
@@ -425,7 +425,7 @@ const stylesFnc = (css: { container: { backgroundColor: string } }) =>
     h1: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#C5A028',
+      color: '#00F5DC',
       textAlign: 'center',
       marginBottom: 20,
       fontFamily: 'Roboto',
