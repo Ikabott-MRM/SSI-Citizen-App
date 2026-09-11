@@ -4,6 +4,12 @@ import { isAxiosError } from 'axios';
 import Toast from 'react-native-root-toast';
 import { getPublicEnv } from '@/utils/publicEnv';
 import i18n from '@/app/i18n';
+import type { InternalAxiosRequestConfig } from 'axios';
+import {
+  ensureDidAccessToken,
+  isDidAuthEndpoint,
+  isDidSubjectRoute,
+} from '@/services/didSession';
 
 // Default API endpoint (HTTPS) for all builds.
 // Keep env override available for local dev / staging switches.
@@ -54,7 +60,9 @@ if (apiKey) {
   console.warn('[API] EXPO_PUBLIC_API_KEY is not configured.');
 }
 
-instance.interceptors.request.use(config => {
+type DidRetryConfig = InternalAxiosRequestConfig & { _didRetry?: boolean };
+
+instance.interceptors.request.use(async (config: DidRetryConfig) => {
   // Avoid logging secrets like api_key; log only the request target.
   const baseURL = config.baseURL ?? instance.defaults.baseURL ?? '';
   const url = config.url ?? '';
@@ -63,6 +71,18 @@ instance.interceptors.request.use(config => {
   // In release builds, this helps debug network issues via logcat (ReactNativeJS).
   // eslint-disable-next-line no-console
   console.log(`[API] ${method} ${resolvedUrl}`);
+
+  if (!isDidAuthEndpoint(resolvedUrl) && !isDidAuthEndpoint(url)) {
+    try {
+      const token = await ensureDidAccessToken();
+      if (token) {
+        config.headers = config.headers ?? {};
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // Request proceeds; guarded routes will 401 and the response interceptor may retry.
+    }
+  }
   return config;
 });
 
@@ -70,7 +90,32 @@ instance.interceptors.response.use(
   response => {
     return response;
   },
-  error => {
+  async error => {
+    if (isAxiosError(error) && error.response?.status === 401 && error.config) {
+      const cfg = error.config as DidRetryConfig;
+      const resolved = resolveRequestUrl(cfg.baseURL ?? instance.defaults.baseURL, cfg.url);
+      const subject =
+        isDidSubjectRoute(cfg.url) || isDidSubjectRoute(resolved);
+      if (
+        subject &&
+        !cfg._didRetry &&
+        !isDidAuthEndpoint(cfg.url) &&
+        !isDidAuthEndpoint(resolved)
+      ) {
+        cfg._didRetry = true;
+        try {
+          const token = await ensureDidAccessToken({ force: true });
+          if (token) {
+            cfg.headers = cfg.headers ?? {};
+            cfg.headers.Authorization = `Bearer ${token}`;
+            return instance.request(cfg);
+          }
+        } catch {
+          // fall through to toast
+        }
+      }
+    }
+
     const lang = i18n.language === 'es' ? 'es' : 'en';
     let errorMessage = i18n.t('An unexpected error occurred.');
     let status: number | undefined;
