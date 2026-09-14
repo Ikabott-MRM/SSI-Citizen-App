@@ -13,6 +13,7 @@ let memoryAccessToken: string | null = null;
 let memoryExpiresAtMs: number | null = null;
 let credentials: SessionCredentials | null = null;
 let inFlightAuth: Promise<string | null> | null = null;
+let inFlightDid: string | null = null;
 
 export function getDidAccessToken(): string | null {
   if (
@@ -34,6 +35,9 @@ export function clearDidAccessToken(): void {
 export function setDidSessionCredentials(
   next: SessionCredentials | null,
 ): void {
+  if (credentials?.did && next?.did && credentials.did !== next.did) {
+    clearDidAccessToken();
+  }
   credentials = next;
   if (!next) {
     clearDidAccessToken();
@@ -92,10 +96,12 @@ export async function ensureDidAccessToken(options?: {
     if (existing) return existing;
   }
 
-  if (inFlightAuth) {
+  const didKey = credentials?.did ?? null;
+  if (inFlightAuth && inFlightDid === didKey && !options?.force) {
     return inFlightAuth;
   }
 
+  inFlightDid = didKey;
   inFlightAuth = (async () => {
     if (!credentials?.did || !credentials?.portableDidJson) {
       return null;
@@ -120,6 +126,7 @@ export async function ensureDidAccessToken(options?: {
       throw error;
     } finally {
       inFlightAuth = null;
+      inFlightDid = null;
     }
   })();
 

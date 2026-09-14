@@ -32,6 +32,10 @@ import {
 } from '@/utils/helpers';
 import { useLocalSearchParams } from 'expo-router';
 import { getPublicEnv } from '@/utils/publicEnv';
+import {
+  clearPersistedDidAccessToken,
+  setDidSessionCredentials,
+} from '@/services/didSession';
 
 import { Accordion } from '@/components/Accordion';
 import { useMailMutation } from '@/hooks/mutations/useMailMutation';
@@ -49,6 +53,7 @@ export default function HomeScreen() {
     didUri,
     setDidUri,
     setPortableDid,
+    setDidPair,
     portableDid,
     isBackupDeclined,
     setIsBackupDeclined,
@@ -132,9 +137,10 @@ export default function HomeScreen() {
   const deleteDid = async () => {
     await deleteCredentials();
     await deleteDatabase();
-    setDidUri('');
+    setDidSessionCredentials(null);
+    await clearPersistedDidAccessToken();
+    await setDidPair('', '');
     setIsBackupDeclined(false);
-    setPortableDid('');
     setVerificationCode('');
     setBackupCompleted('');
     hideModal();
@@ -156,9 +162,8 @@ export default function HomeScreen() {
       const validDecryption = isDecryptionSuccessful(decryptedData);
 
       if (validDecryption) {
-        setPortableDid(decryptedData!);
         const portableDidAsJson = JSON.parse(decryptedData);
-        setDidUri(portableDidAsJson.uri);
+        await setDidPair(portableDidAsJson.uri, decryptedData!);
         Toast.show(t('Your DID has been successfully retrieved.'), {
           duration: Toast.durations.LONG,
           position: Toast.positions.BOTTOM,
@@ -209,8 +214,7 @@ export default function HomeScreen() {
       await createDid(undefined, {
         onSuccess: async data => {
           pushDebugLog(`Create DID success. uri=${data?.uri ?? '(missing)'}`);
-          await setPortableDid(JSON.stringify(data));
-          await setDidUri(data.uri);
+          await setDidPair(data.uri, JSON.stringify(data));
           await initDatabase();
         },
         onError: error => {

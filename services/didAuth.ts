@@ -13,15 +13,24 @@ function normalizeBaseUrl(url: string | undefined): string | undefined {
 }
 
 const authClient = axios.create({
-  baseURL:
-    normalizeBaseUrl(getPublicEnv('EXPO_PUBLIC_API_BASE_URL')) ??
-    DEFAULT_PUBLIC_API_BASE_URL,
+  baseURL: DEFAULT_PUBLIC_API_BASE_URL,
 });
 
-const apiKey = getPublicEnv('EXPO_PUBLIC_API_KEY');
-if (apiKey) {
-  authClient.defaults.headers.common['x-api-key'] = apiKey;
-  authClient.defaults.headers.common['api_key'] = apiKey;
+function prepareAuthClient(): void {
+  const base =
+    normalizeBaseUrl(getPublicEnv('EXPO_PUBLIC_API_BASE_URL')) ??
+    DEFAULT_PUBLIC_API_BASE_URL;
+  authClient.defaults.baseURL = base;
+  const key = getPublicEnv('EXPO_PUBLIC_API_KEY');
+  if (key) {
+    authClient.defaults.headers.common['x-api-key'] = key;
+    authClient.defaults.headers.common['api_key'] = key;
+  } else {
+    delete authClient.defaults.headers.common['x-api-key'];
+    delete authClient.defaults.headers.common['api_key'];
+    // eslint-disable-next-line no-console
+    console.warn('[DID auth] EXPO_PUBLIC_API_KEY missing at request time');
+  }
 }
 
 export type DidAuthChallenge = {
@@ -158,7 +167,17 @@ export function signDidAuthMessage(
   return bytesToBase64Url(signature);
 }
 
+function didAuthHttpError(error: unknown): Error {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    const host = authClient.defaults.baseURL ?? 'unknown-host';
+    return new Error(`DID auth failed (${status ?? 'network'}) at ${host}`);
+  }
+  return error instanceof Error ? error : new Error('DID authentication failed');
+}
+
 export async function requestDidChallenge(did: string): Promise<DidAuthChallenge> {
+  prepareAuthClient();
   const response = await authClient.post('/auth/did/challenge', { did });
   const payload = unwrapPayload<DidAuthChallenge>(response.data);
   if (!payload.challengeId || !payload.message) {
@@ -172,6 +191,7 @@ export async function requestDidToken(params: {
   challengeId: string;
   signature: string;
 }): Promise<DidAuthToken> {
+  prepareAuthClient();
   const response = await authClient.post('/auth/did/token', params);
   const payload = unwrapPayload<DidAuthToken>(response.data);
   if (!payload.accessToken) {
@@ -187,11 +207,26 @@ export async function obtainDidAccessToken(params: {
   did: string;
   portableDidJson: string;
 }): Promise<DidAuthToken> {
-  const challenge = await requestDidChallenge(params.did);
-  const signature = signDidAuthMessage(challenge.message, params.portableDidJson);
-  return requestDidToken({
-    did: params.did,
-    challengeId: challenge.challengeId,
-    signature,
-  });
+  let did = params.did;
+  try {
+    const parsed = JSON.parse(params.portableDidJson) as { uri?: unknown };
+    if (typeof parsed.uri === 'string' && parsed.uri && parsed.uri !== did) {
+      // eslint-disable-next-line no-console
+      console.warn('[DID auth] didUri != portableDid.uri; signing as portableDid.uri');
+      did = parsed.uri;
+    }
+  } catch {
+    // portableDid JSON is validated by the signer
+  }
+  try {
+    const challenge = await requestDidChallenge(did);
+    const signature = signDidAuthMessage(challenge.message, params.portableDidJson);
+    return await requestDidToken({
+      did,
+      challengeId: challenge.challengeId,
+      signature,
+    });
+  } catch (error) {
+    throw didAuthHttpError(error);
+  }
 }

@@ -97,6 +97,9 @@ export default function Settings() {
         <Text style={styles.aboutText}>
           {t('App Version')}: {Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? '—'}
         </Text>
+        {didUri ? (
+          <Text style={styles.aboutText}>DID …{didUri.slice(-12)}</Text>
+        ) : null}
       </View>
       <Snackbar
         visible={snackbarVisible}

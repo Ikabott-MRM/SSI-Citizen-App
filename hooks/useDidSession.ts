@@ -31,6 +31,7 @@ export function useDidSession(): DidSessionState {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(true);
+  const prevDidRef = useRef<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -100,6 +101,7 @@ export function useDidSession(): DidSessionState {
 
   useEffect(() => {
     if (!didUri || !portableDid) {
+      prevDidRef.current = didUri;
       setDidSessionCredentials(null);
       void clearPersistedDidAccessToken();
       setIsAuthenticated(false);
@@ -107,6 +109,10 @@ export function useDidSession(): DidSessionState {
       return;
     }
 
+    if (prevDidRef.current && prevDidRef.current !== didUri) {
+      void clearPersistedDidAccessToken();
+    }
+    prevDidRef.current = didUri;
     void runAuth(false);
   }, [didUri, portableDid, runAuth]);
 

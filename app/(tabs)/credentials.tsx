@@ -17,7 +17,8 @@ import { enUS } from 'date-fns/locale/en-US';
 import { es as esLocale } from 'date-fns/locale/es';
 import type { Locale } from 'date-fns';
 import { useNetInfo } from '@/hooks/useNetInfo';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   checkIfCredentialExists,
   DBCredentials,
@@ -40,6 +41,13 @@ interface Styles {
   credentialText: TextStyle;
   labelText: TextStyle;
 }
+
+const isProductionRegistryCredential = (type: string[] = []) =>
+  type.some(
+    item =>
+      typeof item === 'string' &&
+      item.toLowerCase().includes('productionregistry'),
+  );
 
 const getCredentialTitle = (
   type: string[] = [],
@@ -208,16 +216,21 @@ const insertCredentials = async (credentials: Credential[]) => {
     );
 
     if (!exists) {
+      const model = cred.verifiableCredential?.vcDataModel;
+      if (!model) continue;
       const {
         id,
         issuer,
         expirationDate,
         issuanceDate,
         type,
-        credentialSubject: { firstname, lastname, licenseCategory },
-      } = cred.verifiableCredential.vcDataModel;
+      } = model;
+      const subject = model.credentialSubject ?? {};
+      const firstname = subject.firstname;
+      const lastname = subject.lastname;
+      const licenseCategory = subject.licenseCategory;
 
-      if (isProductionRegistryCredential(type)) {
+      if (isProductionRegistryCredential(type ?? [])) {
         continue;
       }
 
@@ -284,23 +297,34 @@ export default function Credentials() {
   });
 
   const fetchData = async () => {
-    let data;
-
     try {
-      if (isConnected && didUri) {
-        data = await credential.getCredentials(didUri);
-        await insertCredentials(data);
-      } else {
-        const dbData = await getCredentials();
-        data = mapDatabaseCredentials(dbData);
+      if (!didUri) {
+        setCredentials([]);
+        return;
       }
 
-      if (data) {
-        // @ts-expect-error
-        const mappedData = mapCredentials(data, styles, t, dateLocale);
-        setCredentials(mappedData);
+      // Never fall back to unscoped SQLite: those rows are not keyed by DID and
+      // can show another identity's VCs (e.g. Rocky after switching to Elpe).
+      if (!isConnected) {
+        setCredentials([]);
+        Toast.show(t('An error occurred loading credentials'), {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+        });
+        return;
       }
+
+      const fetched = await credential.getCredentials(didUri);
+      const data: Credential[] = Array.isArray(fetched) ? fetched : [];
+      if (data.length) {
+        await insertCredentials(data);
+      }
+
+      // Always replace the list (null/empty must not keep a previous DID's VCs).
+      // @ts-expect-error
+      setCredentials(mapCredentials(data, styles, t, dateLocale));
     } catch (error) {
+      setCredentials([]);
       const message =
         typeof error === 'string'
           ? error
@@ -315,8 +339,15 @@ export default function Credentials() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [isConnected, i18n.language]);
+    setCredentials([]);
+    void fetchData();
+  }, [didUri, isConnected, i18n.language]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void fetchData();
+    }, [didUri, isConnected, i18n.language]),
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -336,6 +367,16 @@ export default function Credentials() {
         {didUri && (
           <View style={styles.container}>
             <Text style={styles.h1}>{t('Your credentials')}</Text>
+            <Text
+              style={{
+                color: theme.customColors.typography.secondary,
+                textAlign: 'center',
+                fontSize: 12,
+                marginBottom: 12,
+              }}
+            >
+              DID …{didUri.slice(-12)}
+            </Text>
           </View>
         )}
         {credentials?.length === 0 && didUri && (
